@@ -51,6 +51,7 @@ fun LearningUi(navController: NavController,
                 color = Blue,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
+                    .padding(top = 20.dp)
             )
 
             Row() {
