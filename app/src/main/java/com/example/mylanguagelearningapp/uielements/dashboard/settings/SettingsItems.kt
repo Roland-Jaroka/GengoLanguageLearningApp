@@ -1,0 +1,44 @@
+package com.example.mylanguagelearningapp.uielements.dashboard.settings
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.mylanguagelearningapp.ui.theme.BgBlue
+import com.example.mylanguagelearningapp.ui.theme.White
+import java.nio.file.WatchEvent
+
+@Composable
+fun SettingItems(icon:@Composable () -> Unit, title: String, arrow: @Composable () -> Unit, onClick: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth()
+        .border(1.dp, BgBlue)
+        .clickable{onClick()},
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        icon()
+
+        Spacer(modifier = Modifier.padding(10.dp))
+
+        Text(
+            text = title,
+            modifier = Modifier.align(Alignment.CenterVertically),
+            fontSize = 20.sp,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.Bold
+        )
+        arrow()
+    }
+
+}
