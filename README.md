@@ -1,4 +1,4 @@
-A languge larning application, that helps the users manage their vocabulary in a dictionary form and they can also collect the grammar points, that they are learning during their language learning journey.
+A language learning application, that helps the users manage their vocabulary in a dictionary form and they can also collect the grammar points, that they are learning during their language learning journey.
 <p float="left">
   <img src="app/screenshots/Login.PNG" width="200" />
   <img src="app/screenshots/ForgotPassword.png" width="200" />
