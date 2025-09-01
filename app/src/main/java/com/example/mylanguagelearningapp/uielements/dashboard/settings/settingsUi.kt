@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.R
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +44,9 @@ fun settingsUi(navController: NavController) {
    //TODO settings UI and functions
     val auth = FirebaseAuth.getInstance()
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(White)) {
 
         Column(modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,

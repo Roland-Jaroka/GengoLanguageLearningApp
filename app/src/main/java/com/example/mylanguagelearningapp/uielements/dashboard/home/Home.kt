@@ -8,6 +8,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -36,10 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,6 +58,7 @@ import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
 import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.time.delay
+import kotlin.math.abs
 
 @Composable
 fun Home(viewModel: HomeViewModel= viewModel(),
@@ -62,6 +68,7 @@ fun Home(viewModel: HomeViewModel= viewModel(),
     var visible by remember { mutableStateOf(false) }
     var wordsVisibilty by remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
+     var accumulated by remember { mutableStateOf(0f) }
 
     LaunchedEffect(Unit) {
 
@@ -76,7 +83,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
 
 
     Box(modifier = Modifier
-        .fillMaxSize())
+        .fillMaxSize()
+        .background(White))
     {
         Column(modifier = Modifier
             .fillMaxSize()) {
@@ -112,7 +120,24 @@ fun Home(viewModel: HomeViewModel= viewModel(),
             Card(modifier = Modifier
                 .fillMaxWidth()
                 .height(300.dp)
-                .padding(start = 12.dp, end = 12.dp),
+                .padding(start = 12.dp, end = 12.dp)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onHorizontalDrag = { change, dragAmount ->
+
+                        accumulated += dragAmount
+                        change.consume()
+                        val treshold = 200f
+                        if (abs(accumulated) > treshold) {
+                        if (accumulated > 0) {
+                            viewModel.onNextClick()
+                            wordsVisibilty= !wordsVisibilty
+                        } else {
+                            viewModel.onPreviousClick()
+                            wordsVisibilty= !wordsVisibilty
+                        }
+                            accumulated = 0f }
+                        })
+                },
                 elevation = CardDefaults.cardElevation(10.dp),
                 colors = CardDefaults.cardColors(White),
                 border = BorderStroke(2.dp, Blue)) {
@@ -123,36 +148,45 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                         .height(100.dp)
                         .background(BgBlue)
                         .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween) {
+                        verticalAlignment = Alignment.CenterVertically) {
 
                         Image(
                             painter = painterResource(R.drawable.outline_arrow_back),
                             contentDescription = null,
                             modifier = Modifier
+                                .weight(0.5f)
                                 .padding(start = 10.dp)
+                                .size(25.dp)
                                 .clickable{
                                     viewModel.onPreviousClick()
                                     wordsVisibilty= !wordsVisibilty
                                 }
                         )
+                        Row(modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .weight(4f))
+                        {
+                            Image(
+                                painter = painterResource(R.drawable.japanese),
+                                contentDescription = null
+                            )
 
-                        Image(
-                            painter = painterResource(R.drawable.japanese),
-                            contentDescription = null)
-
-                        Text(
-                            text= "Today's words to learn",
-                            color= White,
-                            fontSize = 20.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.Bold
-                        )
+                            Text(
+                                text = "Today's words to learn",
+                                color = White,
+                                fontSize = 20.sp,
+                                fontFamily = FontFamily.SansSerif,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                        }
 
                         Image(painter = painterResource(R.drawable.outline_arrow_forward),
                             contentDescription = null,
                             modifier = Modifier.padding(end = 5.dp)
                                 .align(Alignment.CenterVertically)
+                                .size(25.dp)
+                                .weight(0.5f)
                                 .clickable{
                                    viewModel.onNextClick()
                                     wordsVisibilty= !wordsVisibilty
@@ -210,7 +244,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                 Button(
                     onClick = {viewModel.onWordClick()},
                     modifier = Modifier
-                        .padding(12.dp),
+                        .padding(12.dp)
+                        .weight(1f),
                     colors= ButtonDefaults.buttonColors(
                         containerColor = if (viewModel.isWordVisible) White else BgBlue,
                         contentColor = if (viewModel.isWordVisible) BgBlue else White
@@ -224,7 +259,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                 Button(
                     onClick = {viewModel.onPronunciationClick()},
                     modifier = Modifier
-                        .padding(12.dp),
+                        .padding(12.dp)
+                        .weight(1f),
                     colors= ButtonDefaults.buttonColors(
                         containerColor = if (viewModel.isPronunciationVisible)White else BgBlue,
                         contentColor = if (viewModel.isPronunciationVisible) BgBlue else White
@@ -232,13 +268,17 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(2.dp, BgBlue)
                 ){
-                    Text(text = "Pronunciation")
+
+                    Text(text = "Pronunciation",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
                 }
 
                 Button(
                     onClick = {viewModel.onTranslationClick()},
                     modifier = Modifier
-                        .padding(12.dp),
+                        .padding(12.dp)
+                        .weight(1f),
                     colors= ButtonDefaults.buttonColors(
                         containerColor = if (viewModel.isTranslationVisible) White else BgBlue,
                         contentColor = if (viewModel.isTranslationVisible) BgBlue else White
@@ -246,7 +286,9 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                     shape = RoundedCornerShape(8.dp),
                     border = BorderStroke(2.dp, BgBlue)
                 ){
-                    Text(text = "Translation")
+                    Text(text = "Translation",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
                 }
 
             }

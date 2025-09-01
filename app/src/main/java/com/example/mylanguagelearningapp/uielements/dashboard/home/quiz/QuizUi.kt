@@ -115,7 +115,7 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(
-                    text = "Next"
+                    text = if (viewModel.isQuizFinished) "Restart" else "Next"
                 )
             }
 

@@ -14,7 +14,7 @@ class QuizViewModel: ViewModel() {
     var currentIndex by mutableStateOf(0)
         private set
 
-    var currentWord= mutableStateOf<Words?>(wordsList[0])
+    var currentWord = mutableStateOf<Words?>(wordsList[0])
 
     var progress = mutableFloatStateOf(0f)
 
@@ -25,16 +25,19 @@ class QuizViewModel: ViewModel() {
         private set
 
     var isQuizFinished by mutableStateOf(false)
+        private set
 
-    fun onAnswerChange(newvalue: String){
-        answer= newvalue
+    fun onAnswerChange(newvalue: String) {
+        answer = newvalue
     }
 
-    fun onNextClick(){
+    fun onNextClick() {
 
         if (wordsList.isEmpty()) return
+        if (isQuizFinished) {points=0;currentIndex=-1;isQuizFinished=false}
 
-        else if (currentIndex < wordsList.size - 1) {
+        if (isCorrect()&& !isQuizFinished) {points++}
+        if (currentIndex < wordsList.size - 1) {
 
             currentIndex += 1
 
@@ -44,20 +47,14 @@ class QuizViewModel: ViewModel() {
 
             answer = ""
 
-            isCorrect()
-        } else {isQuizFinished= true}
-
+        }
+        else isQuizFinished= true
     }
 
-    fun isCorrect(): Boolean{
-        return if (currentWord.value?.pronunciation == answer) {
-            points++
-             true
-
-        } else false
+        fun isCorrect(): Boolean {
+            return currentWord.value?.pronunciation == answer
+        }
 
 
-    }
 
-
-    }
+}

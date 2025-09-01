@@ -9,7 +9,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -22,9 +24,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.wear.compose.material.Colors
+import androidx.wear.compose.material.Text
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
+import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.google.android.gms.common.SignInButton
+import com.google.firebase.database.collection.LLRBNode
 
 @Composable
 fun BottomNavBar(navController: NavController) {
@@ -41,9 +47,12 @@ fun BottomNavBar(navController: NavController) {
 
     Box(modifier = Modifier
         .fillMaxWidth()
-        .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
-        ){
-    NavigationBar(containerColor = White) {
+        .background(White)
+        .clip(RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp))
+        ,
+    )
+        {
+    NavigationBar(containerColor = BgBlue) {
         items.forEach { item->
             NavigationBarItem(
                 selected = currentRoute == item.route,
@@ -54,8 +63,14 @@ fun BottomNavBar(navController: NavController) {
                         restoreState= true
                     }
                 },
-                icon= { Icon(painter = painterResource(id = item.icon), contentDescription = item.title, tint = BgBlue)},
-                label =  {item.title},
+                icon= { Icon(painter = painterResource(id = item.icon), contentDescription = item.title, tint = White)},
+                label =  {
+                    if (currentRoute == item.route)
+                    Text( item.title,
+                    color= White)},
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = BgBlue
+                )
             )
         }
     }

@@ -20,6 +20,7 @@ import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.R
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.ui.theme.White
 
 @Composable
 fun LearningUi(navController: NavController,
@@ -40,7 +42,9 @@ fun LearningUi(navController: NavController,
         JapaneseGrammar.loadGrammar()
     }
 
-    Box(modifier= Modifier.fillMaxSize()){
+    Box(modifier= Modifier
+        .fillMaxSize()
+        .background(White)){
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)) {
