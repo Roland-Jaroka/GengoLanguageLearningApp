@@ -1,5 +1,6 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -43,6 +45,7 @@ import com.example.mylanguagelearningapp.ui.theme.WarmGrey
 fun settingsUi(navController: NavController) {
    //TODO settings UI and functions
     val auth = FirebaseAuth.getInstance()
+    val context = LocalContext.current
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -72,7 +75,8 @@ fun settingsUi(navController: NavController) {
                                 contentDescription = null)
                         },
                         onClick = {
-                            navController.navigate("learningLanguage")
+                            //navController.navigate("learningLanguage")
+                            Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show()
                         })
 
                     SettingItems(
@@ -90,6 +94,7 @@ fun settingsUi(navController: NavController) {
                         },
                         onClick = {
                             //TODO interface language
+                            Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show()
                         })
 
 

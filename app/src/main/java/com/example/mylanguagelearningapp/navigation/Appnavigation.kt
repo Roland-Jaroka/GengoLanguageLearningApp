@@ -27,6 +27,7 @@ import com.example.mylanguagelearningapp.uielements.autchentication.login.LoginU
 import com.example.mylanguagelearningapp.uielements.autchentication.signup.SignUpUi
 import com.example.mylanguagelearningapp.uielements.dashboard.home.Home
 import com.example.mylanguagelearningapp.uielements.dashboard.home.addwords.AddWordsUi
+import com.example.mylanguagelearningapp.uielements.dashboard.home.drawingquiz.DrawingQuizView
 import com.example.mylanguagelearningapp.uielements.dashboard.home.mylist.MyListUi
 import com.example.mylanguagelearningapp.uielements.dashboard.home.quiz.QuizUi
 import com.example.mylanguagelearningapp.uielements.dashboard.learning.AddNewGrammarUi
@@ -105,6 +106,8 @@ fun AppNavigation() {
                 composable("mylist") { MyListUi(navController = navController) }
 
                 composable("quiz") { QuizUi(navController= navController) }
+
+                composable("drawing") { DrawingQuizView(navController= navController) }
 
                 composable("learning") { LearningUi(navController= navController) }
 
