@@ -18,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -42,6 +43,9 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= viewModel(),
                     navController: NavController) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        println("DrawingQuizView launched: ${viewModel.wordsList}")
+    }
 
     Column(
         modifier = Modifier
@@ -93,34 +97,73 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= viewModel(),
             modifier = Modifier
                 .fillMaxWidth(),
         )
+        Row(modifier = Modifier.fillMaxWidth()) {
 
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                contentColor = White,
-                containerColor = Blue
-            ),
-            elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
-            shape = RoundedCornerShape(20.dp),
-            onClick = {
-               viewModel.onNextClick()
-            },
-
-            ) {
-
-            Text(
-                text = "Next"
-            )
-
-            Image(
-                painter = painterResource(R.drawable.foward_arrow),
-                contentDescription = null,
+            Button(
                 modifier = Modifier
-                    .padding(end = 5.dp)
-            )
+                    .padding(12.dp)
+                    .height(50.dp)
+                    .weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = White,
+                    containerColor = Blue
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    hoveredElevation = 10.dp,
+                    pressedElevation = 10.dp,
+                    defaultElevation = 5.dp
+                ),
+                shape = RoundedCornerShape(20.dp),
+                onClick = {
+                    viewModel.onBackClick()
+                },
+
+                ) {
+
+                Image(
+                    painter = painterResource(R.drawable.arrow_back),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 5.dp)
+                )
+
+                Text(
+                    text = "Back"
+                )
+
+            }
+            Button(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .height(50.dp)
+                    .weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = White,
+                    containerColor = Blue
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    hoveredElevation = 10.dp,
+                    pressedElevation = 10.dp,
+                    defaultElevation = 5.dp
+                ),
+                shape = RoundedCornerShape(20.dp),
+                onClick = {
+                    viewModel.onNextClick()
+                },
+
+                ) {
+
+                Text(
+                    text = "Next"
+                )
+
+                Image(
+                    painter = painterResource(R.drawable.foward_arrow),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(start =  5.dp)
+                )
+            }
         }
 
         Button(

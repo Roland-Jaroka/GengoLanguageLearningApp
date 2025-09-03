@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +46,9 @@ fun GrammarCards(grammar: String, explanation: String, example: String, onClick:
                 modifier = Modifier
                     .padding(top = 10.dp, start = 20.dp),
                 fontSize = 25.sp,
-                fontFamily = FontFamily.SansSerif
+                fontFamily = FontFamily.SansSerif,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(

@@ -4,7 +4,9 @@ package com.example.mylanguagelearningapp.uielements.dashboard.home.mylist
 import android.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -133,26 +135,30 @@ Box(modifier = Modifier.fillMaxSize())
                     println("Selected words ID: ${word.id}")
                     println("Button clicked for word: ${word.word}")})
             }
+            item {
+                Spacer(modifier = Modifier.height(100.dp))
+
+            }
+
         }
 
     }
 
-    Box(
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .padding(bottom = 50.dp)
-        //TODO hide the scroll behind the button
-    ){
+
     AnimatedVisibility(
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(bottom = 40.dp),
         visible = onEdit,
-        enter = slideInVertically { fullHeight -> fullHeight },
-        exit = slideOutVertically { fullHeight -> fullHeight }
+        enter = slideInHorizontally { fullWidth -> fullWidth },
+        exit = slideOutHorizontally { fullWidth -> fullWidth }
     ) {
+        Column() {
 
     Button(
         onClick = { viewModel.onRemove() },
         modifier = Modifier
-            .fillMaxWidth()
+            .align(Alignment.End)
             .height(50.dp)
             .padding(start = 12.dp, end = 12.dp),
         colors = ButtonDefaults.buttonColors(
@@ -162,7 +168,37 @@ Box(modifier = Modifier.fillMaxSize())
     ) { Text(text = "Remove Word")
     }
 
+        Button(
+            onClick = { viewModel.onSendWordsToQuiz()
+                      navController.navigate("quiz")},
+            modifier = Modifier
+                .align(Alignment.End)
+                .height(50.dp)
+                .padding(start = 12.dp, end = 12.dp, top = 5.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = BgBlue,
+                contentColor = White
+            )
+        ) { Text(text = "Send words to Quiz")
+        }
+
+            Button(
+                onClick = { viewModel.onSendWordsToDrawingQuiz()
+                    navController.navigate("drawing")},
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .height(50.dp)
+                    .padding(start = 12.dp, end = 12.dp, top = 5.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BgBlue,
+                    contentColor = White
+                )
+            ) { Text(text = "Send words to Drawing Quiz")
+            }
+
+        }
+
     }
-} //Box End
+
 }
 }

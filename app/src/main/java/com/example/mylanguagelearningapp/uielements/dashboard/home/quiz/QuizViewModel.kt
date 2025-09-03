@@ -6,11 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.example.mylanguagelearningapp.model.Words
 
 class QuizViewModel: ViewModel() {
 
-    val wordsList = JapaneseWords.wordList
+    val wordsList = if(quizzes.isNotEmpty()) quizzes else JapaneseWords.wordList
     var currentIndex by mutableStateOf(0)
         private set
 

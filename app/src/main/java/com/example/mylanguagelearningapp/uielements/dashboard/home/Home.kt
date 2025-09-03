@@ -51,6 +51,7 @@ import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
 import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.abs
 
@@ -359,7 +360,9 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                 elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
                 shape = RoundedCornerShape(20.dp),
                 onClick = {
+                    quizzes.clear()
                     navController.navigate("quiz")
+
                 },
 
                 ) {
@@ -390,7 +393,9 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                 elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
                 shape = RoundedCornerShape(20.dp),
                 onClick = {
+                    quizzes.clear()
                     navController.navigate("drawing")
+
                 },
 
                 ) {

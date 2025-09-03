@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -59,6 +60,28 @@ class MyListViewModel: ViewModel() {
                 }
         }
 
+    }
+
+    fun onSendWordsToDrawingQuiz(){
+        quizzes.clear()
+        selectedWords.forEach { id ->
+            words.find { it.id == id }?.let { word ->
+                quizzes.add(word)
+                println("Word added to drawing quiz: $quizzes")
+            }
+        }
+
+    }
+
+    fun onSendWordsToQuiz(){
+        quizzes.clear()
+        selectedWords.forEach { id->
+            words.find{it.id==id}?.let{word->
+                quizzes.add(word)
+                println("Word added to quiz: $quizzes")
+
+            }
+        }
     }
 
 
