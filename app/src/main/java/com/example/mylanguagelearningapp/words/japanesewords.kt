@@ -1,4 +1,4 @@
-package com.example.mylanguagelearningapp.japanesewords
+package com.example.mylanguagelearningapp.words
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf

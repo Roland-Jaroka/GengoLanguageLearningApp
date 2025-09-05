@@ -50,8 +50,10 @@ import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
-import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.model.CountryFlags
+import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.abs
 
@@ -65,13 +67,14 @@ fun Home(viewModel: HomeViewModel= viewModel(),
     val auth = FirebaseAuth.getInstance()
      var accumulated by remember { mutableStateOf(0f) }
     val scrollState = rememberScrollState()
+    val currentLanguage = UserSettingsRepository.language.value
+
 
     LaunchedEffect(Unit) {
-
-        JapaneseWords.loadWords()
-        JapaneseGrammar.loadGrammar()
+        viewModel.loadData()
         visible = true
         println("Logged in user email ${auth.currentUser?.email}")
+
     }
 
     val currentWord= viewModel.currentWord
@@ -164,7 +167,9 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                             .weight(4f))
                         {
                             Image(
-                                painter = painterResource(R.drawable.japanese),
+                                painter = painterResource(
+                                    if (currentLanguage== "jp") R.drawable.japanese else CountryFlags.CHINESE.resID
+                                ),
                                 contentDescription = null
                             )
 

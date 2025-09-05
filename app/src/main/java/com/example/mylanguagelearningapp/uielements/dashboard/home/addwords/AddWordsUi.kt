@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
-import com.example.mylanguagelearningapp.model.AddWordResults
+import com.example.mylanguagelearningapp.words.JapaneseWords
+import com.example.mylanguagelearningapp.model.results.AddWordResults
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 

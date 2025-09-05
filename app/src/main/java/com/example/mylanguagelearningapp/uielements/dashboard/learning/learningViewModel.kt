@@ -5,11 +5,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 
 class LearningViewModel: ViewModel() {
 
-    val grammars = JapaneseGrammar.grammarList
+    val currentLanguage= UserSettingsRepository.language.value
+    val grammars = if (currentLanguage=="jp") JapaneseGrammar.grammarList
+    else if (currentLanguage=="cn") ChineseGrammar.grammarList
+    else JapaneseGrammar.grammarList
 
     var search by mutableStateOf("")
         private set
@@ -29,6 +34,12 @@ class LearningViewModel: ViewModel() {
             }.sortedBy { it.grammar }
         }
 
+
+    }
+
+    fun loadData(){
+        JapaneseGrammar.loadGrammar()
+        ChineseGrammar.loadGrammar()
 
     }
 

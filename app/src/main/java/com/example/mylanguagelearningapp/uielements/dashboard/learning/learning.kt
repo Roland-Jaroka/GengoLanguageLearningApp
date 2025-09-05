@@ -39,7 +39,7 @@ fun LearningUi(navController: NavController,
     val grammars = viewModel.filteredGrammar
 
     LaunchedEffect(Unit) {
-        JapaneseGrammar.loadGrammar()
+       viewModel.loadData()
     }
 
     Box(modifier= Modifier

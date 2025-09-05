@@ -5,13 +5,21 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.model.Words
+import com.example.mylanguagelearningapp.words.ChineseWords
 
 class QuizViewModel: ViewModel() {
 
-    val wordsList = if(quizzes.isNotEmpty()) quizzes else JapaneseWords.wordList
+    val currentLanguage= UserSettingsRepository.language.value
+
+    val wordsList = if(quizzes.isNotEmpty()) quizzes
+    else if (currentLanguage=="jp") JapaneseWords.wordList
+    else if (currentLanguage=="cn") ChineseWords.chinseWordsList
+    else JapaneseWords.wordList
+
     var currentIndex by mutableStateOf(0)
         private set
 

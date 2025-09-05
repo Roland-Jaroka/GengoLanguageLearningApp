@@ -122,7 +122,7 @@ fun AppNavigation() {
                 composable("addnewgrammar") { AddNewGrammarUi(navController = navController) }
 
                 composable("settings") { settingsUi(navController = navController) }
-                composable("learningLanguage") { LearningLanguageUi() }
+                composable("learningLanguage") { LearningLanguageUi(navController = navController) }
             }
         }
     }

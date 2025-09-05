@@ -6,13 +6,21 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
+import com.example.mylanguagelearningapp.words.ChineseWords
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MyListViewModel: ViewModel() {
-    val words = JapaneseWords.wordList
+
+    val currentLanguage= UserSettingsRepository.language.value
+    val words = when(currentLanguage) {
+        "jp" -> JapaneseWords.wordList
+        "cn"-> ChineseWords.chinseWordsList
+        else -> JapaneseWords.wordList
+    }
 
     var searchInput by mutableStateOf("")
         private set
@@ -47,17 +55,36 @@ class MyListViewModel: ViewModel() {
     }
 
     fun onRemove(){
-        selectedWords.forEach{ id ->
-            db.collection("users")
-                .document(uid)
-                .collection("words")
-                .document(id)
-                .delete()
-                .addOnSuccessListener {
-                    selectedWords.clear()
-                    JapaneseWords.loadWords()
-                    println("Word removed from database")
-                }
+        if (currentLanguage=="jp") {
+            selectedWords.forEach { id ->
+                db.collection("users")
+                    .document(uid)
+                    .collection("words")
+                    .document(id)
+                    .delete()
+                    .addOnSuccessListener {
+                        selectedWords.clear()
+                        JapaneseWords.loadWords()
+                        println("Word removed from database")
+                    }
+            }
+        }
+
+        else if (currentLanguage=="cn"){
+            selectedWords.forEach{id->
+                db.collection("users")
+                    .document(uid)
+                    .collection("chineseCollection")
+                    .document("chinese")
+                    .collection("chineseWords")
+                    .document(id)
+                    .delete()
+                    .addOnSuccessListener {
+                        selectedWords.clear()
+                        ChineseWords.loadWords()
+                        println("Word removed from database")
+                    }
+            }
         }
 
     }
