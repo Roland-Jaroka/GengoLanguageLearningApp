@@ -1,4 +1,4 @@
-package com.example.mylanguagelearningapp.model
+package com.example.mylanguagelearningapp.model.results
 
 sealed class AddWordResults {
     object Success: AddWordResults()

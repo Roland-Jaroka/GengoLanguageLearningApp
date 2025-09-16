@@ -116,6 +116,7 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= viewModel(),
                 shape = RoundedCornerShape(20.dp),
                 onClick = {
                     viewModel.onBackClick()
+                    viewModel.onAction(DrawingActions.OnClearCanvas)
                 },
 
                 ) {
@@ -149,6 +150,7 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= viewModel(),
                 shape = RoundedCornerShape(20.dp),
                 onClick = {
                     viewModel.onNextClick()
+                    viewModel.onAction(DrawingActions.OnClearCanvas)
                 },
 
                 ) {

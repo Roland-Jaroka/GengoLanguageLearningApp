@@ -2,6 +2,7 @@ package com.example.mylanguagelearningapp.uielements.dashboard.home.addwords
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -27,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
-import com.example.mylanguagelearningapp.model.AddWordResults
+import com.example.mylanguagelearningapp.words.JapaneseWords
+import com.example.mylanguagelearningapp.model.results.AddWordResults
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 
@@ -40,12 +43,14 @@ fun AddWordsUi(navController: NavController,
     val translation = viewModel.translation
     val pronunciation = viewModel.pronunciation
     val context= LocalContext.current
+    val scrollstate= rememberScrollState()
 
     var wordInputError by remember { mutableStateOf<String?>(null) }
     var translationInputError by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier
-        .fillMaxSize()) {
+        .fillMaxSize()
+        .verticalScroll(scrollstate)) {
 
         Column(modifier = Modifier.align(Alignment.Center)) {
 
@@ -163,7 +168,7 @@ fun AddWordsUi(navController: NavController,
                 fontSize = 15.sp,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(20.dp)
+                    .padding(top= 20.dp)
                     .clickable(indication = null,
                         interactionSource = remember{ MutableInteractionSource() }) {
 

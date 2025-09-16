@@ -47,7 +47,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.LightBlue
@@ -59,7 +61,10 @@ fun GrammarDetails(navController: NavController,
                    grammarId: String?,
                    viewModel: GrammarDetailsViewModel = viewModel()) {
 
-    val grammar = JapaneseGrammar.grammarList.find { it.id == grammarId } ?: return
+    val currentLanguage = UserSettingsRepository.language.value
+    val grammar = if (currentLanguage == "jp") JapaneseGrammar.grammarList.find { it.id == grammarId } ?: return
+    else if (currentLanguage == "cn")  ChineseGrammar.grammarList.find { it.id == grammarId } ?: return
+    else return
 
     val exampleSentences = grammar.examples ?: emptyList()
 
@@ -305,7 +310,9 @@ fun GrammarDetails(navController: NavController,
             visible = isEditMode,
             enter = slideInVertically { fullHeight -> fullHeight },
             exit = slideOutVertically { fullHeight -> fullHeight },
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 30.dp)
         ) {
         Box(
             modifier = Modifier
@@ -316,7 +323,7 @@ fun GrammarDetails(navController: NavController,
         ){
 
 
-                Column {
+                Column() {
 
                     Spacer(modifier = Modifier.height(20.dp))
 

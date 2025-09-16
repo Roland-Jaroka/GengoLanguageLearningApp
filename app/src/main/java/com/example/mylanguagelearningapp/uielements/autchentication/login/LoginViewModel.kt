@@ -5,9 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.mylanguagelearningapp.model.LoginResult
+import com.example.mylanguagelearningapp.model.results.LoginResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class LoginViewModel: ViewModel() {

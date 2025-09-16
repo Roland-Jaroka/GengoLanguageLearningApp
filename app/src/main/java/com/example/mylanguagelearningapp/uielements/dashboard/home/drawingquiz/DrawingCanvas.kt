@@ -1,6 +1,7 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.home.drawingquiz
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -94,6 +95,7 @@ fun DrawingCanvas(
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 private fun DrawScope.drawPath(
     path: List<Offset>,
     color: Color = Color.Black,

@@ -34,7 +34,9 @@ import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import com.example.mylanguagelearningapp.model.CountryFlags
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.LightBlue
 import com.example.mylanguagelearningapp.ui.theme.Purple40
 import com.example.mylanguagelearningapp.ui.theme.PurpleGrey40
@@ -46,6 +48,11 @@ fun settingsUi(navController: NavController) {
    //TODO settings UI and functions
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    val currentLanguage = UserSettingsRepository.language.value
+
+    LaunchedEffect(Unit) {
+        println("Language set to: ${UserSettingsRepository.language.value}")
+    }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -64,7 +71,8 @@ fun settingsUi(navController: NavController) {
                     SettingItems(
                         {
                             Image(
-                                painter = painterResource(CountryFlags.JAPANESE.resID),
+                                painter = painterResource(
+                                    if (currentLanguage== "jp") CountryFlags.JAPANESE.resID else CountryFlags.CHINESE.resID),
                                 contentDescription = null,
                                 modifier = Modifier.size(80.dp))
                         },
@@ -75,8 +83,7 @@ fun settingsUi(navController: NavController) {
                                 contentDescription = null)
                         },
                         onClick = {
-                            //navController.navigate("learningLanguage")
-                            Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show()
+                            navController.navigate("learningLanguage")
                         })
 
                     SettingItems(

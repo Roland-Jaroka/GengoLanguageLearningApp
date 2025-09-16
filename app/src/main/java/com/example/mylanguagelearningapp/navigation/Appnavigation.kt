@@ -1,10 +1,14 @@
 package com.example.mylanguagelearningapp.navigation
 
+import android.annotation.SuppressLint
 import android.view.WindowInsets.Type.statusBars
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -39,6 +43,8 @@ import com.google.firebase.auth.FirebaseAuth
 
 
 
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNavigation() {
@@ -68,7 +74,7 @@ fun AppNavigation() {
             { BottomNavBar(navController)}
         }
 
-    ) {innerPadding ->
+    ) {//innerPadding ->
 
 
         NavHost(
@@ -76,9 +82,6 @@ fun AppNavigation() {
             startDestination= startDestination,
             modifier= Modifier
                 .fillMaxSize()
-                .padding(
-                    bottom = if (showBottomBar) innerPadding.calculateBottomPadding() else 0.dp
-                )
 
         ) {
 
@@ -101,9 +104,13 @@ fun AppNavigation() {
             ) {
                 composable("home") { Home(navController = navController) }
 
-                composable("addwords") { AddWordsUi(navController = navController) }
+                composable("addwords",
+                    enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
+                    exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { AddWordsUi(navController = navController) }
 
-                composable("mylist") { MyListUi(navController = navController) }
+                composable("mylist",
+                    enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
+                    exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { MyListUi(navController = navController) }
 
                 composable("quiz") { QuizUi(navController= navController) }
 
@@ -119,10 +126,12 @@ fun AppNavigation() {
 
                     GrammarDetails(navController = navController, grammarId) }
 
-                composable("addnewgrammar") { AddNewGrammarUi(navController = navController) }
+                composable("addnewgrammar",
+                    enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
+                    exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { AddNewGrammarUi(navController = navController) }
 
                 composable("settings") { settingsUi(navController = navController) }
-                composable("learningLanguage") { LearningLanguageUi() }
+                composable("learningLanguage") { LearningLanguageUi(navController = navController) }
             }
         }
     }

@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.model.ResetPasswordResult
+import com.example.mylanguagelearningapp.model.results.ResetPasswordResult
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import kotlinx.coroutines.launch

@@ -4,7 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -12,63 +14,56 @@ import com.google.firebase.firestore.FirebaseFirestore
 class GrammarDetailsViewModel: ViewModel() {
 
 
+
+    val currentLanguage = UserSettingsRepository.language.value
     fun addNewExample(grammarid: String?, exampleText: String) {
 
-        if (exampleText.isBlank()) return
+        if (currentLanguage=="jp") {
+            JapaneseGrammar.addNewExample(grammarid, exampleText)
+        }
+        else if (currentLanguage=="cn"){
 
-        val auth = FirebaseAuth.getInstance()
-        val uid = auth.currentUser?.uid
-        val db = FirebaseFirestore.getInstance()
+            ChineseGrammar.addNewExample(grammarid, exampleText)
 
-        db.collection("users")
-            .document(uid!!)
-            .collection("grammar")
-            .document(grammarid!!)
-            .update("examples", FieldValue.arrayUnion(exampleText))
+        }
+
+
 
     }
 
     fun onSave(grammarid: String?, grammar: String, explanation: String){
-        val auth = FirebaseAuth.getInstance()
-        val uid = auth.currentUser?.uid
-        val db = FirebaseFirestore.getInstance()
 
-        db.collection("users")
-            .document(uid!!)
-            .collection("grammar")
-            .document(grammarid!!)
-            .update(mapOf(
-                "grammar" to grammar,
-                "explanation" to explanation
-            )).addOnSuccessListener {
-                JapaneseGrammar.loadGrammar()
-            }
+        if (currentLanguage=="jp") {
+            JapaneseGrammar.onSave(grammarid, grammar, explanation)
+        }
+        else if (currentLanguage=="cn"){
+
+            ChineseGrammar.onSave(grammarid, grammar, explanation)
+
+        }
 
     }
 
     fun onExampleDelete(grammarId: String?, exampleRows: List<String>, index: Int) {
-        val auth = FirebaseAuth.getInstance()
-        val uid = auth.currentUser?.uid
-        val db = FirebaseFirestore.getInstance()
+        if (currentLanguage=="jp") {
+            JapaneseGrammar.onExampleDelete(grammarId, exampleRows, index)
+        }
+        else if (currentLanguage=="cn"){
 
-        db.collection("users")
-            .document(uid!!)
-            .collection("grammar")
-            .document(grammarId!!)
-            .update("examples", FieldValue.arrayRemove(exampleRows[index]))
-            .addOnSuccessListener { JapaneseGrammar.loadGrammar() }
+            ChineseGrammar.onExampleDelete(grammarId, exampleRows, index)
+
+        }
+
+        println("on example delete was executed ${grammarId} + ${exampleRows} + ${index}")
 
     }
 
     fun onRemove(grammarid: String?){
-        val auth = FirebaseAuth.getInstance()
-        val uid = auth.currentUser?.uid
-        val db = FirebaseFirestore.getInstance()
-
-        db.collection("users")
-            .document(uid!!)
-            .collection("grammar")
-            .document(grammarid!!)
-            .delete()
+        if (currentLanguage=="jp") {
+            JapaneseGrammar.onRemove(grammarid)
+        }
+        else if (currentLanguage=="cn"){
+            ChineseGrammar.onRemove(grammarid)
+        }
     }
 }

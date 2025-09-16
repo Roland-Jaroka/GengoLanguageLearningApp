@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,12 +41,13 @@ fun LearningUi(navController: NavController,
     val grammars = viewModel.filteredGrammar
 
     LaunchedEffect(Unit) {
-        JapaneseGrammar.loadGrammar()
+       viewModel.loadData()
     }
 
     Box(modifier= Modifier
         .fillMaxSize()
-        .background(White)){
+        .background(White)
+        .padding(bottom = 90.dp)){
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)) {
@@ -98,6 +101,9 @@ fun LearningUi(navController: NavController,
                             navController.navigate("grammarDetails/${grammars.id}")
 
                         })
+                }
+                item {
+                    Spacer(modifier = Modifier.height(50.dp))
                 }
 
 

@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.mylanguagelearningapp.model.ResetPasswordResult
+import com.example.mylanguagelearningapp.model.results.ResetPasswordResult
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
 

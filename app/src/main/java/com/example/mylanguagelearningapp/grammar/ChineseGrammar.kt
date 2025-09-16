@@ -1,28 +1,27 @@
 package com.example.mylanguagelearningapp.grammar
 
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateListOf
 import com.example.mylanguagelearningapp.model.Grammar
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 
-object JapaneseGrammar {
-
+object ChineseGrammar {
     val grammarList = mutableStateListOf<Grammar>()
 
-    val auth= FirebaseAuth.getInstance()
+    fun loadGrammar(){
+        val auth = FirebaseAuth.getInstance()
+        val db = FirebaseFirestore.getInstance()
+        val uid = auth.currentUser?.uid
 
-
-    fun loadGrammar() {
-        val uid= auth.currentUser?.uid.toString()
-
-        Firebase.firestore
-            .collection("users")
-            .document(uid)
-            .collection("grammar")
-            .get().addOnSuccessListener {
+        db.collection("users")
+            .document(uid!!)
+            .collection("chineseCollection")
+            .document("chinese")
+            .collection("chinese_grammar")
+            .get()
+            .addOnSuccessListener {
                 grammarList.clear()
 
                 for (document in it) {
@@ -30,11 +29,14 @@ object JapaneseGrammar {
                     val explanation = document.getString("explanation") ?: ""
                     val examples = document.get("examples") as? List<String> ?: emptyList()
                     val id = document.id
-                    grammarList.add(Grammar(grammar, explanation, examples, id))
-                }
-            }
-    }
 
+                    grammarList.add(Grammar(grammar, explanation, examples, id))
+
+                }
+
+            }
+
+    }
     fun addGrammar(grammar: Grammar, example: String){
         val auth = FirebaseAuth.getInstance()
         val db = FirebaseFirestore.getInstance()
@@ -46,7 +48,9 @@ object JapaneseGrammar {
 
         db.collection("users")
             .document(uid!!)
-            .collection("grammar")
+            .collection("chineseCollection")
+            .document("chinese")
+            .collection("chinese_grammar")
             .add(
                 mapOf(
                     "grammar" to grammar.grammar,
@@ -54,6 +58,7 @@ object JapaneseGrammar {
                     "examples" to allExamples
                 )
             )
+
 
     }
 
@@ -67,9 +72,12 @@ object JapaneseGrammar {
 
         db.collection("users")
             .document(uid!!)
-            .collection("grammar")
+            .collection("chineseCollection")
+            .document("chinese")
+            .collection("chinese_grammar")
             .document(grammarid!!)
             .update("examples", FieldValue.arrayUnion(exampleText))
+            .addOnSuccessListener{loadGrammar()}
 
     }
 
@@ -80,7 +88,9 @@ object JapaneseGrammar {
 
         db.collection("users")
             .document(uid!!)
-            .collection("grammar")
+            .collection("chineseCollection")
+            .document("chinese")
+            .collection("chinese_grammar")
             .document(grammarid!!)
             .update(mapOf(
                 "grammar" to grammar,
@@ -98,7 +108,9 @@ object JapaneseGrammar {
 
         db.collection("users")
             .document(uid!!)
-            .collection("grammar")
+            .collection("chineseCollection")
+            .document("chinese")
+            .collection("chinese_grammar")
             .document(grammarId!!)
             .update("examples", FieldValue.arrayRemove(exampleRows[index]))
             .addOnSuccessListener { loadGrammar() }
@@ -112,8 +124,11 @@ object JapaneseGrammar {
 
         db.collection("users")
             .document(uid!!)
-            .collection("grammar")
+            .collection("chineseCollection")
+            .document("chinese")
+            .collection("chinese_grammar")
             .document(grammarid!!)
             .delete()
     }
+
 }

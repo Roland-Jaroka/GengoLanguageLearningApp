@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +51,14 @@ import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
-import com.example.mylanguagelearningapp.japanesewords.JapaneseWords
+import com.example.mylanguagelearningapp.model.CountryFlags
+import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.math.abs
+import androidx.compose.foundation.layout.*
+
 
 @Composable
 fun Home(viewModel: HomeViewModel= viewModel(),
@@ -65,23 +70,27 @@ fun Home(viewModel: HomeViewModel= viewModel(),
     val auth = FirebaseAuth.getInstance()
      var accumulated by remember { mutableStateOf(0f) }
     val scrollState = rememberScrollState()
+    val currentLanguage = UserSettingsRepository.language.value
+
+
 
     LaunchedEffect(Unit) {
-
-        JapaneseWords.loadWords()
-        JapaneseGrammar.loadGrammar()
+        viewModel.loadData()
         visible = true
         println("Logged in user email ${auth.currentUser?.email}")
+        println("current language ${currentLanguage}")
+
     }
 
-    val currentWord= viewModel.currentWord
+    val currentWord by viewModel.currentWord
     val currentIndex= viewModel.currentIndex
 
 
     Box(modifier = Modifier
         .fillMaxSize()
         .background(White)
-        .verticalScroll(scrollState))
+        .verticalScroll(scrollState)
+        .padding(bottom = 120.dp))
     {
         Column(modifier = Modifier
             .fillMaxSize()) {
@@ -164,7 +173,9 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                             .weight(4f))
                         {
                             Image(
-                                painter = painterResource(R.drawable.japanese),
+                                painter = painterResource(
+                                    if (currentLanguage== "jp") R.drawable.japanese else CountryFlags.CHINESE.resID
+                                ),
                                 contentDescription = null
                             )
 
@@ -193,8 +204,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                       Text(
                           text = when {
                               !viewModel.isWordVisible -> ""
-                              currentWord.value != null -> currentWord.value!!.word
-                              else -> "Loading"
+                              currentWord != null -> currentWord!!.word
+                              else -> ""
                           },
                           modifier = Modifier
                               .padding(top = 20.dp, start = 20.dp),
@@ -207,8 +218,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                     Text(
                         text = when {
                             !viewModel.isPronunciationVisible -> ""
-                            currentWord.value != null -> currentWord.value!!.pronunciation
-                            else -> "Loading"
+                            currentWord != null -> currentWord!!.pronunciation
+                            else -> ""
                         },
                         modifier = Modifier
                             .padding(top = 5.dp, start = 20.dp),
@@ -220,8 +231,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                     Text(
                         text = when{
                             !viewModel.isTranslationVisible -> ""
-                            currentWord.value != null -> currentWord.value!!.translation
-                            else -> "Loading"
+                            currentWord!= null -> currentWord!!.translation
+                            else -> ""
                         },
                         modifier = Modifier
                             .padding(top = 10.dp, start = 20.dp),

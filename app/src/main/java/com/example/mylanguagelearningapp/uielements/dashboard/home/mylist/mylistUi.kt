@@ -4,6 +4,7 @@ package com.example.mylanguagelearningapp.uielements.dashboard.home.mylist
 import android.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -27,7 +28,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -44,6 +52,7 @@ import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.Red
 import com.example.mylanguagelearningapp.ui.theme.White
 
+
 @Composable
 fun MyListUi(viewModel: MyListViewModel = viewModel(),
              navController: NavController
@@ -53,13 +62,14 @@ fun MyListUi(viewModel: MyListViewModel = viewModel(),
     val searchInput = viewModel.searchInput
     val onEdit = viewModel.onEdit
 
+
 Box(modifier = Modifier.fillMaxSize())
 {
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)) {
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         Box(modifier = Modifier.fillMaxWidth()) {
 
@@ -153,7 +163,7 @@ Box(modifier = Modifier.fillMaxSize())
         enter = slideInHorizontally { fullWidth -> fullWidth },
         exit = slideOutHorizontally { fullWidth -> fullWidth }
     ) {
-        Column() {
+        Column(modifier = Modifier.padding(bottom = 12.dp)) {
 
     Button(
         onClick = { viewModel.onRemove() },
@@ -164,23 +174,30 @@ Box(modifier = Modifier.fillMaxSize())
         colors = ButtonDefaults.buttonColors(
             containerColor = Red,
             contentColor = White
-        )
+        ),
+        elevation = ButtonDefaults.buttonElevation(5.dp),
     ) { Text(text = "Remove Word")
     }
 
-        Button(
-            onClick = { viewModel.onSendWordsToQuiz()
-                      navController.navigate("quiz")},
-            modifier = Modifier
-                .align(Alignment.End)
-                .height(50.dp)
-                .padding(start = 12.dp, end = 12.dp, top = 5.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = BgBlue,
-                contentColor = White
-            )
-        ) { Text(text = "Send words to Quiz")
-        }
+
+                Button(
+                    onClick = {
+                        viewModel.onSendWordsToQuiz()
+                        navController.navigate("quiz")
+                    },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .height(50.dp)
+                        .padding(start = 12.dp, end = 12.dp, top = 5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BgBlue,
+                        contentColor = White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(5.dp)
+                ) {
+                    Text(text = "Send words to Quiz")
+                }
+
 
             Button(
                 onClick = { viewModel.onSendWordsToDrawingQuiz()
@@ -192,7 +209,8 @@ Box(modifier = Modifier.fillMaxSize())
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BgBlue,
                     contentColor = White
-                )
+                ),
+                elevation = ButtonDefaults.buttonElevation(5.dp)
             ) { Text(text = "Send words to Drawing Quiz")
             }
 
