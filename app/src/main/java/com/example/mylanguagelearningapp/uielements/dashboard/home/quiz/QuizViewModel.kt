@@ -36,6 +36,9 @@ class QuizViewModel: ViewModel() {
     var isQuizFinished by mutableStateOf(false)
         private set
 
+    var wrongAnswers = mutableListOf<Words>()
+        private set
+
     fun onAnswerChange(newvalue: String) {
         answer = newvalue
     }
@@ -43,9 +46,18 @@ class QuizViewModel: ViewModel() {
     fun onNextClick() {
 
         if (wordsList.isEmpty()) return
-        if (isQuizFinished) {points=0;currentIndex=-1;isQuizFinished=false}
+        if (isQuizFinished) {
+            isQuizFinished=false
+            points = 0
+        currentIndex = -1
+        wrongAnswers.clear()} else {
+            if (currentIndex>= 0){
+                if (isCorrect()) {
+                    points++
+                } else wrongAnswers.add(wordsList[currentIndex])
+            }
+        }
 
-        if (isCorrect()&& !isQuizFinished) {points++}
         if (currentIndex < wordsList.size - 1) {
 
             currentIndex += 1
@@ -57,7 +69,10 @@ class QuizViewModel: ViewModel() {
             answer = ""
 
         }
-        else isQuizFinished= true
+        else { isQuizFinished= true
+
+        println("wrong answers ${wrongAnswers}")}
+        println("currentIndex: $currentIndex, Wordlist: ${wordsList[currentIndex]}, ${currentWord.value}")
     }
 
         fun isCorrect(): Boolean {

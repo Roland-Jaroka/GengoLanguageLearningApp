@@ -5,10 +5,17 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.mylanguagelearningapp.grammar.ChineseGrammar
+import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.model.Grammar
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AddNewGrammarViewModel: ViewModel() {
+
+
+    val currentLanguage = UserSettingsRepository.language.value
 
     var grammar by mutableStateOf("")
         private set
@@ -37,32 +44,19 @@ class AddNewGrammarViewModel: ViewModel() {
     val examplerows = mutableStateListOf<String>()
 
     fun addGrammarToList() {
-      val auth = FirebaseAuth.getInstance()
-      val db = FirebaseFirestore.getInstance()
-        val uid = auth.currentUser?.uid
 
-        val allExamples = mutableListOf<String>()
-        if (example.isNotBlank()) allExamples.add(example)
-        allExamples.addAll(examplerows.filter { it.isNotBlank() })
+        if (currentLanguage == "jp")
 
-        db.collection("users")
-            .document(uid!!)
-            .collection("grammar")
-            .add(
-                mapOf(
-                    "grammar" to grammar,
-                    "explanation" to explanation,
-                    "examples" to allExamples
+        JapaneseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)
 
-                )
-            ).addOnSuccessListener {
+        if (currentLanguage == "cn")
+
+            ChineseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)
+
                 grammar = ""
                 explanation = ""
                 example = ""
                 examplerows.clear()
-
-
-            }
 
     }
 

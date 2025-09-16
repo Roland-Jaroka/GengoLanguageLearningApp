@@ -69,4 +69,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
 
     implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
+
+    implementation("com.google.firebase:firebase-analytics-ktx:21.3.0")
 }

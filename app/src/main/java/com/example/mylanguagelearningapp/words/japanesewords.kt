@@ -4,12 +4,20 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import com.example.mylanguagelearningapp.model.Words
 import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.tasks.await
 
 
 object JapaneseWords {
     val wordList = mutableStateListOf<Words>()
+
+
 
     val auth= FirebaseAuth.getInstance()
 
@@ -40,10 +48,9 @@ object JapaneseWords {
 
             }
     }
-
-   fun loadWords() {
-       val uid= auth.currentUser?.uid.toString()
-       if (uid.isEmpty()) return
+  fun loadWords() {
+        val uid= auth.currentUser?.uid.toString()
+        if (uid.isEmpty()) return
 
         Firebase.firestore
             .collection("users")
@@ -64,5 +71,9 @@ object JapaneseWords {
                 Log.d("JapaneseWords", "Words Loaded from user with uid ${auth.currentUser?.uid}")
             }
 
+
     }
+
+
+
 }
