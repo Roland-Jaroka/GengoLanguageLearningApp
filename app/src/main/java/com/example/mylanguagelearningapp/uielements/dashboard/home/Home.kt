@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,18 +45,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mylanguagelearningapp.R
+import com.example.mylanguagelearningapp.model.CountryFlags
+import com.example.mylanguagelearningapp.model.QuizManager.quizzes
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
-import com.example.mylanguagelearningapp.R
-import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
-import com.example.mylanguagelearningapp.model.CountryFlags
-import com.example.mylanguagelearningapp.words.JapaneseWords
-import com.example.mylanguagelearningapp.model.QuizManager.quizzes
-import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
 import kotlin.math.abs
-import androidx.compose.foundation.layout.*
 
 
 @Composable
@@ -70,7 +67,7 @@ fun Home(viewModel: HomeViewModel= viewModel(),
     val auth = FirebaseAuth.getInstance()
      var accumulated by remember { mutableStateOf(0f) }
     val scrollState = rememberScrollState()
-    val currentLanguage = UserSettingsRepository.language.value
+    val currentLanguage by UserSettingsRepository.language
 
 
 
@@ -84,6 +81,8 @@ fun Home(viewModel: HomeViewModel= viewModel(),
 
     val currentWord by viewModel.currentWord
     val currentIndex= viewModel.currentIndex
+
+    viewModel.updateWordsList(currentLanguage)
 
 
     Box(modifier = Modifier
@@ -259,7 +258,11 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                         contentColor = if (viewModel.isWordVisible) BgBlue else White
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(2.dp, BgBlue)
+                    border = BorderStroke(2.dp, BgBlue),
+                    elevation = if (!viewModel.isWordVisible) ButtonDefaults.buttonElevation(
+                        12.dp
+                    )
+                    else null
                 ){
                     Text(text = "Word")
                 }
@@ -274,7 +277,11 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                         contentColor = if (viewModel.isPronunciationVisible) BgBlue else White
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(2.dp, BgBlue)
+                    border = BorderStroke(2.dp, BgBlue),
+                    elevation = if (!viewModel.isPronunciationVisible) ButtonDefaults.buttonElevation(
+                        12.dp
+                    )
+                    else null
                 ){
 
                     Text(text = "Pronunciation",
@@ -292,7 +299,11 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                         contentColor = if (viewModel.isTranslationVisible) BgBlue else White
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(2.dp, BgBlue)
+                    border = BorderStroke(2.dp, BgBlue),
+                    elevation = if (!viewModel.isTranslationVisible) ButtonDefaults.buttonElevation(
+                        12.dp
+                    )
+                    else null
                 ){
                     Text(text = "Translation",
                         maxLines = 1,

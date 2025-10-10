@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.mylanguagelearningapp.model.Tonemarks
+import com.example.mylanguagelearningapp.model.Tonemarks.toPinyin
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.results.AddWordResults
@@ -15,7 +17,6 @@ class AddWordsViewModel: ViewModel() {
 
 
     val auth= FirebaseAuth.getInstance()
-    val uid= auth.currentUser?.uid.toString()
     var word by mutableStateOf("")
         private set
     val currentLanguage= UserSettingsRepository.language.value
@@ -34,7 +35,7 @@ class AddWordsViewModel: ViewModel() {
         private set
 
     fun onPronunciationChange(newPronunciation: String) {
-        pronunciation = newPronunciation
+        pronunciation = toPinyin(newPronunciation)
 
     }
     fun addWordToList(): AddWordResults {
@@ -64,6 +65,7 @@ class AddWordsViewModel: ViewModel() {
 
 
     }
+
 
 
 

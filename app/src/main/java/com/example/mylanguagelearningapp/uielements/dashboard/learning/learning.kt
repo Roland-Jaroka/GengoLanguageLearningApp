@@ -1,37 +1,38 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.learning
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mylanguagelearningapp.ui.theme.Blue
-import com.example.mylanguagelearningapp.R
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.R
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
+import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.GrammarCards
 
 @Composable
 fun LearningUi(navController: NavController,
@@ -39,9 +40,10 @@ fun LearningUi(navController: NavController,
 //TODO learning UI and functions
 
     val grammars = viewModel.filteredGrammar
+    val currentLanguage = UserSettingsRepository.language
 
     LaunchedEffect(Unit) {
-       viewModel.loadData()
+       viewModel.loadData(currentLanguage)
     }
 
     Box(modifier= Modifier
@@ -94,7 +96,8 @@ fun LearningUi(navController: NavController,
 
                     val firstExample = grammars.examples?.firstOrNull() ?: ""
 
-                    GrammarCards(grammars.grammar,
+                    GrammarCards(
+                        grammars.grammar,
                         grammars.explanation,
                         firstExample,
                         onClick = {
@@ -103,6 +106,22 @@ fun LearningUi(navController: NavController,
                         })
                 }
                 item {
+                    Text(text = "Refresh",
+                        color= Blue,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth()
+                            .padding(top = 10.dp)
+                            .clickable(
+                                onClick = {
+                                    viewModel.loadData(currentLanguage)
+                                    navController.navigate("learning"){
+                                        popUpTo("learning"){
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            ))
                     Spacer(modifier = Modifier.height(50.dp))
                 }
 

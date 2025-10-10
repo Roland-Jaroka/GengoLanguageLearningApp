@@ -6,18 +6,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
-import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.words.ChineseWords
+import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class MyListViewModel: ViewModel() {
 

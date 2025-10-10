@@ -7,8 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
+import com.example.mylanguagelearningapp.model.Tonemarks.toPinyin
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.model.Words
+import com.example.mylanguagelearningapp.model.quizWrongAnswers
 import com.example.mylanguagelearningapp.words.ChineseWords
 
 class QuizViewModel: ViewModel() {
@@ -36,11 +38,12 @@ class QuizViewModel: ViewModel() {
     var isQuizFinished by mutableStateOf(false)
         private set
 
-    var wrongAnswers = mutableListOf<Words>()
+    var wrongAnswers = mutableListOf<quizWrongAnswers>()
         private set
 
+
     fun onAnswerChange(newvalue: String) {
-        answer = newvalue
+        answer = toPinyin(newvalue)
     }
 
     fun onNextClick() {
@@ -50,11 +53,16 @@ class QuizViewModel: ViewModel() {
             isQuizFinished=false
             points = 0
         currentIndex = -1
-        wrongAnswers.clear()} else {
+        wrongAnswers.clear()
+       } else {
             if (currentIndex>= 0){
                 if (isCorrect()) {
                     points++
-                } else wrongAnswers.add(wordsList[currentIndex])
+                } else wrongAnswers.add(
+                    quizWrongAnswers (word = wordsList[currentIndex].word,
+                    pronunciation = wordsList[currentIndex].pronunciation,
+                    input = answer)
+                )
             }
         }
 

@@ -1,16 +1,17 @@
 package com.example.mylanguagelearningapp.words
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import com.example.mylanguagelearningapp.model.Words
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.tasks.await
 
 object ChineseWords {
 
     val chinseWordsList = mutableStateListOf<Words>()
     val auth= FirebaseAuth.getInstance()
+    val loaded = mutableStateOf(false)
 
 
     var error = ""
@@ -34,6 +35,7 @@ object ChineseWords {
                     val id = document.id
                     chinseWordsList.add(Words(word, pronunciation, translation, id))
                 }
+                loaded.value = true
             }
     }
 

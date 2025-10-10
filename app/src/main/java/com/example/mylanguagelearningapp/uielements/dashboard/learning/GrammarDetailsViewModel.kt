@@ -1,15 +1,12 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.learning
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 
 class GrammarDetailsViewModel: ViewModel() {
 
@@ -65,5 +62,15 @@ class GrammarDetailsViewModel: ViewModel() {
         else if (currentLanguage=="cn"){
             ChineseGrammar.onRemove(grammarid)
         }
+    }
+
+    suspend fun geminAiGrammar(grammar: String): String {
+
+
+        val model = Firebase.ai(backend = GenerativeBackend.googleAI())
+            .generativeModel("gemini-2.5-flash")
+        val prompt= "Give me an example sentence in Japanese using the following grammar: $grammar"
+        val response = model.generateContent(prompt)
+        return response.text?:""
     }
 }

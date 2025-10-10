@@ -9,8 +9,9 @@ import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
 import com.example.mylanguagelearningapp.model.Grammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 
 class AddNewGrammarViewModel: ViewModel() {
 
@@ -45,13 +46,13 @@ class AddNewGrammarViewModel: ViewModel() {
 
     fun addGrammarToList() {
 
-        if (currentLanguage == "jp")
+        if (currentLanguage == "jp"){
 
-        JapaneseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)
+        JapaneseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)}
 
-        if (currentLanguage == "cn")
+        if (currentLanguage == "cn"){
 
-            ChineseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)
+            ChineseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)}
 
                 grammar = ""
                 explanation = ""

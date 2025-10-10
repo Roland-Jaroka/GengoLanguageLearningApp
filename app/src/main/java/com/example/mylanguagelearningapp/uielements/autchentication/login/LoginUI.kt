@@ -50,9 +50,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.model.results.LoginResult
 import com.example.mylanguagelearningapp.R
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.BlueGray
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 import kotlinx.coroutines.launch
 
 @Composable
@@ -116,6 +118,8 @@ fun LoginUi(navController: NavController,
         }
              }
 
+        Spacer(modifier = Modifier.height(200.dp))
+
         Box(modifier = Modifier.align(Alignment.Center)) {
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -125,7 +129,7 @@ fun LoginUi(navController: NavController,
                Spacer(modifier = Modifier.height(200.dp))
 
                 Text(
-                    text = "Language\n Learning",
+                    text = "   言語\n Learning",
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally),
                     fontSize = 40.sp,
@@ -192,26 +196,20 @@ fun LoginUi(navController: NavController,
                     )
                 }
 
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                        .height(50.dp),
+                MyAppButton(
+                    modifier=Modifier
+                        .padding(start = 18.dp, end = 18.dp, top = 2.dp),
+                    text= "Login",
                     colors = ButtonDefaults.buttonColors(
                         contentColor = White,
                         containerColor = BgBlue
-                    ),
-                    shape = RoundedCornerShape(20.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        hoveredElevation = 10.dp,
-                        pressedElevation = 10.dp,
-                        defaultElevation = 5.dp
                     ),
                     onClick = {
                         scope.launch {
                             val result = viewModel.login(email, password)
                             when (result) {
                                 is LoginResult.Success -> {
+                                    UserSettingsRepository.getUserData()
                                     navController.navigate("dashboard")
                                     { popUpTo("login") { inclusive = true } }
                                 }
@@ -234,14 +232,8 @@ fun LoginUi(navController: NavController,
                                 ).show()
                             }
                         }
-
-                    }) {
-                    Text(
-                        text = "Login",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                }
+                    }
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -250,7 +242,7 @@ fun LoginUi(navController: NavController,
                     Text(
                         text = "Forgot password?",
                         modifier = Modifier
-                            .padding(top = 20.dp, start = 20.dp)
+                            .padding(top = 15.dp, start = 20.dp)
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
@@ -267,7 +259,7 @@ fun LoginUi(navController: NavController,
                     Text(
                         text = "Sign Up",
                         modifier = Modifier
-                            .padding(top = 20.dp, end = 20.dp)
+                            .padding(top = 15.dp, end = 30.dp)
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {

@@ -19,7 +19,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +32,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.R
-import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 
 @Composable
 fun AddNewGrammarUi(navController: NavController,
@@ -171,33 +170,24 @@ fun AddNewGrammarUi(navController: NavController,
                     }
                 }
 
-
-            Button(
-                modifier = Modifier.fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                    .height(48.dp),
+            MyAppButton(
+                modifier = Modifier
+                    .padding(start = 12.dp, end = 12.dp, top = 20.dp),
+                text= "Add",
                 colors = ButtonDefaults.buttonColors(
                     contentColor = White,
                     containerColor = Blue
                 ),
-                elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
-                shape = RoundedCornerShape(20.dp),
                 onClick = {
                     when {
                         viewModel.grammar.isBlank() -> grammarInputError = "Grammar cannot be blank"
                         viewModel.explanation.isBlank() -> explanationInputError = "Explanation cannot be blank"
                         else -> viewModel.addGrammarToList()
                     }
-                }
-            )
-            {
 
-                Text(
-                    text = "Add",
-                    fontSize = 20.sp
-                )
-            }
+                }
+
+            )
 
 
             Text(

@@ -3,54 +3,47 @@ package com.example.mylanguagelearningapp.uielements.dashboard.home.mylist
 //noinspection SuspiciousImport
 import android.R
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
-import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.Red
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.WordCard
 
 
 @Composable
@@ -61,6 +54,11 @@ fun MyListUi(viewModel: MyListViewModel = viewModel(),
     val words = viewModel.filteredWords
     val searchInput = viewModel.searchInput
     val onEdit = viewModel.onEdit
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible= true
+    }
 
 
 Box(modifier = Modifier.fillMaxSize())
@@ -122,7 +120,7 @@ Box(modifier = Modifier.fillMaxSize())
             Image(
                 painter = painterResource(R.drawable.ic_menu_edit),
                 contentDescription = null,
-                colorFilter = if (onEdit) androidx.compose.ui.graphics.ColorFilter.tint(BgBlue) else null,
+                colorFilter = if (onEdit) ColorFilter.tint(BgBlue) else null,
                 modifier = Modifier.padding(start = 5.dp, top = 15.dp)
                     .clickable(
                         onClick = {
@@ -135,15 +133,28 @@ Box(modifier = Modifier.fillMaxSize())
 
         LazyColumn(modifier = Modifier.fillMaxSize()
             .animateContentSize()) {
-            items(words) { word ->
-                WordCard(word.word,
-                    word.pronunciation,
-                    word.translation,
-                    isSelectable = onEdit,
-                    isSelected= viewModel.selectedWords.contains(word.id),
-                    onClick = { viewModel.toggleSelection(word.id)
-                    println("Selected words ID: ${word.id}")
-                    println("Button clicked for word: ${word.word}")})
+            val maxAnimatedItems = 10
+            itemsIndexed(words) { index, word ->
+                val shouldAnimate = index < maxAnimatedItems
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = if (shouldAnimate) slideInHorizontally (initialOffsetX = { fullWidth -> fullWidth },
+                        animationSpec = tween(delayMillis = index * 100, durationMillis = 400))
+                    else EnterTransition.None,
+
+                ) {
+                    WordCard(
+                        word.word,
+                        word.pronunciation,
+                        word.translation,
+                        isSelectable = onEdit,
+                        isSelected = viewModel.selectedWords.contains(word.id),
+                        onClick = {
+                            viewModel.toggleSelection(word.id)
+                            println("Selected words ID: ${word.id}")
+                            println("Button clicked for word: ${word.word}")
+                        })
+                }
             }
             item {
                 Spacer(modifier = Modifier.height(100.dp))
