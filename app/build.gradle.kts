@@ -13,8 +13,8 @@ android {
         applicationId = "com.example.mylanguagelearningapp"
         minSdk = 32
         targetSdk = 36
-        versionCode = 2
-        versionName = "2.8"
+        versionCode = 3
+        versionName = "3.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -71,4 +71,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
 
     implementation("com.google.firebase:firebase-analytics-ktx:21.3.0")
+
+    implementation("com.google.firebase:firebase-ai")
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

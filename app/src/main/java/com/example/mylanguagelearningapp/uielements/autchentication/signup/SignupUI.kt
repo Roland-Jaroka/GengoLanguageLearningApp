@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.model.results.SignupResult
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 import kotlinx.coroutines.launch
 
 @Composable
@@ -196,18 +197,16 @@ Box(modifier = Modifier
             )
         }
 
-        Button(
-            modifier = Modifier.fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                .height(48.dp),
+        MyAppButton(
+            modifier=Modifier
+                .padding(start = 18.dp, end = 18.dp, top = 2.dp),
+            text= "Sign Up",
             colors = ButtonDefaults.buttonColors(
                 contentColor = White,
                 containerColor = Blue
             ),
-            elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
-            shape = RoundedCornerShape(20.dp),
             onClick = {
+
                 scope.launch {
                     val result= viewModel.createAccount(name, email, password, confirmPassword)
                     when (result){
@@ -235,17 +234,9 @@ Box(modifier = Modifier
                 }
 
 
+            }
 
-
-
-                 }
-        ) {
-            Text(
-                text = "Sign Up",
-                fontSize = 20.sp
-            )
-
-        }
+        )
 
         Text(
             text = "Back to login",

@@ -7,18 +7,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
-import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.words.ChineseWords
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.example.mylanguagelearningapp.words.JapaneseWords
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 class HomeViewModel: ViewModel() {
 
@@ -57,19 +54,29 @@ class HomeViewModel: ViewModel() {
     }
 
     fun updateWordsList(currentLanguage: String) {
-        if (currentLanguage == "jp") {
-            wordsList = JapaneseWords.wordList
-        } else if (currentLanguage == "cn") {
-
-            wordsList = ChineseWords.chinseWordsList
-        }
+        wordsList.clear()
+       when (currentLanguage){
+           "jp" -> {
+               wordsList.addAll(JapaneseWords.wordList)
+           }
+           "cn" -> {
+               wordsList.addAll(ChineseWords.chinseWordsList)
+           }
+       }
     }
 
     fun loadData() {
 
-        JapaneseWords.loadWords()
-        JapaneseGrammar.loadGrammar()
-        ChineseWords.loadWords()
+        when (UserSettingsRepository.language.value){
+            "jp"-> {
+                JapaneseWords.loadWords()
+                JapaneseGrammar.loadGrammar()
+            }
+            "cn" -> {
+                ChineseWords.loadWords()
+                ChineseGrammar.loadGrammar()
+            }
+        }
 
 
 

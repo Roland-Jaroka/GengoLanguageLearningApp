@@ -2,7 +2,6 @@ package com.example.mylanguagelearningapp.uielements.dashboard.home.addwords
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,10 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.results.AddWordResults
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
+import com.example.mylanguagelearningapp.words.JapaneseWords
 
 @Composable
 fun AddWordsUi(navController: NavController,
@@ -126,20 +126,16 @@ fun AddWordsUi(navController: NavController,
                     modifier = Modifier.padding(start = 30.dp, top = 5.dp)
                 )
             }
-
-            Button(
-
-                modifier = Modifier.fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                    .height(48.dp),
+            MyAppButton(
+                modifier = Modifier
+                    .padding(start = 12.dp, end = 12.dp, top = 20.dp),
+                text= "Add",
                 colors = ButtonDefaults.buttonColors(
                     contentColor = White,
                     containerColor = Blue
                 ),
-                elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
-                shape = RoundedCornerShape(20.dp),
                 onClick = {
+
                     val result = viewModel.addWordToList()
 
                     when (result) {
@@ -152,15 +148,9 @@ fun AddWordsUi(navController: NavController,
                             JapaneseWords.error, Toast.LENGTH_SHORT).show()
                     }
 
+
                 }
             )
-            {
-
-                Text(
-                    text = "Add",
-                    fontSize = 20.sp
-                )
-            }
 
 
                 Text(
@@ -168,7 +158,7 @@ fun AddWordsUi(navController: NavController,
                 fontSize = 15.sp,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(top= 20.dp)
+                    .padding(top= 10.dp)
                     .clickable(indication = null,
                         interactionSource = remember{ MutableInteractionSource() }) {
 

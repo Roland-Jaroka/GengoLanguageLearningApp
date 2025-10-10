@@ -108,6 +108,8 @@ class DrawingCanvasViewModel: ViewModel(){
 
         currentWord.value = wordsList[currentIndex]
 
+        isKanjiReveled = false
+
 
 
     }

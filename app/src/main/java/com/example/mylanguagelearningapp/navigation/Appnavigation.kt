@@ -1,9 +1,7 @@
 package com.example.mylanguagelearningapp.navigation
 
 import android.annotation.SuppressLint
-import android.view.WindowInsets.Type.statusBars
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -11,13 +9,10 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,28 +21,29 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mylanguagelearningapp.model.BottomNavBar
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.uielements.autchentication.forgotpassword.ForgotPasswordScr
 import com.example.mylanguagelearningapp.uielements.autchentication.login.LoginUi
 import com.example.mylanguagelearningapp.uielements.autchentication.signup.SignUpUi
 import com.example.mylanguagelearningapp.uielements.dashboard.home.Home
 import com.example.mylanguagelearningapp.uielements.dashboard.home.addwords.AddWordsUi
 import com.example.mylanguagelearningapp.uielements.dashboard.home.drawingquiz.DrawingQuizView
+import com.example.mylanguagelearningapp.uielements.dashboard.home.mainlanguage.MainLanguageSelector
 import com.example.mylanguagelearningapp.uielements.dashboard.home.mylist.MyListUi
 import com.example.mylanguagelearningapp.uielements.dashboard.home.quiz.QuizUi
 import com.example.mylanguagelearningapp.uielements.dashboard.learning.AddNewGrammarUi
 import com.example.mylanguagelearningapp.uielements.dashboard.learning.GrammarDetails
 import com.example.mylanguagelearningapp.uielements.dashboard.learning.LearningUi
 import com.example.mylanguagelearningapp.uielements.dashboard.settings.LearningLanguageUi
+import com.example.mylanguagelearningapp.uielements.dashboard.settings.ProfileMenu
 import com.example.mylanguagelearningapp.uielements.dashboard.settings.settingsUi
 import com.google.firebase.auth.FirebaseAuth
-
-
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(firstLogin: Boolean) {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
@@ -99,10 +95,12 @@ fun AppNavigation() {
 
             //DashboardFlow
             navigation(
-                startDestination = "home",
+                startDestination = if (firstLogin == false)"home" else "mainlanguageSelector",
                 route = "dashboard"
             ) {
                 composable("home") { Home(navController = navController) }
+
+                composable("mainlanguageSelector") { MainLanguageSelector(navController = navController) }
 
                 composable("addwords",
                     enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
@@ -131,7 +129,10 @@ fun AppNavigation() {
                     exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { AddNewGrammarUi(navController = navController) }
 
                 composable("settings") { settingsUi(navController = navController) }
-                composable("learningLanguage") { LearningLanguageUi(navController = navController) }
+                composable("profile") { ProfileMenu(navController = navController) }
+                composable("learningLanguage",
+                    enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
+                    exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { LearningLanguageUi(navController = navController) }
             }
         }
     }

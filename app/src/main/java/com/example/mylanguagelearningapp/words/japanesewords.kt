@@ -2,20 +2,17 @@ package com.example.mylanguagelearningapp.words
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import com.example.mylanguagelearningapp.model.Words
 import com.google.firebase.Firebase
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.tasks.await
 
 
 object JapaneseWords {
     val wordList = mutableStateListOf<Words>()
+
+    var loaded = mutableStateOf(false)
 
 
 
@@ -58,6 +55,7 @@ object JapaneseWords {
             .collection("words")
             .get().addOnSuccessListener {
                 wordList.clear()
+                loaded.value = true
 
                 for (document in it) {
                     val word = document.getString("word") ?: ""

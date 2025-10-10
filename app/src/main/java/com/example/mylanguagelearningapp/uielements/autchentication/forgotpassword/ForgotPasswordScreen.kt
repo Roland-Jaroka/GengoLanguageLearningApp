@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.model.results.ResetPasswordResult
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 import kotlinx.coroutines.launch
 
 @Composable
@@ -99,65 +100,55 @@ fun ForgotPasswordScr(viewModel: ForgotPasswordViewModel = viewModel(),
 
                    }
 
+            MyAppButton(
+                modifier=Modifier
+                    .padding(start = 18.dp, end = 18.dp, top = 2.dp),
+                text= "Reset Password",
+                colors = ButtonDefaults.buttonColors(
+                    contentColor = White,
+                    containerColor = Blue
+                ),
+                enabled = if (email.isBlank()) false else true,
+                onClick = {
+                    scope.launch {
 
-                        Button(
-                            modifier = Modifier.fillMaxWidth()
-                                .align(Alignment.CenterHorizontally)
-                                .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                                .height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = White,
-                                containerColor = Blue
-                            ),
-                            elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
-                            shape = RoundedCornerShape(20.dp),
+                        val result = viewModel.onResetPassword(email)
 
-                            onClick = {
-                                scope.launch {
-
-                                    val result = viewModel.onResetPassword(email)
-
-                                    when (result) {
-                                        is ResetPasswordResult.Success -> {
-                                            navController.navigate("login")
-
-                                        }
-
-                                        is ResetPasswordResult.BlankEmail -> {
-                                            emailError = "Email cannot be blank"
-                                        }
-
-                                        is ResetPasswordResult.InvalidEmail -> {
-                                            emailError = "Invalid Email"
-                                        }
-
-                                        is ResetPasswordResult.Error -> {
-                                            Toast.makeText(
-                                                context,
-                                                result.message,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    }
-                                }
+                        when (result) {
+                            is ResetPasswordResult.Success -> {
+                                navController.navigate("login")
 
                             }
 
+                            is ResetPasswordResult.BlankEmail -> {
+                                emailError = "Email cannot be blank"
+                            }
 
-                        ) {
+                            is ResetPasswordResult.InvalidEmail -> {
+                                emailError = "Invalid Email"
+                            }
 
-                            Text(
-                                text = "Reset Password",
-                                fontSize = 20.sp
-                            )
+                            is ResetPasswordResult.Error -> {
+                                Toast.makeText(
+                                    context,
+                                    result.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
+                    }
+
+                }
+
+
+            )
 
             Text(
                 text = "Back to login",
                 fontSize = 15.sp,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(20.dp)
+                    .padding(top = 10.dp, bottom = 20.dp, start = 20.dp, end = 20.dp)
                     .clickable(indication = null,
                         interactionSource = remember{ MutableInteractionSource() }) {
                         navController.navigate("login")

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
@@ -36,15 +34,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
@@ -55,6 +54,8 @@ import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.LightBlue
 import com.example.mylanguagelearningapp.ui.theme.Red
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.GrammarCardsAlertDialog
+import kotlinx.coroutines.launch
 
 @Composable
 fun GrammarDetails(navController: NavController,
@@ -75,6 +76,11 @@ fun GrammarDetails(navController: NavController,
     var grammarInput by remember { mutableStateOf(grammar.grammar) }
     var explanationInput by remember { mutableStateOf(grammar.explanation) }
     var dialogState by remember { mutableStateOf(false) }
+    var geminAiDialog by remember{ mutableStateOf(false) }
+    val dialogWidth = 400
+    val dialogHeight = 500
+    var generatedText by remember{ mutableStateOf<String?>(null)}
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -289,6 +295,7 @@ fun GrammarDetails(navController: NavController,
                     }
 
 
+
                     Text(
                         text = "Add sentences",
                         fontSize = 20.sp,
@@ -303,6 +310,23 @@ fun GrammarDetails(navController: NavController,
 
 
 
+            }
+
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(start = 12.dp, end = 12.dp, top = 5.dp),
+
+                onClick = {
+                    geminAiDialog = true
+
+                   scope.launch {
+                       generatedText = viewModel.geminAiGrammar(grammar.grammar)}
+
+                }
+            ) {
+                Text(text = "Get examples from GeminAi")
             }
 
         }
@@ -371,13 +395,25 @@ fun GrammarDetails(navController: NavController,
                 onConfirm = {
                     dialogState = false
                     viewModel.onRemove(grammarId)
-                    navController.navigate("learning") {popUpTo("learning") { inclusive = true }}
+                    navController.navigate("learning") { popUpTo("learning") { inclusive = true } }
                     isEditMode = false
                 },
                 onDismiss = {
                     dialogState = false
                 }
             )
+        }
+        if (geminAiDialog) {
+            Dialog(
+                onDismissRequest = { geminAiDialog = false}
+            ) {
+                GeminAiChatUi(
+                onClick = { geminAiDialog = false },
+                dialogWidth,
+                dialogHeight,
+                    text = generatedText?: "Loading"
+            )
+            }
         }
 
     }
