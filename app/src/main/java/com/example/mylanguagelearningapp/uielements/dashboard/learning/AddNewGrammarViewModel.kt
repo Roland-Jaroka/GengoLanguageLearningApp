@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.grammar.LanguageGrammar
 import com.example.mylanguagelearningapp.model.Grammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.Firebase
@@ -44,16 +45,9 @@ class AddNewGrammarViewModel: ViewModel() {
 
     val examplerows = mutableStateListOf<String>()
 
-    fun addGrammarToList() {
+    fun addGrammarToList(language: String) {
 
-        if (currentLanguage == "jp"){
-
-        JapaneseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)}
-
-        if (currentLanguage == "cn"){
-
-            ChineseGrammar.addGrammar(Grammar(grammar, explanation, examplerows, id = ""), example)}
-
+        LanguageGrammar.addGrammar(language, example, Grammar(grammar, explanation, examplerows, id = ""))
                 grammar = ""
                 explanation = ""
                 example = ""

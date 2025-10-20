@@ -11,6 +11,7 @@ import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.results.AddWordResults
 import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.words.ChineseWords
+import com.example.mylanguagelearningapp.words.LanguageWords
 import com.google.firebase.auth.FirebaseAuth
 
 class AddWordsViewModel: ViewModel() {
@@ -47,12 +48,8 @@ class AddWordsViewModel: ViewModel() {
         if (translation.isBlank()) return AddWordResults.BlankTranslation
 
        try {
-          if (currentLanguage=="jp"){
-       JapaneseWords.addWord(Words(word, pronunciation, translation, id = ""))}
 
-           else if (currentLanguage=="cn"){
-               ChineseWords.addWord(Words(word, pronunciation, translation, id = ""))
-           }
+           LanguageWords.addWord(Words(word, pronunciation, translation, id = ""), currentLanguage)
 
            word=""
            pronunciation=""

@@ -124,15 +124,11 @@ fun AppNavigation(firstLogin: Boolean) {
 
                     GrammarDetails(navController = navController, grammarId) }
 
-                composable("addnewgrammar",
-                    enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
-                    exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { AddNewGrammarUi(navController = navController) }
+                composable("addnewgrammar") { AddNewGrammarUi(navController = navController) }
 
                 composable("settings") { settingsUi(navController = navController) }
                 composable("profile") { ProfileMenu(navController = navController) }
-                composable("learningLanguage",
-                    enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
-                    exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { LearningLanguageUi(navController = navController) }
+                composable("learningLanguage") { LearningLanguageUi(navController = navController) }
             }
         }
     }

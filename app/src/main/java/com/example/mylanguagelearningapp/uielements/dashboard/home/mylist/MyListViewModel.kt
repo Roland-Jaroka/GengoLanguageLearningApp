@@ -8,27 +8,45 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
+import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.words.ChineseWords
 import com.example.mylanguagelearningapp.words.JapaneseWords
+import com.example.mylanguagelearningapp.words.JapaneseWords.auth
+import com.example.mylanguagelearningapp.words.LanguageWords
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 class MyListViewModel: ViewModel() {
 
     val currentLanguage= UserSettingsRepository.language.value
-    val words = when(currentLanguage) {
-        "jp" -> JapaneseWords.wordList
-        "cn"-> ChineseWords.chinseWordsList
-        else -> JapaneseWords.wordList
-    }
+    val repository= LanguageWords
+    var words = repository.words
+
+
 
     var searchInput by mutableStateOf("")
         private set
 
+    var labelInput by mutableStateOf("")
+        private set
+
     val db= FirebaseFirestore.getInstance()
     val uid= FirebaseAuth.getInstance().currentUser?.uid.toString()
+
+    val labels = repository.words.map {
+        list-> list.mapNotNull { it.label }.toSet()
+    }
+
     fun onInputChanged(newInput: String) {
         searchInput = newInput
+    }
+
+    fun onLabelInputChanged(newInput: String){
+        labelInput= newInput
     }
 
     var onEdit by mutableStateOf(false)
@@ -43,68 +61,21 @@ class MyListViewModel: ViewModel() {
         }
     }
 
-    val filteredWords by derivedStateOf {
-        if (searchInput.isBlank()) {
-            words.sortedBy { it.word }
-        } else {
-            words.filter { word ->
-                listOf(word.word, word.pronunciation, word.translation).any{
-                    it.contains(searchInput, ignoreCase = true)}
-            }.sortedBy { it.word }
-        }
-    }
+
 
     fun onRemove(){
-        if (currentLanguage=="jp") {
-            selectedWords.forEach { id ->
-                db.collection("users")
-                    .document(uid)
-                    .collection("words")
-                    .document(id)
-                    .delete()
-                    .addOnSuccessListener {
-                        println("Word removed from database")
-                    }
-            }
-            selectedWords.forEach{id->
-                JapaneseWords.wordList.find { it.id == id }?.let { word ->
-                    JapaneseWords.wordList.remove(word)
-                }
-            }
-            selectedWords.clear()
-
+        selectedWords.forEach { id->
+            repository.onRemove(id, currentLanguage)
         }
 
-        else if (currentLanguage=="cn"){
-            selectedWords.forEach{id->
-                db.collection("users")
-                    .document(uid)
-                    .collection("chineseCollection")
-                    .document("chinese")
-                    .collection("chineseWords")
-                    .document(id)
-                    .delete()
-                    .addOnSuccessListener {
-                        println("Word removed from database")
-                    }
-
-            }
-
-            selectedWords.forEach { id->
-                ChineseWords.chinseWordsList.find { it.id == id }?.let { word->
-                    ChineseWords.chinseWordsList.remove(word)
-                }
-            }
-            selectedWords.clear()
-        }
-
+        selectedWords.clear()
     }
 
     fun onSendWordsToDrawingQuiz(){
+        val words= words.value
         quizzes.clear()
         selectedWords.forEach { id ->
-            words.find { it.id == id }?.let { word ->
-                quizzes.add(word)
+            words.find { it.id == id }?.let { quizzes.add(it)
                 println("Word added to drawing quiz: $quizzes")
             }
         }
@@ -112,6 +83,8 @@ class MyListViewModel: ViewModel() {
     }
 
     fun onSendWordsToQuiz(){
+        val words= words.value
+        println("Words: $words")
         quizzes.clear()
         selectedWords.forEach { id->
             words.find{it.id==id}?.let{word->
@@ -120,6 +93,27 @@ class MyListViewModel: ViewModel() {
 
             }
         }
+    }
+
+    fun labeling(label: String){
+        val uid= auth.currentUser?.uid.toString()
+        if (uid.isEmpty()) return
+        if (label.isBlank()) return
+
+        selectedWords.forEach { id ->
+
+            Firebase.firestore
+                .collection("users")
+                .document(uid)
+                .collection("words")
+                .document(id)
+                .update("label", label)
+                .addOnSuccessListener {
+                    println("Word labeled successfully")
+                }
+        }
+
+
     }
 
 

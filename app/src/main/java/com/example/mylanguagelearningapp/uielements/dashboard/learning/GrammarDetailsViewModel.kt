@@ -3,74 +3,69 @@ package com.example.mylanguagelearningapp.uielements.dashboard.learning
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.grammar.LanguageGrammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
+sealed class ChatGPTState{
+    object Loading: ChatGPTState()
+    class Success(val response: String): ChatGPTState()
+    class Error(val message: String): ChatGPTState()
+}
 class GrammarDetailsViewModel: ViewModel() {
 
 
 
     val currentLanguage = UserSettingsRepository.language.value
-    fun addNewExample(grammarid: String?, exampleText: String) {
+    fun addNewExample(language: String, grammarid: String?, exampleText: String) {
 
-        if (currentLanguage=="jp") {
-            JapaneseGrammar.addNewExample(grammarid, exampleText)
-        }
-        else if (currentLanguage=="cn"){
-
-            ChineseGrammar.addNewExample(grammarid, exampleText)
-
-        }
+        LanguageGrammar.addNewExample(language, grammarid, exampleText)
 
 
 
     }
 
-    fun onSave(grammarid: String?, grammar: String, explanation: String){
+    fun onSave(grammarid: String?, language: String, grammar: String, explanation: String){
 
-        if (currentLanguage=="jp") {
-            JapaneseGrammar.onSave(grammarid, grammar, explanation)
-        }
-        else if (currentLanguage=="cn"){
+        LanguageGrammar.onSave(language, grammarid, grammar, explanation)
 
-            ChineseGrammar.onSave(grammarid, grammar, explanation)
-
-        }
 
     }
 
-    fun onExampleDelete(grammarId: String?, exampleRows: List<String>, index: Int) {
-        if (currentLanguage=="jp") {
-            JapaneseGrammar.onExampleDelete(grammarId, exampleRows, index)
-        }
-        else if (currentLanguage=="cn"){
+    fun onExampleDelete(language: String, grammarId: String?, exampleRows: List<String>, index: Int) {
 
-            ChineseGrammar.onExampleDelete(grammarId, exampleRows, index)
-
-        }
-
-        println("on example delete was executed ${grammarId} + ${exampleRows} + ${index}")
+        LanguageGrammar.onExampleRemove(language, grammarId, exampleRows, index)
 
     }
 
-    fun onRemove(grammarid: String?){
-        if (currentLanguage=="jp") {
-            JapaneseGrammar.onRemove(grammarid)
-        }
-        else if (currentLanguage=="cn"){
-            ChineseGrammar.onRemove(grammarid)
-        }
+    fun onRemove(language: String, grammarid: String?){
+
+        LanguageGrammar.onRemove(language, grammarid)
+
     }
 
-    suspend fun geminAiGrammar(grammar: String): String {
+    private val _chatGPTState = MutableStateFlow<ChatGPTState>(ChatGPTState.Loading)
+    val chatGPTState: StateFlow<ChatGPTState> = _chatGPTState
+
+    suspend fun geminAiGrammar(grammar: String) {
+
+        _chatGPTState.value = ChatGPTState.Loading
+
+        try {
+            val model = Firebase.ai(backend = GenerativeBackend.googleAI())
+                .generativeModel("gemini-2.5-flash")
+            val prompt =
+                "Give me an example sentence in Japanese using the following grammar: $grammar"
+            val response = model.generateContent(prompt)
+             _chatGPTState.value = ChatGPTState.Success(response.text ?: "")
+        } catch (e: Exception) {
+            _chatGPTState.value = ChatGPTState.Error(e.message ?: "Unknown error")
 
 
-        val model = Firebase.ai(backend = GenerativeBackend.googleAI())
-            .generativeModel("gemini-2.5-flash")
-        val prompt= "Give me an example sentence in Japanese using the following grammar: $grammar"
-        val response = model.generateContent(prompt)
-        return response.text?:""
+        }
     }
 }

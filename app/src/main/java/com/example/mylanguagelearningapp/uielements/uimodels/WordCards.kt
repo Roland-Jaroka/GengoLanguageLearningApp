@@ -27,7 +27,8 @@ fun WordCard(word: String,
              translation: String,
              isSelectable: Boolean = false,
              isSelected: Boolean = false,
-             onClick: () -> Unit = {}) {
+             onClick: () -> Unit = {},
+             currentLanguage: String) {
 
     Card(modifier = Modifier
         .fillMaxWidth()
@@ -56,15 +57,17 @@ fun WordCard(word: String,
                 overflow = TextOverflow.Ellipsis
 
             )
+            if (currentLanguage== "jp" || currentLanguage== "cn") {
 
-            Text(
-                text = pronunciation,
-                modifier = Modifier
-                    .padding(top = 5.dp, start = 20.dp),
-                fontSize = 30.sp,
-                fontFamily = FontFamily.SansSerif,
-                color = BgBlue
-            )
+                Text(
+                    text = pronunciation,
+                    modifier = Modifier
+                        .padding(top = 5.dp, start = 20.dp),
+                    fontSize = 30.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    color = BgBlue
+                )
+            }
 
             Text(
                 text = translation,

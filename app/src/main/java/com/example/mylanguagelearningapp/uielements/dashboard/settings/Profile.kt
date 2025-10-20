@@ -20,6 +20,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,6 +36,7 @@ import androidx.wear.compose.material.Scaffold
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.grammar.LanguageGrammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
@@ -41,6 +44,7 @@ import com.example.mylanguagelearningapp.uielements.uimodels.MyTopAppBar
 import com.example.mylanguagelearningapp.uielements.uimodels.ProfileTextFields
 import com.example.mylanguagelearningapp.words.ChineseWords
 import com.example.mylanguagelearningapp.words.JapaneseWords
+import com.example.mylanguagelearningapp.words.LanguageWords
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,7 +53,9 @@ fun ProfileMenu(navController: NavController) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     val email= currentUser?.email.toString()
-    val currentLanguage = UserSettingsRepository.language.value
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val wordList by LanguageWords.words.collectAsState()
+    val grammarList by LanguageGrammar.grammar.collectAsState()
     val profileName = UserSettingsRepository.profileName.value.toString()
     val appversion = LocalContext.current.packageManager.getPackageInfo(LocalContext.current.packageName, 0).versionName.toString()
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -78,30 +84,19 @@ fun ProfileMenu(navController: NavController) {
                             boldText = "Email:",
                             normalText = email
                         )
+                        ProfileTextFields(
+                            boldText = "Language:",
+                            normalText = currentLanguage
+                        )
 
                         ProfileTextFields(
                             boldText = "Number of words:",
-                            normalText = when (currentLanguage){
-                                "jp"-> {
-                                    JapaneseWords.wordList.size.toString()}
-                                "cn"-> {
-                                    ChineseWords.chinseWordsList.size.toString()
-                                }
-
-                                else -> {""}
-                            }
+                            normalText = wordList.size.toString()
                         )
                         ProfileTextFields(
                             boldText = "Number of grammar points:",
-                            normalText = when (currentLanguage){
-                                "jp"-> {
-                                    JapaneseGrammar.grammarList.size.toString()}
-                                "cn"-> {
-                                    ChineseGrammar.grammarList.size.toString()
-                                }
+                            normalText = grammarList.size.toString()
 
-                                else -> {""}
-                            }
                         )
 
                         ProfileTextFields(

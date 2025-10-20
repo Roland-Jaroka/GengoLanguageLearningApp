@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.grammar.LanguageGrammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.Blue
@@ -56,16 +58,16 @@ import com.example.mylanguagelearningapp.ui.theme.Red
 import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.uielements.uimodels.GrammarCardsAlertDialog
 import kotlinx.coroutines.launch
+import kotlin.String
 
 @Composable
 fun GrammarDetails(navController: NavController,
                    grammarId: String?,
                    viewModel: GrammarDetailsViewModel = viewModel()) {
 
-    val currentLanguage = UserSettingsRepository.language.value
-    val grammar = if (currentLanguage == "jp") JapaneseGrammar.grammarList.find { it.id == grammarId } ?: return
-    else if (currentLanguage == "cn")  ChineseGrammar.grammarList.find { it.id == grammarId } ?: return
-    else return
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val grammarList by LanguageGrammar.grammar.collectAsState()
+    val grammar = grammarList.find {it.id== grammarId} ?: return
 
     val exampleSentences = grammar.examples ?: emptyList()
 
@@ -81,6 +83,7 @@ fun GrammarDetails(navController: NavController,
     val dialogHeight = 500
     var generatedText by remember{ mutableStateOf<String?>(null)}
     val scope = rememberCoroutineScope()
+    val chatGPTState by viewModel.chatGPTState.collectAsState()
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -234,7 +237,7 @@ fun GrammarDetails(navController: NavController,
                                    modifier = Modifier
                                        .padding(5.dp)
                                        .clickable {
-                                          viewModel.onExampleDelete(grammarId, exampleSentences, exampleSentences.indexOf(example))
+                                          viewModel.onExampleDelete( currentLanguage, grammarId, exampleSentences, exampleSentences.indexOf(example))
                                        }
                                )
                            }
@@ -272,7 +275,7 @@ fun GrammarDetails(navController: NavController,
                                     modifier = Modifier
                                         .padding(5.dp)
                                         .clickable {
-                                            viewModel.addNewExample(grammarId,exampleRows[index])
+                                            viewModel.addNewExample(currentLanguage, grammarId,exampleRows[index])
                                             exampleRows[index] = ""
                                             exampleRows.removeAt(index)
                                             JapaneseGrammar.loadGrammar()
@@ -322,7 +325,8 @@ fun GrammarDetails(navController: NavController,
                     geminAiDialog = true
 
                    scope.launch {
-                       generatedText = viewModel.geminAiGrammar(grammar.grammar)}
+                      viewModel.geminAiGrammar(grammar.grammar)
+                   }
 
                 }
             ) {
@@ -353,7 +357,7 @@ fun GrammarDetails(navController: NavController,
 
                 Button(
                     onClick = {
-                        viewModel.onSave(grammarId, grammarInput, explanationInput)
+                        viewModel.onSave(grammarId, currentLanguage, grammarInput, explanationInput)
                         isEditMode = false
                     },
                     modifier = Modifier
@@ -394,7 +398,7 @@ fun GrammarDetails(navController: NavController,
             GrammarCardsAlertDialog(
                 onConfirm = {
                     dialogState = false
-                    viewModel.onRemove(grammarId)
+                    viewModel.onRemove( currentLanguage, grammarId)
                     navController.navigate("learning") { popUpTo("learning") { inclusive = true } }
                     isEditMode = false
                 },
@@ -411,7 +415,7 @@ fun GrammarDetails(navController: NavController,
                 onClick = { geminAiDialog = false },
                 dialogWidth,
                 dialogHeight,
-                    text = generatedText?: "Loading"
+                    state = chatGPTState
             )
             }
         }

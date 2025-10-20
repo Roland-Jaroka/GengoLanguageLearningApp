@@ -20,31 +20,6 @@ object JapaneseWords {
 
     var error = ""
 
-
-    fun addWord(word: Words){
-
-        val uid= auth.currentUser?.uid.toString()
-        if (uid.isEmpty()) return
-
-        Firebase.firestore
-            .collection("users")
-            .document(uid)
-            .collection("words")
-            .add(
-                mapOf(
-                    "word" to word.word,
-                    "pronunciation" to word.pronunciation,
-                    "translation" to word.translation
-                )
-            ).addOnSuccessListener {
-                println("Word added successfully")
-            }
-            .addOnFailureListener {
-                println("Error adding word")
-                error = it.message.toString()
-
-            }
-    }
   fun loadWords() {
         val uid= auth.currentUser?.uid.toString()
         if (uid.isEmpty()) return
@@ -61,8 +36,10 @@ object JapaneseWords {
                     val word = document.getString("word") ?: ""
                     val pronunciation = document.getString("pronunciation") ?: ""
                     val translation = document.getString("translation") ?: ""
+                    val label = document.getString("label")
+                    val isOnHomePage = document.getBoolean("isOnHomePage") ?: false
                     val id = document.id
-                    wordList.add(Words(word, pronunciation, translation, id))
+                    wordList.add(Words(word, pronunciation, translation, id, label, isOnHomePage))
                 }
 
                 Log.d("JapaneseWords", "Loaded ${wordList.size} words")

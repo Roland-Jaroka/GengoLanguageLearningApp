@@ -19,9 +19,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,7 +36,10 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.model.CountryFlags
@@ -39,15 +49,19 @@ import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.LightBlue
 import com.example.mylanguagelearningapp.ui.theme.Red
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.InfoModal
 import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 import com.google.firebase.auth.FirebaseAuth
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun settingsUi(navController: NavController) {
    //TODO settings UI and functions
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
-    val currentLanguage = UserSettingsRepository.language.value
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val sheetState= rememberModalBottomSheetState()
+    var infoModal by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         println("Language set to: ${UserSettingsRepository.language.value}")
@@ -57,9 +71,28 @@ fun settingsUi(navController: NavController) {
         .fillMaxSize()
         .background(White)) {
 
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(90.dp)
+                .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+                .background(BgBlue)
+        ){
+            Text( text = "Settings",
+                fontSize = 50.sp,
+                modifier = Modifier
+                    .padding(top = 30.dp, start = 20.dp)
+                    .align(Alignment.Center),
+                fontFamily = FontFamily.Cursive,
+                fontWeight = FontWeight.Bold,
+                color = White)
+        }
+
         Column(modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center){
+
+
 
             Card(modifier = Modifier
                 .padding(start = 12.dp, end = 12.dp),
@@ -98,7 +131,13 @@ fun settingsUi(navController: NavController) {
                                 ){
                                 Image(
                                     painter = painterResource(
-                                        if (currentLanguage == "jp") CountryFlags.JAPANESE.resID else CountryFlags.CHINESE.resID
+                                        when (currentLanguage){
+                                            "jp" -> CountryFlags.JAPANESE.resID
+                                            "cn" -> CountryFlags.CHINESE.resID
+                                            "es" -> CountryFlags.SPANISH.resID
+                                            "en" -> CountryFlags.ENGLISH.resID
+                                            else -> CountryFlags.JAPANESE.resID
+                                        }
                                     ),
                                     contentDescription = null,
                                 )
@@ -129,7 +168,8 @@ fun settingsUi(navController: NavController) {
                         },
                         onClick = {
                             //TODO interface language
-                            Toast.makeText(context, "Coming soon", Toast.LENGTH_SHORT).show()
+                            infoModal = true
+
                         },
                         divider = false)
 
@@ -154,6 +194,8 @@ fun settingsUi(navController: NavController) {
 
         }
     }
+    if (infoModal){
+    InfoModal(sheetState, onClick = { infoModal = false })}
 
 }
 

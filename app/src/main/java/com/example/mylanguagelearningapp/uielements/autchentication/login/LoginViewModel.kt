@@ -5,9 +5,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mylanguagelearningapp.model.results.LoginResult
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
 
 class LoginViewModel: ViewModel() {
 
@@ -27,6 +32,7 @@ class LoginViewModel: ViewModel() {
     fun onPasswordChange(newPassword: String) {
         password= newPassword
     }
+
 
     suspend fun login(email:String, password: String): LoginResult {
         if (email.isBlank()) return LoginResult.BlankEmail

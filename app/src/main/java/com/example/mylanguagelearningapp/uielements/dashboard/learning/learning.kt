@@ -21,15 +21,22 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.R
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
+import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.uielements.uimodels.GrammarCards
@@ -39,8 +46,19 @@ fun LearningUi(navController: NavController,
                viewModel: LearningViewModel= viewModel()){
 //TODO learning UI and functions
 
-    val grammars = viewModel.filteredGrammar
-    val currentLanguage = UserSettingsRepository.language
+    val grammarList by viewModel.grammars.collectAsState()
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val searchInput = viewModel.search
+
+
+    val grammars = remember(grammarList, searchInput) {
+        if (searchInput.isBlank()) grammarList
+        else grammarList.filter { grammar ->
+            listOf(grammar.grammar, grammar.explanation, grammar.examples?.firstOrNull() ?: "").any{
+                it.contains(searchInput, ignoreCase = true)
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
        viewModel.loadData(currentLanguage)
@@ -51,19 +69,30 @@ fun LearningUi(navController: NavController,
         .background(White)
         .padding(bottom = 90.dp)){
         Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
+            .fillMaxSize()) {
 
-            Text(
-                text = "Grammar",
-                fontSize = 30.sp,
-                color = Blue,
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(90.dp)
+                .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+                .background(BgBlue)) {
+
+                Text(
+                    text = "Grammars",
+                    fontSize = 50.sp,
+                    fontFamily = FontFamily.Cursive,
+                    fontWeight = FontWeight.Bold,
+                    color = White,
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .align(Alignment.Center)
+                )
+            }
+
+            Row(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp)
-            )
-
-            Row() {
+                    .padding(16.dp)
+            ) {
                 OutlinedTextField(
                     value = viewModel.search,
                     onValueChange = {viewModel.onSearchValueChange(it)},
@@ -106,7 +135,7 @@ fun LearningUi(navController: NavController,
                         })
                 }
                 item {
-                    Text(text = "Refresh",
+                    Text(text = "Migrate grammars",
                         color= Blue,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -114,12 +143,7 @@ fun LearningUi(navController: NavController,
                             .padding(top = 10.dp)
                             .clickable(
                                 onClick = {
-                                    viewModel.loadData(currentLanguage)
-                                    navController.navigate("learning"){
-                                        popUpTo("learning"){
-                                            inclusive = true
-                                        }
-                                    }
+                                    viewModel.migrateGrammar(currentLanguage)
                                 }
                             ))
                     Spacer(modifier = Modifier.height(50.dp))
