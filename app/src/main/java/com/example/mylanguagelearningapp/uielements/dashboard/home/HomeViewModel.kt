@@ -1,5 +1,6 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.home
 
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -13,59 +14,47 @@ import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.words.ChineseWords
 import com.example.mylanguagelearningapp.words.JapaneseWords
+import com.example.mylanguagelearningapp.words.LanguageWords
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class HomeViewModel: ViewModel() {
 
+    val repository = LanguageWords
+    var wordsList = repository.words.map{ list->
+        list.filter { it.isOnHomePage==true }.ifEmpty { list }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            emptyList()
+        )
 
-    var wordsList = mutableStateListOf<Words>()
     var currentIndex = mutableStateOf(0)
 
 
     var currentWord = mutableStateOf<Words?>(null)
 
 
+
+
     init {
-
-        snapshotFlow { UserSettingsRepository.language.value }
-            .onEach { updateWordsList(it) }
-            .launchIn(viewModelScope)
-
-        if (wordsList.isNotEmpty()) {
-
-            currentWord.value = wordsList[0]
-        }
-
-        snapshotFlow { wordsList.size }
-            .filter { it > 0 }
-            .onEach {
-
-                val sorted = wordsList.sortedBy { it.word }
-                wordsList.clear()
-                wordsList.addAll(sorted)
-
-                currentWord.value = wordsList[0]
+              repository.words.onEach{ list ->
                 currentIndex.value = 0
-            }
-            .launchIn(viewModelScope)
+                currentWord.value = list.firstOrNull()
 
-    }
+            }.launchIn(viewModelScope)
 
-    fun updateWordsList(currentLanguage: String) {
-        wordsList.clear()
-       when (currentLanguage){
-           "jp" -> {
-               wordsList.addAll(JapaneseWords.wordList)
-           }
-           "cn" -> {
-               wordsList.addAll(ChineseWords.chinseWordsList)
-           }
-       }
     }
 
     fun loadData() {
+
+        LanguageWords.loadWords(UserSettingsRepository.language.value)
 
         when (UserSettingsRepository.language.value){
             "jp"-> {
@@ -84,18 +73,22 @@ class HomeViewModel: ViewModel() {
 
 
     fun onNextClick() {
+        val list = wordsList.value
 
-        if (wordsList.isEmpty()) return
+        if (list.isEmpty()) return
 
-        currentIndex.value = (currentIndex.value + 1) % wordsList.size
+        currentIndex.value = (currentIndex.value + 1) % list.size
 
-        currentWord.value = wordsList[currentIndex.value]
+        currentWord.value = list[currentIndex.value]
     }
 
     fun onPreviousClick() {
-        if (wordsList.isEmpty()) return
-        currentIndex.value = (currentIndex.value - 1 + wordsList.size) % wordsList.size
-        currentWord.value = wordsList[currentIndex.value]
+
+        val list = wordsList.value
+
+        if (list.isEmpty()) return
+        currentIndex.value = (currentIndex.value - 1 + list.size) % list.size
+        currentWord.value = list[currentIndex.value]
     }
 
     var isWordVisible by mutableStateOf(true)
@@ -113,6 +106,22 @@ class HomeViewModel: ViewModel() {
     fun onTranslationClick() {
 
         isTranslationVisible = !isTranslationVisible
+    }
+    fun migrateWords(language: String){
+        when (language){
+            "jp"-> {
+                val oldList = JapaneseWords.wordList
+                for (word in oldList){
+                    LanguageWords.addWord(word, language)
+                }
+            }
+            "cn" -> {
+                val oldList = ChineseWords.chinseWordsList
+                for (word in oldList){
+                    LanguageWords.addWord(word, language)
+                }
+            }
+        }
     }
 }
 

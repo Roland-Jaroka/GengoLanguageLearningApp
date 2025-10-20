@@ -25,9 +25,7 @@ fun MyTopAppBar(modifier: Modifier, title: String,  route: String,navController:
         },
         navigationIcon = {
             IconButton({
-                navController.navigate(route){
-                    popUpTo(route) { inclusive = true }
-                }
+                navController.popBackStack()
             }) {
                 Image(
                     painter = painterResource(R.drawable.arrow_back2),

@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +46,7 @@ import com.example.mylanguagelearningapp.ui.theme.White
 fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                        navController: NavController) {
 
-    val currentLanguage by viewModel.language
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
     val mainLanguage by UserSettingsRepository.mainLanguage
     var selectedMainLanguage by remember{ mutableStateOf(mainLanguage)}
     var selectedLanguage by remember { mutableStateOf(currentLanguage)}
@@ -60,9 +61,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                 },
                 navigationIcon = {
                     IconButton({
-                        navController.navigate("settings"){
-                            popUpTo("settings") { inclusive = true }
-                        }
+                        navController.popBackStack()
                     }) {
                         Image(
                             painter = painterResource(R.drawable.arrow_back2),
@@ -128,6 +127,44 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                     Checkbox(
                         checked = selectedLanguage == "cn",
                         onCheckedChange = {if (it) selectedLanguage = "cn"},
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 30.dp)
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                )
+
+                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
+
+                    Text(
+                        text = "Spanish",
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                    Checkbox(
+                        checked = selectedLanguage == "es",
+                        onCheckedChange = {if (it) selectedLanguage = "es"},
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 30.dp)
+                    )
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                )
+
+                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
+
+                    Text(
+                        text = "English",
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                    Checkbox(
+                        checked = selectedLanguage == "en",
+                        onCheckedChange = {if (it) selectedLanguage = "en"},
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(start = 30.dp)

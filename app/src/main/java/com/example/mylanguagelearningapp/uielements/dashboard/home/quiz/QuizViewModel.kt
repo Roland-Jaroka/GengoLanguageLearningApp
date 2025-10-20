@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.mylanguagelearningapp.model.QuizManager
 import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.example.mylanguagelearningapp.model.Tonemarks.toPinyin
@@ -12,20 +14,21 @@ import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.model.quizWrongAnswers
 import com.example.mylanguagelearningapp.words.ChineseWords
+import com.example.mylanguagelearningapp.words.LanguageWords
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class QuizViewModel: ViewModel() {
 
     val currentLanguage= UserSettingsRepository.language.value
+    val repository= LanguageWords
+    val wordsList = if (quizzes.isNotEmpty()) quizzes else repository.words.value
 
-    val wordsList = if(quizzes.isNotEmpty()) quizzes
-    else if (currentLanguage=="jp") JapaneseWords.wordList
-    else if (currentLanguage=="cn") ChineseWords.chinseWordsList
-    else JapaneseWords.wordList
 
     var currentIndex by mutableStateOf(0)
         private set
 
-    var currentWord = mutableStateOf<Words?>(wordsList[0])
+    var currentWord = mutableStateOf<Words?>(null)
 
     var progress = mutableFloatStateOf(0f)
 
@@ -44,6 +47,26 @@ class QuizViewModel: ViewModel() {
 
     fun onAnswerChange(newvalue: String) {
         answer = toPinyin(newvalue)
+    }
+
+    init {
+        if (quizzes.isNotEmpty()){
+            currentIndex = 0
+            currentWord.value = quizzes[0]
+            progress.floatValue = 0f
+            answer= ""
+        }
+        else {
+            repository.words.onEach { list ->
+                if (list.isNotEmpty()) {
+                    currentIndex = 0
+                    currentWord.value = list[0]
+                    progress.floatValue = 0f
+                    answer = ""
+                }
+
+            }.launchIn(viewModelScope)
+        }
     }
 
     fun onNextClick() {

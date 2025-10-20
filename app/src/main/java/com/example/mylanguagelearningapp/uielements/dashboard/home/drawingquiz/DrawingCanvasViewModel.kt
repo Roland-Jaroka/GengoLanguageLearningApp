@@ -8,9 +8,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.mylanguagelearningapp.words.JapaneseWords
 import com.example.mylanguagelearningapp.model.QuizManager
+import com.example.mylanguagelearningapp.model.QuizManager.quizzes
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.model.Words
 import com.example.mylanguagelearningapp.words.ChineseWords
+import com.example.mylanguagelearningapp.words.LanguageWords
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -86,10 +88,8 @@ class DrawingCanvasViewModel: ViewModel(){
 
     //Quiz logic
     val currentLanguage= UserSettingsRepository.language.value
-    val wordsList = if (QuizManager.quizzes.isNotEmpty()) QuizManager.quizzes
-    else if (currentLanguage=="jp") JapaneseWords.wordList
-    else if (currentLanguage=="cn") ChineseWords.chinseWordsList
-    else JapaneseWords.wordList
+    val repository = LanguageWords
+    val wordsList = if (quizzes.isNotEmpty()) quizzes else repository.words.value
 
     var currentIndex by mutableStateOf(0)
         private set

@@ -32,34 +32,12 @@ object ChineseWords {
                     val word = document.getString("word") ?: ""
                     val pronunciation = document.getString("pronunciation") ?: ""
                     val translation = document.getString("translation") ?: ""
+                    val label = document.getString("label")
+                    val isOnHomePage = document.getBoolean("isOnHomePage") ?: false
                     val id = document.id
-                    chinseWordsList.add(Words(word, pronunciation, translation, id))
+                    chinseWordsList.add(Words(word, pronunciation, translation, id, label, isOnHomePage))
                 }
                 loaded.value = true
-            }
-    }
-
-    fun addWord(word: Words){
-        val uid= auth.currentUser?.uid.toString()
-        if (uid.isEmpty()) return
-        Firebase.firestore
-            .collection("users")
-            .document(uid)
-            .collection("chineseCollection")
-            .document("chinese")
-            .collection("chineseWords")
-            .add(
-                mapOf(
-                    "word" to word.word,
-                    "pronunciation" to word.pronunciation,
-                    "translation" to word.translation
-                )
-            ).addOnSuccessListener {
-                println("Word added successfully")
-            }
-            .addOnFailureListener {
-                println("Error adding word")
-                error = it.message.toString()
             }
     }
 }

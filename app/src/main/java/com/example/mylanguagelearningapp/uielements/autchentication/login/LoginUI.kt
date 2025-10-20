@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,6 +72,9 @@ fun LoginUi(navController: NavController,
     var passwordError by remember { mutableStateOf<String?>(null) }
 
     var visible by remember { mutableStateOf(false) }
+
+    var isLoading by remember{ mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         visible = true
@@ -206,7 +210,9 @@ fun LoginUi(navController: NavController,
                     ),
                     onClick = {
                         scope.launch {
+                            isLoading = true
                             val result = viewModel.login(email, password)
+                            isLoading = false
                             when (result) {
                                 is LoginResult.Success -> {
                                     UserSettingsRepository.getUserData()
@@ -232,7 +238,8 @@ fun LoginUi(navController: NavController,
                                 ).show()
                             }
                         }
-                    }
+                    },
+                    isLoading = isLoading
                 )
 
                 Row(
@@ -275,5 +282,6 @@ fun LoginUi(navController: NavController,
             }
         }//Box
     }
+
 
 }

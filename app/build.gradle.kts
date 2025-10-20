@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "com.example.mylanguagelearningapp"
-        minSdk = 32
+        minSdk = 30
         targetSdk = 36
-        versionCode = 3
-        versionName = "3.4"
+        versionCode = 4
+        versionName = "4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

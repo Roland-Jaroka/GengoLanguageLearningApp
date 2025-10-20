@@ -30,12 +30,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -67,7 +69,9 @@ fun Home(viewModel: HomeViewModel= viewModel(),
     val auth = FirebaseAuth.getInstance()
      var accumulated by remember { mutableStateOf(0f) }
     val scrollState = rememberScrollState()
-    val currentLanguage by UserSettingsRepository.language
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val wordList by viewModel.wordsList.collectAsState()
+
 
 
 
@@ -79,10 +83,10 @@ fun Home(viewModel: HomeViewModel= viewModel(),
 
     }
 
+
     val currentWord by viewModel.currentWord
     val currentIndex= viewModel.currentIndex
 
-    viewModel.updateWordsList(currentLanguage)
 
 
     Box(modifier = Modifier
@@ -94,16 +98,23 @@ fun Home(viewModel: HomeViewModel= viewModel(),
         Column(modifier = Modifier
             .fillMaxSize()) {
 
-            Text(
-                text = "Home",
-                fontSize = 50.sp,
-                modifier = Modifier
-                    .padding(top = 30.dp, start = 20.dp)
-                    .align(Alignment.CenterHorizontally),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold,
-                color = BgBlue
-            )
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(90.dp)
+                .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
+                .background(BgBlue)
+                ) {
+                Text(
+                    text = "Home",
+                    fontSize = 50.sp,
+                    modifier = Modifier
+                        .padding(top = 30.dp, start = 20.dp)
+                        .align(Alignment.Center),
+                    fontFamily = FontFamily.Cursive,
+                    fontWeight = FontWeight.Bold,
+                    color = White
+                )
+            }
 
 
             AnimatedVisibility(
@@ -114,7 +125,7 @@ fun Home(viewModel: HomeViewModel= viewModel(),
             Column(modifier = Modifier.fillMaxWidth()){
 
             Text(
-                text = "${currentIndex.value + 1}/${viewModel.wordsList.size}",
+                text = "${currentIndex.value + 1}/${wordList.size}",
                 modifier = Modifier
                     .padding(end = 30.dp, top = 12.dp)
                     .align(Alignment.End),
@@ -173,7 +184,13 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                         {
                             Image(
                                 painter = painterResource(
-                                    if (currentLanguage== "jp") R.drawable.japanese else CountryFlags.CHINESE.resID
+                                    when(currentLanguage){
+                                        "jp" -> CountryFlags.JAPANESE.resID
+                                        "cn" -> CountryFlags.CHINESE.resID
+                                        "es" -> CountryFlags.SPANISH.resID
+                                        "en" -> CountryFlags.ENGLISH.resID
+                                        else -> CountryFlags.JAPANESE.resID
+                                    }
                                 ),
                                 contentDescription = null
                             )
@@ -214,18 +231,20 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                           color = BgBlue
                       )
 
-                    Text(
-                        text = when {
-                            !viewModel.isPronunciationVisible -> ""
-                            currentWord != null -> currentWord!!.pronunciation
-                            else -> ""
-                        },
-                        modifier = Modifier
-                            .padding(top = 5.dp, start = 20.dp),
-                        fontSize = 20.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        color = BgBlue
-                    )
+                  if (currentLanguage == "jp" || currentLanguage == "cn") {
+                      Text(
+                          text = when {
+                              !viewModel.isPronunciationVisible -> ""
+                              currentWord != null -> currentWord!!.pronunciation
+                              else -> ""
+                          },
+                          modifier = Modifier
+                              .padding(top = 5.dp, start = 20.dp),
+                          fontSize = 20.sp,
+                          fontFamily = FontFamily.SansSerif,
+                          color = BgBlue
+                      )
+                  }
 
                     Text(
                         text = when{
@@ -267,27 +286,31 @@ fun Home(viewModel: HomeViewModel= viewModel(),
                     Text(text = "Word")
                 }
 
-                Button(
-                    onClick = {viewModel.onPronunciationClick()},
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .weight(1f),
-                    colors= ButtonDefaults.buttonColors(
-                        containerColor = if (viewModel.isPronunciationVisible)White else BgBlue,
-                        contentColor = if (viewModel.isPronunciationVisible) BgBlue else White
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(2.dp, BgBlue),
-                    elevation = if (!viewModel.isPronunciationVisible) ButtonDefaults.buttonElevation(
-                        12.dp
-                    )
-                    else null
-                ){
+             if (currentLanguage == "jp" || currentLanguage == "cn") {
+                 Button(
+                     onClick = { viewModel.onPronunciationClick() },
+                     modifier = Modifier
+                         .padding(12.dp)
+                         .weight(1f),
+                     colors = ButtonDefaults.buttonColors(
+                         containerColor = if (viewModel.isPronunciationVisible) White else BgBlue,
+                         contentColor = if (viewModel.isPronunciationVisible) BgBlue else White
+                     ),
+                     shape = RoundedCornerShape(8.dp),
+                     border = BorderStroke(2.dp, BgBlue),
+                     elevation = if (!viewModel.isPronunciationVisible) ButtonDefaults.buttonElevation(
+                         12.dp
+                     )
+                     else null
+                 ) {
 
-                    Text(text = "Pronunciation",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis)
-                }
+                     Text(
+                         text = "Pronunciation",
+                         maxLines = 1,
+                         overflow = TextOverflow.Ellipsis
+                     )
+                 }
+             }
 
                 Button(
                     onClick = {viewModel.onTranslationClick()},
@@ -403,36 +426,55 @@ fun Home(viewModel: HomeViewModel= viewModel(),
 
             //Drawing Function
 
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = White,
-                    containerColor = BgBlue
-                ),
-                elevation = ButtonDefaults.buttonElevation(hoveredElevation = 10.dp, pressedElevation = 10.dp, defaultElevation = 5.dp),
-                shape = RoundedCornerShape(20.dp),
-                onClick = {
-                    quizzes.clear()
-                    navController.navigate("drawing")
+            if (currentLanguage == "jp" || currentLanguage == "cn") {
 
-                },
-
-                ) {
-
-                Image(
-                    painter = painterResource(R.drawable.paintingbrush),
-                    contentDescription = null,
+                Button(
                     modifier = Modifier
-                        .padding(end = 5.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = White,
+                        containerColor = BgBlue
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        hoveredElevation = 10.dp,
+                        pressedElevation = 10.dp,
+                        defaultElevation = 5.dp
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        if (wordList.isEmpty()) {
+                            Unit
+                        } else {
+                            quizzes.clear()
+                            navController.navigate("drawing")
+                        }
 
-                Text(
-                    text = "Drawing"
-                )
+                    },
+
+                    ) {
+
+                    Image(
+                        painter = painterResource(R.drawable.paintingbrush),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                    )
+
+                    Text(
+                        text = "Drawing"
+                    )
+                }
             }
+
+//            Button(
+//                onClick = {
+//                    viewModel.migrateWords(currentLanguage)
+//                }
+//            ) {
+//                Text(text = "Migrate Words")
+//            }
 
 
         }

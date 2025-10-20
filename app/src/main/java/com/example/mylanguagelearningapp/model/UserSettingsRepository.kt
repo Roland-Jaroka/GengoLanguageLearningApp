@@ -12,7 +12,9 @@ import kotlinx.coroutines.tasks.await
 object UserSettingsRepository {
 
 
-     val language = mutableStateOf("jp")
+     private val _language = MutableStateFlow("jp")
+    val language: StateFlow<String> = _language
+
     val mainLanguage = mutableStateOf<String?>(null)
 
     val profileName = mutableStateOf<String?>(null)
@@ -25,7 +27,7 @@ object UserSettingsRepository {
     //TODO Initiate a global List of Words based on language
     fun setLanguage(selectedLanguage: String?) {
         if (selectedLanguage != null) {
-            language.value= selectedLanguage
+            _language.value= selectedLanguage
         }
 
         println("Language set to: ${language.value}")

@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.model.results.AddWordResults
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
@@ -44,6 +46,7 @@ fun AddWordsUi(navController: NavController,
     val pronunciation = viewModel.pronunciation
     val context= LocalContext.current
     val scrollstate= rememberScrollState()
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
 
     var wordInputError by remember { mutableStateOf<String?>(null) }
     var translationInputError by remember { mutableStateOf<String?>(null) }
@@ -91,18 +94,21 @@ fun AddWordsUi(navController: NavController,
                 )
             }
 
-            OutlinedTextField(
-                value = pronunciation,
-                onValueChange = { viewModel.onPronunciationChange(it)
-                },
-                label = { Text("Pronunciations") },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                    .fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(20.dp),
+            if(currentLanguage == "jp" || currentLanguage == "cn") {
+                OutlinedTextField(
+                    value = pronunciation,
+                    onValueChange = {
+                        viewModel.onPronunciationChange(it)
+                    },
+                    label = { Text("Pronunciations") },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(start = 30.dp, end = 30.dp, top = 20.dp)
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(20.dp),
                 )
+            }
 
             OutlinedTextField(
                 value = translation,

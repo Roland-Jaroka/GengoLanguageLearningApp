@@ -10,15 +10,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
 import com.example.mylanguagelearningapp.grammar.JapaneseGrammar
+import com.example.mylanguagelearningapp.grammar.LanguageGrammar
 import com.example.mylanguagelearningapp.model.Grammar
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class LearningViewModel: ViewModel() {
 
-    var grammars by mutableStateOf(listOf<Grammar>())
-        private set
+    val repository = LanguageGrammar
+
+    var grammars = repository.grammar
     var search by mutableStateOf("")
         private set
 
@@ -26,43 +30,33 @@ class LearningViewModel: ViewModel() {
         search = newValue
     }
 
-    val filteredGrammar by derivedStateOf{
-        if (search.isBlank()) {
-            grammars.sortedBy { it.grammar }
-        } else {
-            grammars.filter{ grammar ->
-                listOf(grammar.grammar, grammar.explanation).any{
-                    it.contains(search, ignoreCase = true)
-                }
-            }.sortedBy { it.grammar }
-        }
 
-
-    }
-
-    init {
-        snapshotFlow { UserSettingsRepository.language.value}
-            .onEach { updateGrammarList(it)}
-            .launchIn(viewModelScope)
-    }
-
-    fun updateGrammarList(currentLanguage: String){
-        if (currentLanguage=="jp"){
-            grammars= JapaneseGrammar.grammarList
-        }
-        else if (currentLanguage=="cn"){
-            grammars= ChineseGrammar.grammarList
-        }
-
-    }
-
-    fun loadData(currentLanguage: MutableState<String>){
-        if (currentLanguage.value=="jp"){
+    fun loadData(currentLanguage: String){
+        LanguageGrammar.loadGrammar(currentLanguage)
+        if (currentLanguage =="jp"){
         JapaneseGrammar.loadGrammar()}
 
-        else if(currentLanguage.value=="cn") {
+        else if(currentLanguage =="cn") {
             ChineseGrammar.loadGrammar()}
 
+    }
+
+    fun migrateGrammar(language: String){
+        when (language){
+            "jp"-> {
+                val oldList = JapaneseGrammar.grammarList
+                for (grammar in oldList){
+                    LanguageGrammar.addGrammar("jp", grammar.examples?.firstOrNull() ?: "", grammar)
+                }
+            }
+            "cn" -> {
+                val oldList = ChineseGrammar.grammarList
+                for (grammar in oldList) {
+                    LanguageGrammar.addGrammar("cn", grammar.examples?.firstOrNull() ?: "", grammar)
+                }
+            }
+
+        }
     }
 
 

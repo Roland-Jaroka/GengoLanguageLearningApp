@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.R
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
@@ -45,6 +47,7 @@ fun AddNewGrammarUi(navController: NavController,
 
     var grammarInputError by remember { mutableStateOf<String?>(null) }
     var explanationInputError by remember { mutableStateOf<String?>(null) }
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -182,7 +185,7 @@ fun AddNewGrammarUi(navController: NavController,
                     when {
                         viewModel.grammar.isBlank() -> grammarInputError = "Grammar cannot be blank"
                         viewModel.explanation.isBlank() -> explanationInputError = "Explanation cannot be blank"
-                        else -> viewModel.addGrammarToList()
+                        else -> viewModel.addGrammarToList(currentLanguage)
                     }
 
                 }
