@@ -7,10 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,8 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,13 +43,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.model.results.SignupResult
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
 import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 import kotlinx.coroutines.launch
 import com.example.mylanguagelearningapp.R
+import com.example.mylanguagelearningapp.model.results.FieldValidationResult
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
+import com.example.mylanguagelearningapp.uielements.uimodels.ErrorModal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,6 +71,8 @@ fun SignUpUi(navController: NavController,
         skipPartiallyExpanded = true
     )
     var isSheetOpen by rememberSaveable { mutableStateOf(false) }
+    val signUpState by viewModel.signUpState.collectAsState()
+
 
 
 
@@ -81,6 +81,17 @@ fun SignUpUi(navController: NavController,
 
     LaunchedEffect(Unit) {
         isSheetOpen = true
+    }
+
+    LaunchedEffect(signUpState) {
+        if (signUpState is SignUpState.Success){
+            navController.navigate("login") {
+                popUpTo("signup") {
+                    inclusive = true
+                }
+            }
+            Toast.makeText(context,"Account created successfully", Toast.LENGTH_SHORT).show()
+        }
     }
 
 Box(modifier = Modifier
@@ -231,33 +242,36 @@ Box(modifier = Modifier
             onClick = {
 
                 scope.launch {
-                    val result= viewModel.createAccount(name, email, password, confirmPassword)
-                    when (result){
 
+                    val result= viewModel.fieldValidation(name, email, password, confirmPassword)
+
+                    when (result){
                         //Success:
-                        is SignupResult.Success -> {navController.navigate("login")
-                            Toast.makeText(context,"Account created successfully", Toast.LENGTH_SHORT).show()}
+                        is FieldValidationResult.Success -> { scope.launch {
+                            viewModel.createAccount(name, email, password)
+                        }
+                            }
 
                         //Blank:
-                        is SignupResult.BlankName -> nameError= "Name cannot be blank"
-                        is SignupResult.BlankEmail -> emailError= "Email cannot be blank"
-                        is SignupResult.BlankPassword -> passwordError= "Password cannot be blank"
-                        is SignupResult.BlankConfirmPassword -> confirmPasswordError= "Confirm password cannot be blank"
+                        is FieldValidationResult.BlankName -> nameError= "Name cannot be blank"
+                        is FieldValidationResult.BlankEmail -> emailError= "Email cannot be blank"
+                        is FieldValidationResult.BlankPassword -> passwordError= "Password cannot be blank"
+                        is FieldValidationResult.BlankConfirmPassword -> confirmPasswordError= "Confirm password cannot be blank"
 
                         //Invalid:
-                        is SignupResult.InvalidEmail -> emailError= "Invalid email"
-                        is SignupResult.InvalidPassword -> passwordError = "Password has to be at least 8 characters"
-                        is SignupResult.PasswordMismatch -> confirmPasswordError = "Passwords do not match"
+                        is FieldValidationResult.InvalidEmail -> emailError= "Invalid email"
+                        is FieldValidationResult.InvalidPassword -> passwordError = "Password has to be at least 8 characters"
+                        is FieldValidationResult.PasswordMismatch -> confirmPasswordError = "Passwords do not match"
 
                         //Error:
-                        is SignupResult.Error -> emailError= "This email address is already in use"
-                        is SignupResult.UnknownError -> Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                        is FieldValidationResult.Error -> emailError= "This email address is already in use"
 
                     }
                 }
 
 
-            }
+            },
+            isLoading = signUpState is SignUpState.Loading
 
         )
 
@@ -317,4 +331,13 @@ Box(modifier = Modifier
         }
     }
 }
+    if (signUpState is SignUpState.Error){
+        ErrorModal(
+            sheetState= sheetState,
+            onClick = {
+                viewModel.resetState()
+            },
+            text= (signUpState as SignUpState.Error).message
+        )
+    }
 }

@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.onEach
 
 class QuizViewModel: ViewModel() {
 
-    val currentLanguage= UserSettingsRepository.language.value
+
     val repository= LanguageWords
     val wordsList = if (quizzes.isNotEmpty()) quizzes else repository.words.value
 
@@ -69,7 +69,7 @@ class QuizViewModel: ViewModel() {
         }
     }
 
-    fun onNextClick() {
+    fun onNextClick(currentLanguage: String) {
 
         if (wordsList.isEmpty()) return
         if (isQuizFinished) {
@@ -79,12 +79,14 @@ class QuizViewModel: ViewModel() {
         wrongAnswers.clear()
        } else {
             if (currentIndex>= 0){
-                if (isCorrect()) {
+                if (isCorrect(currentLanguage)) {
                     points++
                 } else wrongAnswers.add(
                     quizWrongAnswers (word = wordsList[currentIndex].word,
                     pronunciation = wordsList[currentIndex].pronunciation,
+                        translation = wordsList[currentIndex].translation,
                     input = answer)
+
                 )
             }
         }
@@ -106,9 +108,15 @@ class QuizViewModel: ViewModel() {
         println("currentIndex: $currentIndex, Wordlist: ${wordsList[currentIndex]}, ${currentWord.value}")
     }
 
-        fun isCorrect(): Boolean {
-            return currentWord.value?.pronunciation == answer
-        }
+        fun isCorrect(currentLanguage: String): Boolean {
+            when (currentLanguage) {
+                "jp"-> {return currentWord.value?.pronunciation == answer}
+                "cn" -> {return currentWord.value?.pronunciation == answer}
+                else -> {return currentWord.value?.translation == answer}
+            }
+
+            }
+
 
 
 

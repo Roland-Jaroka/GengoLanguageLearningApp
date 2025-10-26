@@ -10,6 +10,7 @@ import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 sealed class ChatGPTState{
     object Loading: ChatGPTState()
@@ -49,7 +50,7 @@ class GrammarDetailsViewModel: ViewModel() {
     }
 
     private val _chatGPTState = MutableStateFlow<ChatGPTState>(ChatGPTState.Loading)
-    val chatGPTState: StateFlow<ChatGPTState> = _chatGPTState
+    val chatGPTState = _chatGPTState.asStateFlow()
 
     suspend fun geminAiGrammar(grammar: String) {
 
@@ -59,7 +60,7 @@ class GrammarDetailsViewModel: ViewModel() {
             val model = Firebase.ai(backend = GenerativeBackend.googleAI())
                 .generativeModel("gemini-2.5-flash")
             val prompt =
-                "Give me an example sentence in Japanese using the following grammar: $grammar"
+                "Give me an example sentence in $currentLanguage using the following grammar: $grammar"
             val response = model.generateContent(prompt)
              _chatGPTState.value = ChatGPTState.Success(response.text ?: "")
         } catch (e: Exception) {

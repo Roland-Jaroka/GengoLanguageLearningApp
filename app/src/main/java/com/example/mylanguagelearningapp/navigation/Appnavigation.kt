@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -43,10 +44,10 @@ import com.google.firebase.auth.FirebaseAuth
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AppNavigation(firstLogin: Boolean) {
+fun AppNavigation() {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
+    val currentUser = remember {auth.currentUser}
 
     val startDestination = if (currentUser != null) "dashboard" else "authentication"
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -86,21 +87,24 @@ fun AppNavigation(firstLogin: Boolean) {
                 startDestination = "login",
                 route = "authentication"
             ) {
-                composable("login") { LoginUi(navController = navController) }
+                composable("login",
+                    exitTransition ={ slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> -fullWidth} } ) { LoginUi(navController = navController) }
                 composable("forgot_password") { ForgotPasswordScr(navController = navController) }
                 composable("signup") { SignUpUi(navController = navController) }
 
             }
 
+            composable("mainLanguageSelector",
+                enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { MainLanguageSelector(navController = navController) }
+
 
             //DashboardFlow
             navigation(
-                startDestination = if (firstLogin == false)"home" else "mainlanguageSelector",
+                startDestination = "home",
                 route = "dashboard"
             ) {
                 composable("home") { Home(navController = navController) }
 
-                composable("mainlanguageSelector") { MainLanguageSelector(navController = navController) }
 
                 composable("addwords",
                     enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
@@ -130,6 +134,7 @@ fun AppNavigation(firstLogin: Boolean) {
                 composable("profile") { ProfileMenu(navController = navController) }
                 composable("learningLanguage") { LearningLanguageUi(navController = navController) }
             }
+
         }
     }
 }

@@ -5,15 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.mylanguagelearningapp.model.results.LoginResult
+import com.example.mylanguagelearningapp.model.results.FieldValidationResult
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 
-
+sealed class LoginStates{
+    object Idle: LoginStates()
+    object Loading: LoginStates()
+    object Success: LoginStates()
+    data class Error(val message: String): LoginStates()
+}
 class LoginViewModel: ViewModel() {
 
 
@@ -24,7 +27,6 @@ class LoginViewModel: ViewModel() {
     var password by mutableStateOf("")
         private set
 
-
     fun onEmailChange(newEmail: String) {
         email = newEmail
     }
@@ -33,21 +35,32 @@ class LoginViewModel: ViewModel() {
         password= newPassword
     }
 
+    private val _loginState= MutableStateFlow<LoginStates>(LoginStates.Idle)
+    val loginState= _loginState.asStateFlow()
 
-    suspend fun login(email:String, password: String): LoginResult {
-        if (email.isBlank()) return LoginResult.BlankEmail
-        if (password.isBlank()) return LoginResult.BlankPassword
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) return LoginResult.InvalidEmail
-        return try {
-            auth.signInWithEmailAndPassword(email,password).await()
-            LoginResult.Success
-        } catch (e: Exception) {
+    fun fieldValidation(email: String, password: String): FieldValidationResult {
+        if (email.isBlank()) return FieldValidationResult.BlankEmail
+        if (password.isBlank()) return FieldValidationResult.BlankPassword
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) return FieldValidationResult.InvalidEmail
+        return FieldValidationResult.Success
+    }
 
-            if (e.message?.contains("user not found") == true || e.message?.contains("wrong password") == true) LoginResult.Error
+    suspend fun login(email:String, password: String) {
+      val auth= FirebaseAuth.getInstance()
+        _loginState.value= LoginStates.Loading
+        try{
+            auth.signInWithEmailAndPassword(email, password).await()
 
-            else return LoginResult.UnknownError(e.message ?: "Unknown Error")
+            _loginState.value= LoginStates.Success
 
+        } catch (e: Exception){
+            _loginState.value= LoginStates.Error(e.message ?: "Unknown Error")
         }
+    }
+
+    fun resetState(){
+        _loginState.value= LoginStates.Idle
+
     }
 
     }

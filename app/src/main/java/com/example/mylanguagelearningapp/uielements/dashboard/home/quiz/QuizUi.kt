@@ -1,7 +1,5 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.home.quiz
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -10,12 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,12 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.Red
 import com.example.mylanguagelearningapp.ui.theme.White
@@ -51,6 +46,10 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
     var currentWord by viewModel.currentWord
     val progress by viewModel.progress
     val isQuizFinished = viewModel.isQuizFinished
+    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val points = viewModel.points
+
+
 
 
 
@@ -76,16 +75,21 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
                 elevation = CardDefaults.cardElevation(20.dp)
             ) {
                 Text(
-                    text = currentWord?.word?:"",
+                    text = if(isQuizFinished) "$points/${wordList.size}" else currentWord?.word ?: "",
                     fontSize = 50.sp,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp)
+                        .padding(top = if (currentLanguage== "jp" || currentLanguage == "cn") 20.dp else 50.dp)
                 )
-                Text(text = currentWord?.translation?:"",
-                    fontSize = 40.sp,
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally))
+                if (currentLanguage == "jp" || currentLanguage == "cn") {
+                    Text(
+                        text = if(isQuizFinished) "" else currentWord?.word ?: "",
+                        fontSize = 40.sp,
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
+
             }
 
 
@@ -129,7 +133,7 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
 
                             MyAppButton(
                                 onClick = {
-                                    viewModel.onNextClick()
+                                    viewModel.onNextClick(currentLanguage)
                                 },
                                 text = "Next",
                                 modifier = Modifier
@@ -169,7 +173,9 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
                                 Row(modifier = Modifier.align(Alignment.Center))
                                 {
                                     Text(
-                                        text = "${it.word} - ${it.pronunciation} - ",
+                                        text = if (currentLanguage== "jp" || currentLanguage == "cn")
+                                        {"${it.word} - ${it.pronunciation} - "}
+                                        else {"${it.word} - ${it.translation} - "},
                                         fontSize = 30.sp,
                                         modifier = Modifier
                                             .padding(start = 5.dp),
@@ -193,7 +199,7 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
             if (isQuizFinished){
                 MyAppButton(
                     onClick = {
-                        viewModel.onNextClick()
+                        viewModel.onNextClick(currentLanguage)
                     },
                     text = "Restart",
                     modifier = Modifier
