@@ -59,7 +59,7 @@ fun settingsUi(navController: NavController) {
    //TODO settings UI and functions
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val currentLanguage by UserSettingsRepository.selectedLanguage.collectAsState()
     val sheetState= rememberModalBottomSheetState()
     var infoModal by rememberSaveable { mutableStateOf(false) }
 
@@ -130,15 +130,7 @@ fun settingsUi(navController: NavController) {
                                 .border(1.dp, BgBlue, RoundedCornerShape(10.dp))
                                 ){
                                 Image(
-                                    painter = painterResource(
-                                        when (currentLanguage){
-                                            "jp" -> CountryFlags.JAPANESE.resID
-                                            "cn" -> CountryFlags.CHINESE.resID
-                                            "es" -> CountryFlags.SPANISH.resID
-                                            "en" -> CountryFlags.ENGLISH.resID
-                                            else -> CountryFlags.JAPANESE.resID
-                                        }
-                                    ),
+                                    painter = painterResource(currentLanguage.flag),
                                     contentDescription = null,
                                 )
                             }

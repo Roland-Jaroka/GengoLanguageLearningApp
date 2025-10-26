@@ -134,20 +134,20 @@ fun LearningUi(navController: NavController,
 
                         })
                 }
-                item {
-                    Text(text = "Migrate grammars",
-                        color= Blue,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentWidth()
-                            .padding(top = 10.dp)
-                            .clickable(
-                                onClick = {
-                                    viewModel.migrateGrammar(currentLanguage)
-                                }
-                            ))
-                    Spacer(modifier = Modifier.height(50.dp))
-                }
+//                item {
+//                    Text(text = "Migrate grammars",
+//                        color= Blue,
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .wrapContentWidth()
+//                            .padding(top = 10.dp)
+//                            .clickable(
+//                                onClick = {
+//                                    viewModel.migrateGrammar(currentLanguage)
+//                                }
+//                            ))
+//                    Spacer(modifier = Modifier.height(50.dp))
+//                }
 
 
             }

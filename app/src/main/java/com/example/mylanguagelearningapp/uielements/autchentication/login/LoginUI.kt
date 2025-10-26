@@ -1,7 +1,7 @@
 package com.example.mylanguagelearningapp.uielements.autchentication.login
 
 
-import android.widget.Toast
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -23,11 +23,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -49,15 +49,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mylanguagelearningapp.model.results.LoginResult
 import com.example.mylanguagelearningapp.R
-import com.example.mylanguagelearningapp.model.UserSettingsRepository
+import com.example.mylanguagelearningapp.model.results.FieldValidationResult
 import com.example.mylanguagelearningapp.ui.theme.BgBlue
 import com.example.mylanguagelearningapp.ui.theme.BlueGray
 import com.example.mylanguagelearningapp.ui.theme.White
+import com.example.mylanguagelearningapp.uielements.uimodels.ErrorModal
 import com.example.mylanguagelearningapp.uielements.uimodels.MyAppButton
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginUi(navController: NavController,
             viewModel: LoginViewModel = viewModel()
@@ -66,20 +67,32 @@ fun LoginUi(navController: NavController,
     val email= viewModel.email
     val password= viewModel.password
     val scope = rememberCoroutineScope()
-    val context= LocalContext.current
-
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
     var visible by remember { mutableStateOf(false) }
 
-    var isLoading by remember{ mutableStateOf(false) }
+    val loginState by viewModel.loginState.collectAsState()
+
+    val sheetState = rememberModalBottomSheetState()
+
+
 
 
     LaunchedEffect(Unit) {
         visible = true
         println("Logged in user email ${viewModel.auth.currentUser?.email}")
 
+    }
+
+    LaunchedEffect(loginState) {
+       if (loginState is LoginStates.Success){
+           navController.navigate("mainLanguageSelector"){
+               popUpTo("authentication"){
+                   inclusive= true
+               }
+           }
+       }
     }
 
     Box(modifier= Modifier
@@ -209,37 +222,22 @@ fun LoginUi(navController: NavController,
                         containerColor = BgBlue
                     ),
                     onClick = {
-                        scope.launch {
-                            isLoading = true
-                            val result = viewModel.login(email, password)
-                            isLoading = false
-                            when (result) {
-                                is LoginResult.Success -> {
-                                    UserSettingsRepository.getUserData()
-                                    navController.navigate("dashboard")
-                                    { popUpTo("login") { inclusive = true } }
+                        val result = viewModel.fieldValidation(email, password)
+                        when(result){
+                            is FieldValidationResult.BlankEmail -> emailError = "Email cannot be blank"
+                            is FieldValidationResult.BlankPassword -> passwordError = "Password cannot be blank"
+                            is FieldValidationResult.InvalidEmail -> emailError = "Invalid email"
+                            is FieldValidationResult.Success -> {
+                                scope.launch {
+                                    viewModel.login(email, password)
                                 }
-
-                                is LoginResult.BlankEmail -> emailError = "Email cannot be blank"
-                                is LoginResult.BlankPassword -> passwordError =
-                                    "Password cannot be blank"
-
-                                is LoginResult.InvalidEmail -> emailError = "Invalid email"
-                                is LoginResult.Error -> Toast.makeText(
-                                    context,
-                                    "Invalid email or password",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                is LoginResult.UnknownError -> Toast.makeText(
-                                    context,
-                                    result.message,
-                                    Toast.LENGTH_SHORT
-                                ).show()
                             }
+                            else -> Unit
                         }
+
                     },
-                    isLoading = isLoading
+                    isLoading = loginState is LoginStates.Loading
+
                 )
 
                 Row(
@@ -282,6 +280,15 @@ fun LoginUi(navController: NavController,
             }
         }//Box
     }
+    if (loginState is LoginStates.Error) {
+        ErrorModal(
+            sheetState,
+            onClick = {
+                        viewModel.resetState()
+            },
+            text = (loginState as LoginStates.Error).message
 
+        )
+    }
 
 }

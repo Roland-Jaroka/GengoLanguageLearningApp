@@ -1,6 +1,6 @@
 package com.example.mylanguagelearningapp.uielements.dashboard.settings
 
-import androidx.compose.runtime.collectAsState
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mylanguagelearningapp.grammar.ChineseGrammar
@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 
 
 class LearningLanguageViewModel: ViewModel() {
-
 
     fun setLanguage(selectedLanguage: String) {
         UserSettingsRepository.setLanguage(selectedLanguage)
@@ -22,9 +21,10 @@ class LearningLanguageViewModel: ViewModel() {
         }
     }
 
-    fun setMainLanguage(selectedLanguage: String?){
+    fun setMainLanguage(context: Context, selectedLanguage: String){
         viewModelScope.launch {
-            UserSettingsRepository.setMainLanguage(selectedLanguage)
+                UserSettingsRepository.setMainLanguage( context = context, selectedLanguage)
+
         }
     }
 

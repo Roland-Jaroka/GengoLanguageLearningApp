@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -24,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,12 +34,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.mylanguagelearningapp.R
+import com.example.mylanguagelearningapp.model.Languages
 import com.example.mylanguagelearningapp.model.UserSettingsRepository
 import com.example.mylanguagelearningapp.ui.theme.Blue
 import com.example.mylanguagelearningapp.ui.theme.White
@@ -45,12 +50,18 @@ import com.example.mylanguagelearningapp.ui.theme.White
 @Composable
 fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                        navController: NavController) {
-
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
-    val mainLanguage by UserSettingsRepository.mainLanguage
-    var selectedMainLanguage by remember{ mutableStateOf(mainLanguage)}
+    val context = LocalContext.current
+    val currentLanguage by UserSettingsRepository.selectedLanguage.collectAsState()
+    val mainLanguage by UserSettingsRepository.getMainLanguage(context).collectAsState("jp")
+    var selectedMainLanguage by remember{ mutableStateOf("")}
     var selectedLanguage by remember { mutableStateOf(currentLanguage)}
+    val scrollState = rememberScrollState()
+    val languages = Languages.languagesList
 
+
+    LaunchedEffect(mainLanguage) {
+        selectedMainLanguage = mainLanguage
+    }
 
     Scaffold( modifier = Modifier
         .fillMaxSize(),
@@ -79,7 +90,8 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
         Column (modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .background(White)) {
+            .background(White)
+            .verticalScroll(scrollState)) {
             Card(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -97,84 +109,34 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                     fontSize = 20.sp
                 )
 
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
+                languages.forEach { language ->
 
-                    Text(
-                        text = "Japanese",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Checkbox(
-                        checked = selectedLanguage == "jp",
-                        onCheckedChange = {
-                           if (it) selectedLanguage = "jp"
-                        },
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 20.dp)
-                    )
-                }
+                    Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                )
+                        Text(
+                            text = language.name,
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
+                        Checkbox(
+                            checked = selectedLanguage.code == language.code,
+                            onCheckedChange = { checked ->
+                                if (checked) selectedLanguage =
+                                    Languages.languagesList.first {it.code == language.code  }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(start = 20.dp)
+                        )
+                    }
 
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
-
-                    Text(
-                        text = "Chinese",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Checkbox(
-                        checked = selectedLanguage == "cn",
-                        onCheckedChange = {if (it) selectedLanguage = "cn"},
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 30.dp)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                     )
                 }
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                )
-
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
-
-                    Text(
-                        text = "Spanish",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Checkbox(
-                        checked = selectedLanguage == "es",
-                        onCheckedChange = {if (it) selectedLanguage = "es"},
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 30.dp)
-                    )
-                }
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                )
-
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
-
-                    Text(
-                        text = "English",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Checkbox(
-                        checked = selectedLanguage == "en",
-                        onCheckedChange = {if (it) selectedLanguage = "en"},
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 30.dp)
-                    )
-                }
-
 
                 Button(
                     onClick = {
-                        viewModel.setLanguage(selectedLanguage)
+                        viewModel.setLanguage(selectedLanguage.code)
                         navController.navigate("home") {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
                             launchSingleTop = true
@@ -217,46 +179,34 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                     fontSize = 20.sp
                 )
 
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
+               languages.forEach { language ->
 
-                    Text(
-                        text = "Japanese",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Checkbox(
-                        checked = selectedMainLanguage == "jp",
-                        onCheckedChange = {
-                            if (it) selectedMainLanguage = "jp"
-                        },
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 20.dp)
-                    )
-                }
+                   Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-                )
+                       Text(
+                           text = language.name,
+                           modifier = Modifier.align(Alignment.CenterVertically)
+                       )
+                       Checkbox(
+                           checked = selectedMainLanguage == language.code,
+                           onCheckedChange = {
+                               if (it) selectedMainLanguage = language.code
+                           },
+                           modifier = Modifier
+                               .align(Alignment.CenterVertically)
+                               .padding(start = 20.dp)
+                       )
+                   }
 
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
-
-                    Text(
-                        text = "Chinese",
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    Checkbox(
-                        checked = selectedMainLanguage == "cn",
-                        onCheckedChange = {if (it) selectedMainLanguage = "cn"},
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 30.dp)
-                    )
-                }
+                   HorizontalDivider(
+                       modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                   )
+               }
 
 
                 Button(
                     onClick = {
-                        viewModel.setMainLanguage(selectedMainLanguage)
+                        viewModel.setMainLanguage(context,selectedMainLanguage)
                         navController.navigate("settings") {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
                             launchSingleTop = true
