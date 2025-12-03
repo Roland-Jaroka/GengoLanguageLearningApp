@@ -1,6 +1,9 @@
 package com.example.gengolearning.uielements.uimodels
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +24,7 @@ import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WordCard(word: String,
              pronunciation: String,
@@ -28,12 +32,17 @@ fun WordCard(word: String,
              isSelectable: Boolean = false,
              isSelected: Boolean = false,
              onClick: () -> Unit = {},
+             longTap: () -> Unit = {},
              currentLanguage: String) {
 
     Card(modifier = Modifier
         .fillMaxWidth()
         .height(200.dp)
-        .padding(10.dp),
+        .padding(10.dp)
+        .combinedClickable(
+            onClick = {},
+            onLongClick = { longTap() }
+        ),
         elevation = CardDefaults.cardElevation(5.dp),
         colors = CardDefaults.cardColors(White),
         border = BorderStroke(1.dp, Blue)) {

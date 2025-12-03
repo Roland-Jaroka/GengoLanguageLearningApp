@@ -26,19 +26,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.gengolearning.app.R
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.MyTopAppBar
+import com.gengolearning.app.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawingQuizView(viewModel:DrawingCanvasViewModel= viewModel(),
+fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                     navController: NavController) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 

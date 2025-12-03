@@ -23,27 +23,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.gengolearning.app.R
 import com.example.gengolearning.grammar.LanguageGrammar
-import com.example.gengolearning.model.UserSettingsRepository
+import com.example.gengolearning.model.Languages
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.MyTopAppBar
 import com.example.gengolearning.uielements.uimodels.ProfileTextFields
-import com.example.gengolearning.words.LanguageWords
+import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileMenu(navController: NavController) {
+fun ProfileMenu(navController: NavController, viewModel: ProfileViewModel = hiltViewModel()){
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     val email= currentUser?.email.toString()
-    val currentLanguage by UserSettingsRepository.selectedLanguage.collectAsState()
-    val wordList by LanguageWords.words.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState(
+        Languages.languagesList[0]
+    )
+    val wordList by viewModel.wordsList.collectAsState()
     val grammarList by LanguageGrammar.grammar.collectAsState()
-    val profileName = UserSettingsRepository.profileName.value.toString()
+    val profileName = viewModel.profileName.toString()
     val appversion = LocalContext.current.packageManager.getPackageInfo(LocalContext.current.packageName, 0).versionName.toString()
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar= {MyTopAppBar(modifier = Modifier,

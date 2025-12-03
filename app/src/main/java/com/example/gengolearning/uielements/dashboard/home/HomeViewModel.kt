@@ -7,20 +7,26 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.AppSettingsPreferences
+import com.example.gengolearning.model.Language
+import com.example.gengolearning.model.Languages
 import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
 import com.example.gengolearning.words.LanguageWords
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val repository: LanguageWords,
+   val userSettingsRepository: UserSettingsRepository
+): ViewModel() {
 
-class HomeViewModel: ViewModel() {
-
-
-    val repository = LanguageWords
     var wordsList = repository.words.map{ list->
         val homeWords = list.filter { it.isOnHomePage==true }
         if (homeWords.isEmpty()) list else homeWords
@@ -35,6 +41,9 @@ class HomeViewModel: ViewModel() {
 
     var currentWord = mutableStateOf<Words?>(null)
 
+    val currentLanguage= userSettingsRepository.selectedLanguage
+
+    val selectedLanguage: StateFlow<String> = userSettingsRepository.language
     fun showTutorial(context: Context) = AppSettingsPreferences.showWelcomeTutorial(context)
 
 

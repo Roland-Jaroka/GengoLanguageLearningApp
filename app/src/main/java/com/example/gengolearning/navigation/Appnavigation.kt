@@ -29,6 +29,7 @@ import com.example.gengolearning.uielements.dashboard.home.Home
 import com.example.gengolearning.uielements.dashboard.home.addwords.AddWordsUi
 import com.example.gengolearning.uielements.dashboard.home.drawingquiz.DrawingQuizView
 import com.example.gengolearning.uielements.dashboard.home.mainlanguage.MainLanguageSelector
+import com.example.gengolearning.uielements.dashboard.home.mylist.EditWord
 import com.example.gengolearning.uielements.dashboard.home.mylist.MyListUi
 import com.example.gengolearning.uielements.dashboard.home.quiz.QuizUi
 import com.example.gengolearning.uielements.dashboard.learning.AddNewGrammarUi
@@ -109,10 +110,13 @@ fun AppNavigation() {
                 composable("addwords",
                     enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
                     exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { AddWordsUi(navController = navController) }
-
                 composable("mylist",
                     enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} },
                     exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> fullWidth} }) { MyListUi(navController = navController) }
+
+                 composable("editWord/{wordId}") { backStackEntry ->
+                    val wordId = backStackEntry.arguments?.getString("wordId")
+                     EditWord(navController = navController, wordId)  }
 
                 composable("quiz") { QuizUi(navController= navController) }
 

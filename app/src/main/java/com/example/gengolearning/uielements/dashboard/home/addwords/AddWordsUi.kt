@@ -12,33 +12,29 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
-import com.example.gengolearning.uielements.uimodels.ErrorModal
 import com.example.gengolearning.uielements.uimodels.MyAppButton
 import com.example.gengolearning.uielements.uimodels.TextButton
 import com.gengolearning.app.R
 
 @Composable
 fun AddWordsUi(navController: NavController,
-               viewModel: AddWordsViewModel = viewModel()) {
+               viewModel: AddWordsViewModel = hiltViewModel()) {
 
     val word = viewModel.word
     val translation = viewModel.translation
     val pronunciation = viewModel.pronunciation
     val scrollstate= rememberScrollState()
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val currentLanguage = viewModel.currentLanguage
 
     val wordInputError = viewModel.wordInputError?.let {id-> stringResource(id)  }
     val translationInputError = viewModel.translationInputError?.let { id->

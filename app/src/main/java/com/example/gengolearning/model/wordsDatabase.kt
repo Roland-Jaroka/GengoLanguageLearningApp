@@ -12,6 +12,9 @@ interface WordsDao {
     @Upsert
     suspend fun updateWords(words: Words)
 
+    @Upsert
+    suspend fun upsertWords(list: List<Words>)
+
     @Delete
     suspend fun deleteWords(words: Words)
 

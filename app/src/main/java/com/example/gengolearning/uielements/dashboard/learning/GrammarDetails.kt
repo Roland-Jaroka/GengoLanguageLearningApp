@@ -49,12 +49,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.gengolearning.app.R
 import com.example.gengolearning.grammar.LanguageGrammar
 import com.example.gengolearning.model.AnalyticsHelper
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.LightBlue
@@ -62,15 +61,17 @@ import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.GrammarCardsAlertDialog
 import com.example.gengolearning.uielements.uimodels.MyAppButton
+import com.gengolearning.app.R
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GrammarDetails(navController: NavController,
                    grammarId: String?,
-                   viewModel: GrammarDetailsViewModel = viewModel()) {
+                   viewModel: GrammarDetailsViewModel = hiltViewModel()) {
 
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val selectedLanguage by viewModel.currentLanguage.collectAsState()
+    val currentLanguage = selectedLanguage.code
     val grammarList by LanguageGrammar.grammar.collectAsState()
     val grammar = grammarList.find {it.id== grammarId} ?: return
 

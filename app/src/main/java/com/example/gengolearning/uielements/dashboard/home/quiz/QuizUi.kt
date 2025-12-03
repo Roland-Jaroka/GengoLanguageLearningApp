@@ -37,18 +37,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.gengolearning.app.R
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.MyAppButton
 import com.example.gengolearning.uielements.uimodels.MyTopAppBar
+import com.gengolearning.app.R
 
 @Composable
-fun QuizUi(viewModel: QuizViewModel = viewModel(),
+fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
            navController: NavController
 ) {
 
@@ -58,7 +57,8 @@ fun QuizUi(viewModel: QuizViewModel = viewModel(),
     var currentWord by viewModel.currentWord
     val progress by viewModel.progress
     val isQuizFinished = viewModel.isQuizFinished
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val selectedLanguage by viewModel.currentLanguage.collectAsState()
+    val currentLanguage = selectedLanguage.code
     val points = viewModel.points
 
 

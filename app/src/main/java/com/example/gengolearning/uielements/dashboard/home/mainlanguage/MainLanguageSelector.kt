@@ -37,21 +37,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.gengolearning.model.AnalyticsHelper
-import com.gengolearning.app.R
 import com.example.gengolearning.model.Languages
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.Pink
 import com.example.gengolearning.ui.theme.TonedPink
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.MyAppButton
-import kotlinx.coroutines.launch
+import com.gengolearning.app.R
 
 @Composable
-fun MainLanguageSelector(navController: NavController) {
+fun MainLanguageSelector(navController: NavController,
+                         viewModel: MainLanguageSelectorViewModel = hiltViewModel()) {
     val languages = Languages.languagesList
     var selectedLanguage by remember{mutableStateOf("")}
     val scope = rememberCoroutineScope()
@@ -168,15 +168,13 @@ fun MainLanguageSelector(navController: NavController) {
                 MyAppButton(
                     onClick = {
                         if (selectedLanguage != "")
-                            scope.launch {
-                                UserSettingsRepository.setMainLanguage(context, selectedLanguage)
-                                UserSettingsRepository.setLanguage(selectedLanguage)
+                             viewModel.setMainLanguage(selectedLanguage)
+                                viewModel.setLanguage(selectedLanguage)
                                 navController.navigate("dashboard") {
                                     popUpTo("mainLanguageSelector") {
                                         inclusive = true
                                     }
                                 }
-                            }
                         AnalyticsHelper.logEvent("selected_language_$selectedLanguage")
                     },
                     text = stringResource(R.string.select_button),

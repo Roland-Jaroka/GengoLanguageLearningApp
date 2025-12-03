@@ -19,7 +19,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,33 +35,32 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.gengolearning.model.AnalyticsHelper
-import com.gengolearning.app.R
-import com.example.gengolearning.model.UserSettingsRepository
+import com.example.gengolearning.model.Languages
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.AppSettingsAlertDialog
 import com.example.gengolearning.uielements.uimodels.InfoModal
 import com.example.gengolearning.uielements.uimodels.MyAppButton
+import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun settingsUi(navController: NavController, viewModel: SettingsViewModel= viewModel()) {
+fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltViewModel()) {
    //TODO settings UI and functions
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
-    val currentLanguage by UserSettingsRepository.selectedLanguage.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState(
+        Languages.languagesList[0]
+    )
     val sheetState= rememberModalBottomSheetState()
     var infoModal by rememberSaveable { mutableStateOf(false) }
     val openAlertDialog = remember{mutableStateOf(false)}
-
-    LaunchedEffect(Unit) {
-        println("Language set to: ${UserSettingsRepository.language.value}")
-    }
 
     Box(modifier = Modifier
         .fillMaxSize()

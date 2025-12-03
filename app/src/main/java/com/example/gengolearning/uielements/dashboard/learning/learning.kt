@@ -33,11 +33,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.gengolearning.model.AnalyticsHelper
-import com.gengolearning.app.R
-import com.example.gengolearning.model.UserSettingsRepository
+import com.example.gengolearning.model.Languages
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.PandaBlack
@@ -45,14 +45,17 @@ import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.AddButton
 import com.example.gengolearning.uielements.uimodels.GrammarCards
 import com.example.gengolearning.uielements.uimodels.MyAppButton
+import com.gengolearning.app.R
 
 @Composable
 fun LearningUi(navController: NavController,
-               viewModel: LearningViewModel= viewModel()){
+               viewModel: LearningViewModel= hiltViewModel()){
 //TODO learning UI and functions
 
     val grammarList by viewModel.grammars.collectAsState()
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState(
+        Languages.languagesList[0]
+    )
     val searchInput = viewModel.search
 
 
@@ -66,7 +69,7 @@ fun LearningUi(navController: NavController,
     }
 
     LaunchedEffect(Unit) {
-       viewModel.loadData(currentLanguage)
+       viewModel.loadData(currentLanguage.code)
     }
 
     Box(modifier= Modifier

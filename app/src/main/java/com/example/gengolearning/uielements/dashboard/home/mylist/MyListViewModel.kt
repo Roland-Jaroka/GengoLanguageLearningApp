@@ -10,18 +10,25 @@ import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.AppSettingsPreferences
 import com.example.gengolearning.model.QuizManager.quizzes
 import com.example.gengolearning.model.UserSettingsRepository
+import com.example.gengolearning.model.Words
 import com.example.gengolearning.words.LanguageWords
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class MyListViewModel: ViewModel() {
+@HiltViewModel
+class MyListViewModel @Inject constructor(
+    private val repository: LanguageWords,
+    private val userSettingsRepository: UserSettingsRepository
+): ViewModel() {
 
-    val currentLanguage= UserSettingsRepository.language.value
-    val repository= LanguageWords
-    var words = repository.words
+    val currentLanguage= userSettingsRepository.language
+
+    var words = repository.words.sa
 
 
 
@@ -30,6 +37,10 @@ class MyListViewModel: ViewModel() {
 
     var labelInput by mutableStateOf("")
         private set
+
+    var longTappedWord by mutableStateOf<Words?>(null)
+        private set
+
 
     val labels = repository.words.map {
         list-> list.mapNotNull { it.label }.toSet()
@@ -46,6 +57,8 @@ class MyListViewModel: ViewModel() {
     var onEdit by mutableStateOf(false)
 
     val selectedWords = mutableStateListOf<String>()
+
+
 
     fun tutorialModal(context: Context) = AppSettingsPreferences.showMyListTutorial(context)
 
@@ -71,7 +84,7 @@ class MyListViewModel: ViewModel() {
 
     fun onRemove(){
         selectedWords.forEach { id->
-            repository.onRemove(id, currentLanguage)
+            repository.onRemove(id, currentLanguage.value)
         }
 
         selectedWords.clear()
@@ -129,12 +142,12 @@ class MyListViewModel: ViewModel() {
        val allWords = words.value
         allWords.filter { it.id  in selectedWords && it.isOnHomePage== false || it.isOnHomePage == null}
             .forEach { words->
-                repository.onHomePage(words.id, currentLanguage, true)
+                repository.onHomePage(words.id, currentLanguage.value, true)
                 println("Word added to home page: $words")
             }
         allWords.filter { it.id !in selectedWords && it.isOnHomePage== true }
             .forEach { words->
-                repository.onHomePage(words.id, currentLanguage, false)
+                repository.onHomePage(words.id, currentLanguage.value, false)
                 println("Word removed from home page: $words")
             }
         selectedWords.clear()
@@ -158,6 +171,11 @@ class MyListViewModel: ViewModel() {
             AppSettingsPreferences.setMyListTutorialShown(context, false)
         }
     }
+
+    fun onLongTap(word: Words) {
+        longTappedWord = word
+    }
+
 
 
 

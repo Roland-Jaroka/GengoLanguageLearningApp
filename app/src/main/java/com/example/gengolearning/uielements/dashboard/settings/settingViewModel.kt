@@ -8,9 +8,18 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.AppSettingsPreferences
+import com.example.gengolearning.model.UserSettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val userSettingsRepository: UserSettingsRepository
+): ViewModel(){
 
-class SettingsViewModel: ViewModel(){
+    val currentLanguage = userSettingsRepository.selectedLanguage
 
     fun sendFeedback(context: Context){
         val recipient = "jaroka.roland@gmail.com"

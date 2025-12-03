@@ -6,12 +6,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.QuizManager.quizzes
 import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
 import com.example.gengolearning.words.LanguageWords
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 data class DrawingState(
@@ -32,7 +37,11 @@ sealed interface DrawingActions{
     data object OnPathEnd: DrawingActions
     data object OnClearCanvas: DrawingActions
 }
-class DrawingCanvasViewModel: ViewModel(){
+@HiltViewModel
+class DrawingCanvasViewModel @Inject constructor(
+    private val repository: LanguageWords,
+    private val userSettingsRepository: UserSettingsRepository
+): ViewModel(){
  private val _state= MutableStateFlow(DrawingState())
     val state= _state.asStateFlow()
 
@@ -84,9 +93,14 @@ class DrawingCanvasViewModel: ViewModel(){
     }
 
     //Quiz logic
-    val currentLanguage= UserSettingsRepository.language.value
-    val repository = LanguageWords
-    val wordsList = if (quizzes.isNotEmpty()) quizzes else repository.words.value
+    val currentLanguage= userSettingsRepository.language.value
+
+    val words = repository.words.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList()
+    )
+    val wordsList = if (quizzes.isNotEmpty()) quizzes else words.value
 
     var currentIndex by mutableStateOf(0)
         private set

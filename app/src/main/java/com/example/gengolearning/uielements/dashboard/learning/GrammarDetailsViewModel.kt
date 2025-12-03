@@ -1,24 +1,36 @@
 package com.example.gengolearning.uielements.dashboard.learning
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.grammar.LanguageGrammar
 import com.example.gengolearning.model.UserSettingsRepository
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 
 sealed class ChatGPTState{
     object Loading: ChatGPTState()
     class Success(val response: String): ChatGPTState()
     class Error(val message: String): ChatGPTState()
 }
-class GrammarDetailsViewModel: ViewModel() {
+@HiltViewModel
+class GrammarDetailsViewModel @Inject constructor(
+    private val userSettingsRepository: UserSettingsRepository
+): ViewModel() {
 
 
 
-    val currentLanguage = UserSettingsRepository.selectedLanguage.value
+    val currentLanguage = userSettingsRepository.selectedLanguage.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        userSettingsRepository.languages[0]
+    )
 
     fun addNewExample(language: String, grammarid: String?, exampleText: String) {
 
@@ -58,7 +70,7 @@ class GrammarDetailsViewModel: ViewModel() {
             val model = Firebase.ai(backend = GenerativeBackend.googleAI())
                 .generativeModel("gemini-2.5-flash")
             val prompt =
-                "Give me an example sentence from ${currentLanguage.name} language using the following grammar: $grammar and use English for explanation"
+                "Give me an example sentence from ${currentLanguage.value.name} language using the following grammar: $grammar and use English for explanation"
             val response = model.generateContent(prompt)
              _chatGPTState.value = ChatGPTState.Success(response.text ?: "")
         } catch (e: Exception) {

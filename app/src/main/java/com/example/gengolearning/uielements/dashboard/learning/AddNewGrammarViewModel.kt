@@ -10,11 +10,17 @@ import com.example.gengolearning.model.Grammar
 import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.results.AddGrammarResults
 import com.gengolearning.app.R
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 
-class AddNewGrammarViewModel: ViewModel() {
+
+@HiltViewModel
+class AddNewGrammarViewModel @Inject constructor(
+    private val userSettingsRepository: UserSettingsRepository
+): ViewModel() {
 
 
-    val currentLanguage = UserSettingsRepository.language.value
+    val currentLanguage = userSettingsRepository.language
 
     var grammar by mutableStateOf("")
         private set
@@ -70,7 +76,7 @@ class AddNewGrammarViewModel: ViewModel() {
             AddGrammarResults.BlankExplanation -> explanationInputError = R.string.explanation_input_error
             AddGrammarResults.Success ->
                 try {
-                    LanguageGrammar.addGrammar(currentLanguage, example, Grammar(grammar, explanation, examplerows, id = ""))
+                    LanguageGrammar.addGrammar(currentLanguage.value, example, Grammar(grammar, explanation, examplerows, id = ""))
                     grammar = ""
                     explanation = ""
                     example = ""

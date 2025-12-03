@@ -54,17 +54,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.Text
 import com.example.gengolearning.model.AnalyticsHelper
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.PandaBlack
 import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
+import com.example.gengolearning.uielements.uimodels.LongTapBottomModal
 import com.example.gengolearning.uielements.uimodels.MyAppButton
 import com.example.gengolearning.uielements.uimodels.MyListTeachingModal
 import com.example.gengolearning.uielements.uimodels.MyTopAppBar
@@ -74,7 +74,7 @@ import com.gengolearning.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyListUi(viewModel: MyListViewModel = viewModel(),
+fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
              navController: NavController
 ) {
 
@@ -95,16 +95,17 @@ fun MyListUi(viewModel: MyListViewModel = viewModel(),
     val sheetState= rememberModalBottomSheetState()
     var isSheetOpen by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState()
 
    var isFocused by remember { mutableStateOf(false) }
    val focusRequester = remember{ FocusRequester() }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val tutorial by viewModel.tutorialModal(context).collectAsState(initial = false)
-    val tutorialSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+
+    var longTap by rememberSaveable {   mutableStateOf(false) }
+    val longTapped = viewModel.longTappedWord
+
 
 
     LaunchedEffect(Unit) {
@@ -128,9 +129,11 @@ Box(modifier = Modifier
     .fillMaxSize()
     .padding(top = paddingValues.calculateTopPadding()))
 {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
 
 
         Row {
@@ -149,7 +152,7 @@ Box(modifier = Modifier
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester)
-                    .onFocusChanged{ isFocused = it.isFocused},
+                    .onFocusChanged { isFocused = it.isFocused },
                 singleLine = true,
                 shape = RoundedCornerShape(20.dp),
                 leadingIcon = {
@@ -160,9 +163,11 @@ Box(modifier = Modifier
                 },
 
                 )
-            AnimatedVisibility(visible= onEdit,
+            AnimatedVisibility(
+                visible = onEdit,
                 modifier = Modifier
-                    .align(Alignment.CenterVertically)) {
+                    .align(Alignment.CenterVertically)
+            ) {
                 Row {
                     IconButton(
                         onClick = {
@@ -202,7 +207,7 @@ Box(modifier = Modifier
                     .padding(start = 5.dp, top = 15.dp)
                     .clickable(
                         indication = null,
-                        interactionSource = remember{ MutableInteractionSource() },
+                        interactionSource = remember { MutableInteractionSource() },
                         onClick = {
                             viewModel.onEdit = !viewModel.onEdit
                         }
@@ -212,18 +217,22 @@ Box(modifier = Modifier
         }
 
 
-        LazyColumn(modifier = Modifier.fillMaxSize()
-            .animateContentSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+                .animateContentSize()
+        ) {
             val maxAnimatedItems = 10
             itemsIndexed(words) { index, word ->
                 val shouldAnimate = index < maxAnimatedItems
                 AnimatedVisibility(
                     visible = visible,
-                    enter = if (shouldAnimate) slideInHorizontally (initialOffsetX = { fullWidth -> fullWidth },
-                        animationSpec = tween(delayMillis = index * 100, durationMillis = 400))
+                    enter = if (shouldAnimate) slideInHorizontally(
+                        initialOffsetX = { fullWidth -> fullWidth },
+                        animationSpec = tween(delayMillis = index * 100, durationMillis = 400)
+                    )
                     else EnterTransition.None,
 
-                ) {
+                    ) {
                     WordCard(
                         word.word,
                         word.pronunciation,
@@ -235,7 +244,13 @@ Box(modifier = Modifier
                             println("Selected words ID: ${word.id}")
                             println("Button clicked for word: ${word.word}")
                         },
-                        currentLanguage)
+                        longTap = {
+                            longTap = true
+                            viewModel.onLongTap(word)
+
+                        },
+                        currentLanguage
+                    )
                 }
             }
             item {
@@ -249,10 +264,12 @@ Box(modifier = Modifier
 
     // empty list view:
 
-    if (wordList.isEmpty() || words.isEmpty()){
-        Column( modifier = Modifier
-            .align(Alignment.Center)
-            .padding(16.dp)) {
+    if (wordList.isEmpty() || words.isEmpty()) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(16.dp)
+        ) {
 
             Image(
                 painter = painterResource(R.drawable.emptybox),
@@ -263,24 +280,26 @@ Box(modifier = Modifier
             )
 
             Text(
-                text = if (wordList.isEmpty()) stringResource(R.string.empty_word_list) else stringResource (R.string.wordlist_empty_search),
+                text = if (wordList.isEmpty()) stringResource(R.string.empty_word_list) else stringResource(
+                    R.string.wordlist_empty_search
+                ),
                 fontSize = 20.sp,
                 color = PandaBlack,
-                textAlign =  TextAlign.Center,
-                    modifier = Modifier
+                textAlign = TextAlign.Center,
+                modifier = Modifier
                     .padding(10.dp)
                     .align(Alignment.CenterHorizontally)
             )
 
-        MyAppButton(
-            onClick = {
-                navController.navigate("addwords")
-                AnalyticsHelper.logEvent("addwords_button_mylist")
-            },
-            text = stringResource(R.string.add_words_button),
-            colors = ButtonDefaults.buttonColors(Blue)
+            MyAppButton(
+                onClick = {
+                    navController.navigate("addwords")
+                    AnalyticsHelper.logEvent("addwords_button_mylist")
+                },
+                text = stringResource(R.string.add_words_button),
+                colors = ButtonDefaults.buttonColors(Blue)
 
-        )
+            )
         }
     }
 
@@ -295,21 +314,23 @@ Box(modifier = Modifier
     ) {
         Column(modifier = Modifier.padding(bottom = 12.dp)) {
 
-    Button(
-        onClick = { viewModel.onRemove()
-            AnalyticsHelper.logEvent("remove_button_mylist")
-                  },
-        modifier = Modifier
-            .align(Alignment.End)
-            .height(50.dp)
-            .padding(start = 12.dp, end = 12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Red,
-            contentColor = White
-        ),
-        elevation = ButtonDefaults.buttonElevation(5.dp),
-    ) { Text(text = stringResource(R.string.remove_word_button))
-    }
+            Button(
+                onClick = {
+                    viewModel.onRemove()
+                    AnalyticsHelper.logEvent("remove_button_mylist")
+                },
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .height(50.dp)
+                    .padding(start = 12.dp, end = 12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Red,
+                    contentColor = White
+                ),
+                elevation = ButtonDefaults.buttonElevation(5.dp),
+            ) {
+                Text(text = stringResource(R.string.remove_word_button))
+            }
 //            Button(
 //                onClick = {
 //                    //isSheetOpen = true
@@ -331,7 +352,7 @@ Box(modifier = Modifier
                 onClick = {
                     viewModel.onHomepage()
                     AnalyticsHelper.logEvent("homePage_button_mylist")
-                    navController.navigate("home"){
+                    navController.navigate("home") {
                         popUpTo("home") { inclusive = true }
                     }
 
@@ -350,26 +371,27 @@ Box(modifier = Modifier
             }
 
 
-                Button(
-                    onClick = {
-                        viewModel.onSendWordsToQuiz()
-                        navController.navigate("quiz")
-                        AnalyticsHelper.logEvent("quiz_button_mylist")
-                    },
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .height(50.dp)
-                        .padding(start = 12.dp, end = 12.dp, top = 5.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BgBlue,
-                        contentColor = White
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(5.dp)
-                ) {
-                    Text(text = stringResource(R.string.send_words_to_quiz_button))
-                }
 
-            if (currentLanguage== "jp" || currentLanguage== "cn") {
+            Button(
+                onClick = {
+                    viewModel.onSendWordsToQuiz()
+                    navController.navigate("quiz")
+                    AnalyticsHelper.logEvent("quiz_button_mylist")
+                },
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .height(50.dp)
+                    .padding(start = 12.dp, end = 12.dp, top = 5.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BgBlue,
+                    contentColor = White
+                ),
+                elevation = ButtonDefaults.buttonElevation(5.dp)
+            ) {
+                Text(text = stringResource(R.string.send_words_to_quiz_button))
+            }
+
+            if (currentLanguage == "jp" || currentLanguage == "cn") {
 
                 Button(
                     onClick = {
@@ -392,12 +414,12 @@ Box(modifier = Modifier
             }
 
 
-
         }
 
     }
 
 }
+
     if(isSheetOpen) {
         ModalBottomSheet(
             onDismissRequest = {
@@ -448,6 +470,16 @@ Box(modifier = Modifier
     }
     }
     if (tutorial){
-        MyListTeachingModal(onClick = { viewModel.setMyListTutorial(context)}, tutorialSheetState)
+        MyListTeachingModal(onClick = { viewModel.setMyListTutorial(context)})
+    }
+
+    if (longTap) {
+        LongTapBottomModal(
+            onDismiss = { longTap = false },
+            onClick = {
+                navController.navigate("editWord/${longTapped?.id.toString()}")
+                longTap = false
+            }
+        )
     }
 }

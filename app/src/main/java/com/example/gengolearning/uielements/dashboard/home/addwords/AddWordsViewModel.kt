@@ -11,8 +11,13 @@ import com.example.gengolearning.model.results.AddWordResults
 import com.example.gengolearning.words.LanguageWords
 import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 
-class AddWordsViewModel(
+@HiltViewModel
+class AddWordsViewModel @Inject constructor(
+    private val repository: LanguageWords,
+    private val userSettingsRepository: UserSettingsRepository
 ): ViewModel() {
 
 
@@ -20,7 +25,7 @@ class AddWordsViewModel(
     var word by mutableStateOf("")
         private set
 
-    val currentLanguage= UserSettingsRepository.language.value
+    val currentLanguage= userSettingsRepository.language.value
 
     var translation by mutableStateOf("")
         private set
@@ -69,7 +74,7 @@ class AddWordsViewModel(
 
                     val newWord = Words(word, pronunciation, translation, id= java.util.UUID.randomUUID().toString())
 
-                    LanguageWords.addWord(Words(word, pronunciation, translation, id = ""), currentLanguage)
+                   repository.addWord(Words(word, pronunciation, translation, id = ""), currentLanguage)
 
                     word=""
                     pronunciation=""

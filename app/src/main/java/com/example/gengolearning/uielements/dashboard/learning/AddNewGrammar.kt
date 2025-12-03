@@ -23,9 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.AddButton
@@ -35,7 +35,8 @@ import com.gengolearning.app.R
 
 @Composable
 fun AddNewGrammarUi(navController: NavController,
-                    viewModel: AddNewGrammarViewModel= viewModel()) {
+                    viewModel: AddNewGrammarViewModel= hiltViewModel()
+) {
 
     val examplerows = viewModel.examplerows
     val scrollState = rememberScrollState()
@@ -46,7 +47,7 @@ fun AddNewGrammarUi(navController: NavController,
     val explanationInputError = viewModel.explanationInputError?.let { id->
         stringResource(id)
     }
-    val currentLanguage by UserSettingsRepository.language.collectAsState()
+    val currentLanguage by viewModel.currentLanguage.collectAsState()
 
 
     Box(modifier = Modifier.fillMaxSize()) {

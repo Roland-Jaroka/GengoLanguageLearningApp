@@ -8,18 +8,32 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.QuizManager.quizzes
 import com.example.gengolearning.model.Tonemarks.toPinyin
+import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
 import com.example.gengolearning.model.quizWrongAnswers
 import com.example.gengolearning.words.LanguageWords
+import com.example.gengolearning.words.WordsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 
-class QuizViewModel: ViewModel() {
+@HiltViewModel
+class QuizViewModel @Inject constructor(
+    private val repository: LanguageWords,
+    private val userSettingsRepository: UserSettingsRepository
+): ViewModel() {
 
 
-    val repository= LanguageWords
     val wordsList = if (quizzes.isNotEmpty()) quizzes else repository.words.value
 
+    val currentLanguage = userSettingsRepository.selectedLanguage.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        userSettingsRepository.languages[0]
+    )
 
     var currentIndex by mutableStateOf(0)
         private set

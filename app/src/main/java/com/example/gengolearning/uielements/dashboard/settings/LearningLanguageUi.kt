@@ -35,29 +35,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.gengolearning.model.AnalyticsHelper
-import com.gengolearning.app.R
 import com.example.gengolearning.model.Languages
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
+import com.gengolearning.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
+fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                        navController: NavController) {
-    val context = LocalContext.current
-    val currentLanguage by UserSettingsRepository.selectedLanguage.collectAsState()
-    val mainLanguage by UserSettingsRepository.getMainLanguage(context).collectAsState("jp")
+    val currentLanguage by viewModel.currentLanguage.collectAsState()
+    val mainLanguage by viewModel.mainLanguage.collectAsState("jp")
     var selectedMainLanguage by remember{ mutableStateOf("")}
-    var selectedLanguage by remember { mutableStateOf(currentLanguage)}
+    var selectedLanguage by remember { mutableStateOf(currentLanguage.code) }
     val scrollState = rememberScrollState()
     val languages = Languages.languagesList
 
@@ -65,6 +62,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
     LaunchedEffect(mainLanguage) {
         selectedMainLanguage = mainLanguage
     }
+
 
     Scaffold( modifier = Modifier
         .fillMaxSize(),
@@ -126,10 +124,10 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
                                 .weight(1f)
                         )
                         Checkbox(
-                            checked = selectedLanguage.code == language.code,
-                            onCheckedChange = { checked ->
-                                if (checked) selectedLanguage =
-                                    Languages.languagesList.first {it.code == language.code  }
+                            checked = selectedLanguage == language.code,
+                            onCheckedChange = {
+                                if (it) selectedLanguage = language.code
+
                             },
                             modifier = Modifier
                                 .padding(end = 20.dp)
@@ -144,7 +142,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
 
                 Button(
                     onClick = {
-                        viewModel.setLanguage(selectedLanguage.code)
+                        viewModel.setLanguage(selectedLanguage)
                         navController.navigate("home") {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
                             launchSingleTop = true
@@ -153,7 +151,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
 
                         }
                         AnalyticsHelper.logEvent("learning_language_changed")
-                        AnalyticsHelper.logEvent("selected_language_${selectedLanguage.name}")
+                        AnalyticsHelper.logEvent("selected_language_${selectedLanguage}")
 
                     },
                     modifier = Modifier
@@ -222,7 +220,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= viewModel(),
 
                 Button(
                     onClick = {
-                        viewModel.setMainLanguage(context,selectedMainLanguage)
+                        viewModel.setMainLanguage(selectedMainLanguage)
                         navController.navigate("settings") {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
                             launchSingleTop = true

@@ -4,27 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.lifecycle.lifecycleScope
+import androidx.activity.viewModels
 import com.example.gengolearning.model.AnalyticsHelper
-import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.navigation.AppNavigation
 import com.example.gengolearning.ui.theme.MyLanguageLearningAppTheme
-import kotlinx.coroutines.launch
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val mainViewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AnalyticsHelper.init(this)
         enableEdgeToEdge()
-
-        lifecycleScope.launch {
-            UserSettingsRepository.loadMainLanguage(this@MainActivity)
-        }
-
+        val viewModel: MainViewModel = mainViewModel
 
             setContent {
 
+
                 MyLanguageLearningAppTheme {
+
+
 
                         AppNavigation()
 
