@@ -50,9 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.gengolearning.grammar.LanguageGrammar
 import com.example.gengolearning.model.AnalyticsHelper
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
@@ -66,13 +64,14 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GrammarDetails(navController: NavController,
-                   grammarId: String?,
-                   viewModel: GrammarDetailsViewModel = hiltViewModel()) {
+fun GrammarDetails(
+    navController: NavController,
+    grammarId: String,
+    viewModel: GrammarDetailsViewModel = hiltViewModel()) {
 
     val selectedLanguage by viewModel.currentLanguage.collectAsState()
     val currentLanguage = selectedLanguage.code
-    val grammarList by LanguageGrammar.grammar.collectAsState()
+    val grammarList by viewModel.grammar.collectAsState()
     val grammar = grammarList.find {it.id== grammarId} ?: return
 
     val exampleSentences = grammar.examples ?: emptyList()

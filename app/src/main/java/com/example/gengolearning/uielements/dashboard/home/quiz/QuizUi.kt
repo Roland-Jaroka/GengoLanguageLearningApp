@@ -53,7 +53,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
 
 
     val wrongAnswers = viewModel.wrongAnswers
-    val wordList = viewModel.wordsList
+    val wordList = viewModel.currentList.collectAsState()
     var currentWord by viewModel.currentWord
     val progress by viewModel.progress
     val isQuizFinished = viewModel.isQuizFinished
@@ -101,7 +101,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
                     elevation = CardDefaults.cardElevation(20.dp)
                 ) {
                     Text(
-                        text = if (isQuizFinished) "$points/${wordList.size}" else currentWord?.word
+                        text = if (isQuizFinished) "$points/${wordList.value.size}" else currentWord?.word
                             ?: "",
                         fontSize = 50.sp,
                         modifier = Modifier
@@ -159,7 +159,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
 
                         Box(modifier = Modifier.fillMaxSize()) {
                             Text(
-                                text = "${viewModel.currentIndex + 1}/${wordList.size}",
+                                text = "${viewModel.currentIndex + 1}/${wordList.value.size}",
                                 fontSize = 30.sp,
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)

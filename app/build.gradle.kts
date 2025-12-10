@@ -16,8 +16,8 @@ android {
         applicationId = "com.gengolearning.app"
         minSdk = 28
         targetSdk = 36
-        versionCode = 5
-        versionName = "5.0"
+        versionCode = 8
+        versionName = "8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -49,7 +49,7 @@ fun LongTapBottomModal(modifier: Modifier = Modifier, onDismiss: () -> Unit, onC
                 .fillMaxWidth()
                 .clickable(
                     interactionSource = interactionSource,
-                    indication = ripple(true, color = Blue),
+                    indication = null
                 ) {
                     onClick()
                 }
@@ -65,7 +65,7 @@ fun LongTapBottomModal(modifier: Modifier = Modifier, onDismiss: () -> Unit, onC
             )
 
             Text(text = "Edit Word",
-                color = PandaBlack,
+                color = if (isPressed) BgBlue else PandaBlack,
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(start = 10.dp, top = 10.dp),

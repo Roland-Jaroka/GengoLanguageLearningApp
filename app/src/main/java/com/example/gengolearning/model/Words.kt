@@ -11,6 +11,7 @@ data class Words(
     @PrimaryKey
     val id: String="",
     val label: String? = null,
-    val isOnHomePage: Boolean?= false
+    val isOnHomePage: Boolean?= false,
+    val language: String=""
 )
 

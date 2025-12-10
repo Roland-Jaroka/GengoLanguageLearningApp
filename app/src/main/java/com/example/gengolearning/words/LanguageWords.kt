@@ -1,22 +1,33 @@
 package com.example.gengolearning.words
 
+import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
 import com.example.gengolearning.model.WordsDao
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
 
-class LanguageWords @Inject constructor(private val dao: WordsDao) {
-//    private val _words = MutableStateFlow<List<Words>>(emptyList())
-//    val words: StateFlow<List<Words>> = _words
+class LanguageWords @Inject constructor(
+    private val dao: WordsDao,
+    private val userSettingsRepository: UserSettingsRepository
+) {
 
-    val words: Flow<List<Words>> = dao.getAllWords()
+
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val words: Flow<List<Words>> = userSettingsRepository.selectedLanguage.flatMapLatest { language ->
+        dao.getAllWords(language.code)
+    }
+
+
+
 
 
 
@@ -34,16 +45,23 @@ class LanguageWords @Inject constructor(private val dao: WordsDao) {
             .collection("words")
             .get().await()
 
-
                 val list = mutableListOf<Words>()
                 for (document in result){
                     val word = document.getString("word") ?: ""
                     val pronunciation = document.getString("pronunciation") ?: ""
                     val translation = document.getString("translation") ?: ""
                     val label = document.getString("label")
-                    val isOnHomePage = document.getBoolean("isOnHomePage") ?: false
                     val id = document.id
-                    list.add(Words(word, pronunciation, translation, id, label, isOnHomePage))
+
+                    //Match the firebase words with the local words and get always the
+                    //value of the local database for isOnHomePage so it always works locally
+                    //Firebase cannot overwrite it when synchronizing
+                    val existingWord= words.firstOrNull()?.find { it.id == id }
+                    val isOnHomePage= existingWord?.isOnHomePage ?: false
+
+
+
+                    list.add(Words(word, pronunciation, translation, id, label, isOnHomePage, language = language))
 
                 }
 
@@ -51,15 +69,14 @@ class LanguageWords @Inject constructor(private val dao: WordsDao) {
 
     }
 
-    fun addWord(word: Words, language: String){
+   suspend fun addWord(word: Words, language: String){
         val auth= FirebaseAuth.getInstance()
         val uid= auth.currentUser?.uid.toString()
         if (uid.isEmpty()) return
 
-        val docID= UUID.randomUUID().toString()
-        val newWord = word.copy(id= docID)
+        val docID= word.id
 
-//        _words.value = _words.value + newWord
+        dao.updateWords(word)
 
         Firebase.firestore
             .collection("users")
@@ -77,12 +94,13 @@ class LanguageWords @Inject constructor(private val dao: WordsDao) {
             )
     }
 
-    fun onRemove(id: String, language: String){
+    suspend fun onRemove(id: String, language: String){
         val auth= FirebaseAuth.getInstance()
         val uid= auth.currentUser?.uid.toString()
         if (uid.isEmpty()) return
 
-//        _words.value = _words.value.filterNot { it.id == id }
+        dao.deleteWords(Words(id = id))
+
 
         Firebase.firestore.collection("users")
             .document(uid)
@@ -94,25 +112,47 @@ class LanguageWords @Inject constructor(private val dao: WordsDao) {
 
     }
 
-    fun onHomePage(id: String, language: String, isOnHomePage: Boolean){
+    suspend fun onHomePage(id: String, isOnHomePage: Boolean){
+       dao.updateIsOnHomePage(id, isOnHomePage)
+
+    }
+
+    suspend fun updateWord(id: String, word: String, translation: String, pronunciation: String, language: String, words: Words?){
+        if (words == null) return
+
+        dao.updateWord(words.copy(word = word, translation = translation, pronunciation = pronunciation))
+
         val auth= FirebaseAuth.getInstance()
         val uid= auth.currentUser?.uid.toString()
         if (uid.isEmpty()) return
 
-//            _words.value = _words.value.map{ it ->
-//                if (it.id== id){
-//                    it.copy(isOnHomePage = isOnHomePage)
-//                } else {
-//                    it
-//                }
-//            }
-
-        Firebase.firestore.collection("users")
+        Firebase.firestore
+            .collection("users")
             .document(uid)
             .collection(language)
             .document(language)
             .collection("words")
             .document(id)
-            .update("isOnHomePage", isOnHomePage)
+            .update(
+                mapOf(
+                    "word" to word,
+                    "pronunciation" to pronunciation,
+                    "translation" to translation
+                )
+            )
+
     }
+
+   suspend fun getWordCount(): Int{
+        return dao.getWordCount()
+    }
+
+    suspend fun getLanguageCount(): Int{
+        return dao.getLanguageCount()
+    }
+
+
+
+
+
 }

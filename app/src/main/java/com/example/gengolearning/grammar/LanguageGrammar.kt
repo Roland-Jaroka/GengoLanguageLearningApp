@@ -1,53 +1,62 @@
 package com.example.gengolearning.grammar
 
 import com.example.gengolearning.model.Grammar
+import com.example.gengolearning.model.GrammarDao
+import com.example.gengolearning.model.UserSettingsRepository
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.tasks.await
 
-object LanguageGrammar {
-    private val _grammar = MutableStateFlow<List<Grammar>>(emptyList())
-    val grammar: StateFlow<List<Grammar>> = _grammar
-    private val grammarCatch= mutableMapOf<String, List<Grammar>>()
+class LanguageGrammar @Inject constructor(
+    private val dao: GrammarDao,
+    private val userSettingsRepository: UserSettingsRepository
+) {
 
-    fun loadGrammar(language: String){
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val grammar: Flow<List<Grammar>> = userSettingsRepository.selectedLanguage.flatMapLatest{ language->
+        dao.getAllGrammar(language.code)
+    }
+
+ suspend   fun loadGrammar(language: String){
         val auth= FirebaseAuth.getInstance()
         val uid= auth.currentUser?.uid.toString()
         if (uid.isEmpty()) return
 
-        _grammar.value = grammarCatch[language] ?: emptyList()
 
-        Firebase.firestore
+        val result= Firebase.firestore
             .collection("users")
             .document(uid)
             .collection(language)
             .document(language)
             .collection("grammar")
-            .get().addOnSuccessListener{
+            .get().await()
                 val list = mutableListOf<Grammar>()
-                for(document in it) {
+                for(document in result) {
                     val grammar = document.getString("grammar") ?: ""
                     val explanation = document.getString("explanation") ?: ""
                     val examples = document.get("examples") as? List<String> ?: emptyList()
                     val id = document.id
-                    list.add(Grammar(grammar, explanation, examples, id))
+                    list.add(Grammar(grammar, explanation, examples, id, language = language))
                 }
-                grammarCatch[language] = list
-                _grammar.value = list
-            }
+                  dao.upsertGrammar(list)
+
     }
 
-    fun addGrammar(language: String, example: String, grammar: Grammar){
+    suspend fun addGrammar(language: String, grammar: Grammar){
         val auth= FirebaseAuth.getInstance()
         val uid= auth.currentUser?.uid.toString()
         if (uid.isEmpty()) return
 
-        val allExamples= mutableListOf<String>()
-        if (example.isNotBlank()) allExamples.add(example)
-        allExamples.addAll(grammar.examples?.filter { it.isNotBlank() } ?: emptyList())
+         val docID = grammar.id
+
+
+        dao.uploadGrammar(grammar)
 
         Firebase.firestore
             .collection("users")
@@ -55,23 +64,32 @@ object LanguageGrammar {
             .collection(language)
             .document(language)
             .collection("grammar")
-            .add(
+            .document(docID)
+            .set(
                 mapOf(
                     "grammar" to grammar.grammar,
                     "explanation" to grammar.explanation,
-                    "examples" to allExamples
+                    "examples" to grammar.examples,
+                    "langauge" to grammar.language
                 )
             )
     }
 
-    fun addNewExample(language: String, grammarid: String?, exampleText: String) {
+   suspend fun addNewExample(language: String, grammarid: String?, exampleText: String, grammar: Grammar?) {
 
         if (exampleText.isBlank()) return
+       if (grammar == null) return
 
         val auth = FirebaseAuth.getInstance()
         val uid = auth.currentUser?.uid
 
+        //Update in Room
+        val currentList = grammar.examples
+        val newList = currentList?.plus(exampleText)
+        dao.updateGrammar(grammar.copy(examples = newList))
 
+
+        //update in Firebase
         Firebase.firestore
             .collection("users")
             .document(uid!!)
@@ -81,16 +99,41 @@ object LanguageGrammar {
             .document(grammarid!!)
             .update("examples", FieldValue.arrayUnion(exampleText))
 
-           _grammar.value = _grammar.value.map { grammar->
-               if (grammar.id == grammarid){
-                   grammar.copy(examples = grammar.examples?.plus(exampleText))
-               } else grammar
-           }
     }
 
-    fun onSave(language: String, grammarid: String?, grammarText: String, explanation: String){
+   suspend fun onExampleRemove(language: String, grammarId: String?, exampleRows: List<String>, index: Int, grammar: Grammar?) {
+
+        if (grammar == null) return
+
         val auth = FirebaseAuth.getInstance()
         val uid = auth.currentUser?.uid
+
+        //Delete in Room
+        val currentList= grammar.examples
+        val newList = currentList?.minus(exampleRows[index])
+        dao.updateGrammar(grammar.copy(examples = newList))
+
+
+       //Delete in Firebase
+        Firebase.firestore
+            .collection("users")
+            .document(uid!!)
+            .collection(language)
+            .document(language)
+            .collection("grammar")
+            .document(grammarId!!)
+            .update(
+                "examples", FieldValue.arrayRemove(exampleRows[index])
+            )
+
+    }
+
+   suspend fun onSave(language: String, grammarid: String?, grammarText: String, explanation: String, grammar: Grammar?){
+       if (grammar == null) return
+        val auth = FirebaseAuth.getInstance()
+        val uid = auth.currentUser?.uid
+
+        dao.updateGrammar(grammar.copy(grammar = grammarText, explanation = explanation))
 
         Firebase.firestore
             .collection("users")
@@ -105,16 +148,16 @@ object LanguageGrammar {
                     "explanation" to explanation
                 )
             )
-        _grammar.value = _grammar.value.map{grammar->
-            if (grammar.id == grammarid){
-                grammar.copy(grammar = grammarText, explanation = explanation)
-            } else grammar
-        }
     }
 
-    fun onExampleRemove(language: String, grammarId: String?, exampleRows: List<String>, index: Int) {
+
+
+   suspend fun onRemove(language: String, grammarId: String){
         val auth = FirebaseAuth.getInstance()
         val uid = auth.currentUser?.uid
+
+        dao.deleteGrammar(Grammar(id = grammarId))
+
 
         Firebase.firestore
             .collection("users")
@@ -122,31 +165,7 @@ object LanguageGrammar {
             .collection(language)
             .document(language)
             .collection("grammar")
-            .document(grammarId!!)
-            .update(
-                "examples", FieldValue.arrayRemove(exampleRows[index])
-            )
-
-        _grammar.value= _grammar.value.map{grammar->
-            if (grammar.id == grammarId) {
-                grammar.copy(examples= grammar.examples?.minus(exampleRows[index]) )
-            } else grammar
-        }
-    }
-
-    fun onRemove(language: String, grammarId: String?){
-        val auth = FirebaseAuth.getInstance()
-        val uid = auth.currentUser?.uid
-
-        _grammar.value = _grammar.value.filterNot { it.id == grammarId }
-
-        Firebase.firestore
-            .collection("users")
-            .document(uid!!)
-            .collection(language)
-            .document(language)
-            .collection("grammar")
-            .document(grammarId!!)
+            .document(grammarId)
             .delete()
 
 

@@ -17,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,10 +40,8 @@ import com.gengolearning.app.R
 fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                     navController: NavController) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentWord by viewModel.currentWord
 
-    LaunchedEffect(Unit) {
-        println("DrawingQuizView launched: ${viewModel.wordsList}")
-    }
     Scaffold(
         topBar = { MyTopAppBar(
             modifier = Modifier,
@@ -62,7 +59,7 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
         ) {
 
             Text(
-                text = if (viewModel.isKanjiReveled) viewModel.currentWord.value!!.word else viewModel.currentWord.value!!.pronunciation,
+                text = if (viewModel.isKanjiReveled) currentWord?.word ?: "" else currentWord?.pronunciation ?: "",
                 fontSize = 50.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -71,7 +68,7 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
             )
 
             Text(
-                text = viewModel.currentWord.value!!.translation,
+                text = currentWord?.translation ?: "",
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier

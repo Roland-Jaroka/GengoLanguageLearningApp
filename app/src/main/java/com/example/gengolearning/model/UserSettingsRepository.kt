@@ -21,8 +21,7 @@ private const val User_Preferences_Name = "user_preferences"
 private val Context.dataStore by preferencesDataStore(User_Preferences_Name)
 
 class UserSettingsRepository @Inject constructor(
-    @ApplicationContext private val  context: Context,
-    private val languageWords: LanguageWords
+    @ApplicationContext private val  context: Context
 ) {
 
     private val LANGUAGE_KEY= stringPreferencesKey("main_language")
@@ -44,7 +43,6 @@ class UserSettingsRepository @Inject constructor(
    suspend fun setLanguage(selectedLanguage: String?) {
         if (selectedLanguage != null) {
             _language.value= selectedLanguage
-            languageWords.loadWords(selectedLanguage)
         }
 
         println("Language set to: ${language.value}")
@@ -85,8 +83,6 @@ class UserSettingsRepository @Inject constructor(
     suspend fun loadMainLanguage(){
        val savedLanguage = getMainLanguage().first()
             _language.value = savedLanguage
-            languageWords.loadWords(savedLanguage)
-
 
     }
 

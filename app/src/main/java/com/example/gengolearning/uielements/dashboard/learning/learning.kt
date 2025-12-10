@@ -52,7 +52,7 @@ fun LearningUi(navController: NavController,
                viewModel: LearningViewModel= hiltViewModel()){
 //TODO learning UI and functions
 
-    val grammarList by viewModel.grammars.collectAsState()
+    val grammarList by viewModel.grammar.collectAsState()
     val currentLanguage by viewModel.currentLanguage.collectAsState(
         Languages.languagesList[0]
     )
@@ -68,9 +68,6 @@ fun LearningUi(navController: NavController,
         }
     }
 
-    LaunchedEffect(Unit) {
-       viewModel.loadData(currentLanguage.code)
-    }
 
     Box(modifier= Modifier
         .fillMaxSize()

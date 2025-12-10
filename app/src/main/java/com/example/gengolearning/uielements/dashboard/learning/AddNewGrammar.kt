@@ -47,7 +47,7 @@ fun AddNewGrammarUi(navController: NavController,
     val explanationInputError = viewModel.explanationInputError?.let { id->
         stringResource(id)
     }
-    val currentLanguage by viewModel.currentLanguage.collectAsState()
+    val currentLanguage = viewModel.currentLanguage
 
 
     Box(modifier = Modifier.fillMaxSize()) {

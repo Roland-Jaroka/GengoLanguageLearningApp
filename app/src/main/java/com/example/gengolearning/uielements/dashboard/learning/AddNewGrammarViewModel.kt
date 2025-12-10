@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.grammar.LanguageGrammar
 import com.example.gengolearning.model.Grammar
 import com.example.gengolearning.model.UserSettingsRepository
@@ -12,15 +13,17 @@ import com.example.gengolearning.model.results.AddGrammarResults
 import com.gengolearning.app.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.launch
 
 
 @HiltViewModel
 class AddNewGrammarViewModel @Inject constructor(
-    private val userSettingsRepository: UserSettingsRepository
+    private val userSettingsRepository: UserSettingsRepository,
+    private val languageGrammar: LanguageGrammar
 ): ViewModel() {
 
 
-    val currentLanguage = userSettingsRepository.language
+    val currentLanguage = userSettingsRepository.language.value
 
     var grammar by mutableStateOf("")
         private set
@@ -75,15 +78,27 @@ class AddNewGrammarViewModel @Inject constructor(
             AddGrammarResults.BlankGrammar -> grammarInputError = R.string.grammar_input_error
             AddGrammarResults.BlankExplanation -> explanationInputError = R.string.explanation_input_error
             AddGrammarResults.Success ->
-                try {
-                    LanguageGrammar.addGrammar(currentLanguage.value, example, Grammar(grammar, explanation, examplerows, id = ""))
-                    grammar = ""
-                    explanation = ""
-                    example = ""
-                    examplerows.clear()
+                viewModelScope.launch {
 
-                } catch (e: Exception){
-                    //Handle error
+                    examplerows.add(example)
+
+                    try {
+                        val newGrammar = Grammar(
+                            grammar,
+                            explanation,
+                            examplerows,
+                            id = java.util.UUID.randomUUID().toString(),
+                            language = currentLanguage
+                        )
+                        languageGrammar.addGrammar(currentLanguage, newGrammar)
+                        grammar = ""
+                        explanation = ""
+                        example = ""
+                        examplerows.clear()
+
+                    } catch (e: Exception) {
+                        //Handle error
+                    }
                 }
         }
 

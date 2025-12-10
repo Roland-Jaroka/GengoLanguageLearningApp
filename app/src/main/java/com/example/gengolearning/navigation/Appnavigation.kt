@@ -14,13 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.gengolearning.model.BottomNavBar
 import com.example.gengolearning.uielements.autchentication.forgotpassword.ForgotPasswordScr
 import com.example.gengolearning.uielements.autchentication.login.LoginUi
@@ -124,11 +122,9 @@ fun AppNavigation() {
 
                 composable("learning") { LearningUi(navController= navController) }
 
-                composable("grammarDetails/{grammarId}",
-                    arguments = listOf(navArgument("grammarId") { type = NavType.StringType }) )
+                composable("grammarDetails/{grammarId}")
                 { backStackEntry ->
-
-                    val grammarId = backStackEntry.arguments?.getString("grammarId")
+                    val grammarId: String = backStackEntry.arguments?.getString("grammarId").toString()
 
                     GrammarDetails(navController = navController, grammarId) }
 

@@ -3,13 +3,15 @@ package com.example.gengolearning.uielements.dashboard.home.mainlanguage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.UserSettingsRepository
+import com.example.gengolearning.words.LanguageWords
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MainLanguageSelectorViewModel @Inject constructor(
-    private val userSettingsRepository: UserSettingsRepository
+    private val userSettingsRepository: UserSettingsRepository,
+    private val repository: LanguageWords
 ): ViewModel() {
 
     fun setMainLanguage(language: String) {
@@ -22,6 +24,8 @@ class MainLanguageSelectorViewModel @Inject constructor(
     fun setLanguage(selectedLanguage: String) {
         viewModelScope.launch {
             userSettingsRepository.setLanguage(selectedLanguage)
+            repository.loadWords(selectedLanguage)
+
         }
     }
 

@@ -17,7 +17,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -28,7 +30,11 @@ class MyListViewModel @Inject constructor(
 
     val currentLanguage= userSettingsRepository.language
 
-    var words = repository.words.sa
+    var words = repository.words.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
 
 
@@ -83,11 +89,13 @@ class MyListViewModel @Inject constructor(
 
 
     fun onRemove(){
-        selectedWords.forEach { id->
-            repository.onRemove(id, currentLanguage.value)
-        }
+        viewModelScope.launch {
+            selectedWords.forEach { id ->
+                repository.onRemove(id, currentLanguage.value)
+            }
 
-        selectedWords.clear()
+            selectedWords.clear()
+        }
     }
 
     fun onSendWordsToDrawingQuiz(){
@@ -139,18 +147,22 @@ class MyListViewModel @Inject constructor(
     fun onHomepage(){
 
         if (selectedWords.isEmpty()) return
-       val allWords = words.value
-        allWords.filter { it.id  in selectedWords && it.isOnHomePage== false || it.isOnHomePage == null}
-            .forEach { words->
-                repository.onHomePage(words.id, currentLanguage.value, true)
-                println("Word added to home page: $words")
-            }
-        allWords.filter { it.id !in selectedWords && it.isOnHomePage== true }
-            .forEach { words->
-                repository.onHomePage(words.id, currentLanguage.value, false)
-                println("Word removed from home page: $words")
-            }
-        selectedWords.clear()
+
+          viewModelScope.launch {
+
+              val allWords = words.value
+              allWords.filter { it.id in selectedWords && it.isOnHomePage == false || it.isOnHomePage == null }
+                  .forEach { words ->
+                      repository.onHomePage(words.id,  true)
+                      println("Word added to home page: $words")
+                  }
+              allWords.filter { it.id !in selectedWords && it.isOnHomePage == true }
+                  .forEach { words ->
+                      repository.onHomePage(words.id,  false)
+                      println("Word removed from home page: $words")
+                  }
+              selectedWords.clear()
+          }
 
     }
 

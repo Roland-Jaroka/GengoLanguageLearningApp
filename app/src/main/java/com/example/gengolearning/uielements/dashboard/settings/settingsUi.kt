@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -28,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -118,16 +121,23 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                     SettingItems(
                         {
                             Box(modifier = Modifier
-                                .padding(10.dp)
+                                .padding(top = 10.dp, start = 10.dp, bottom = 10.dp, end = 5.dp)
                                 .background(White)
                                 .height(65.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .border(2.dp, BgBlue, RoundedCornerShape(30.dp))
-                                ){
+                                )
+                                {
                                 Image(
                                     painter = painterResource(currentLanguage.flag),
                                     contentDescription = null,
-                                    modifier = Modifier.size(70.dp)
+                                    modifier = if (currentLanguage.code == "jp") {
+                                        Modifier
+                                            .width(70.dp)
+                                            .height(60.dp)
+                                            .border(0.5.dp, BgBlue, shape = RoundedCornerShape(10.dp))
+                                        }
+                                        else Modifier
+                                        .size(70.dp)
                                 )
                             }
                         },

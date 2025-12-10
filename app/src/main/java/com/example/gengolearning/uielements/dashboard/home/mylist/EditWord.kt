@@ -11,6 +11,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.gengolearning.model.Languages
 import com.example.gengolearning.ui.theme.Blue
+import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.uielements.uimodels.MyAppButton
 import com.example.gengolearning.uielements.uimodels.TextButton
@@ -33,11 +35,22 @@ fun EditWord(
     wordId: String?,
     viewModel: EditWordViewModel = hiltViewModel()
 ) {
-  val word = viewModel.word
+    val word by viewModel.word.collectAsState()
     val currentLanguage by viewModel.currentLanguage.collectAsState(
         Languages.languagesList[0]
     )
 
+    val editWordState by viewModel.editWordState.collectAsState()
+
+    val wordInputError = viewModel.wordInputError?.let { id -> stringResource(id)}
+    val translationInputError = viewModel.translationInputError?.let { id -> stringResource(id) }
+
+
+    LaunchedEffect(editWordState) {
+        if (editWordState == EditWordState.Success) {
+            navController.popBackStack()
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()){
         Column(
             modifier = Modifier.align(Alignment.Center),
@@ -55,21 +68,33 @@ fun EditWord(
             )
 
             OutlinedTextField(
-                value = word!!.word,
-                onValueChange = {},
+                value = word?.word ?: "",
+                onValueChange = {
+                    viewModel.onWordInputChange(it)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 30.dp, end = 30.dp, top = 20.dp),
                 shape = RoundedCornerShape(20.dp),
                 singleLine = true,
-                label = { Text(stringResource(R.string.word_button)) }
+                label = { Text(stringResource(R.string.word_button)) },
+                isError = wordInputError != null,
+                supportingText = {
+                    if (wordInputError != null) {
+                        Text(text = "*$wordInputError",
+                            color = Red
+                        )
+                    }
+                }
             )
 
             if (currentLanguage.code == "jp" || currentLanguage.code == "cn") {
 
                 OutlinedTextField(
-                    value = word.pronunciation,
-                    onValueChange = {},
+                    value = word?.pronunciation ?: "",
+                    onValueChange = {
+                        viewModel.onPronunciationInputChange(it)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp, top = 20.dp),
@@ -80,18 +105,30 @@ fun EditWord(
             }
 
             OutlinedTextField(
-                value = word.translation,
-                onValueChange = {},
+                value = word?.translation ?: "",
+                onValueChange = {
+                    viewModel.onTranslationInputChange(it)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 30.dp, end = 30.dp, top = 20.dp),
                 shape = RoundedCornerShape(20.dp),
                 singleLine = true,
-                label = { Text(stringResource(R.string.translation_button)) }
+                label = { Text(stringResource(R.string.translation_button)) },
+                isError = translationInputError != null,
+                supportingText = {
+                    if (translationInputError != null) {
+                        Text(text = "*$translationInputError",
+                            color = Red
+                        )
+                    }
+                }
             )
 
             MyAppButton(
-                onClick = {},
+                onClick = {
+                    viewModel.onUpdate(currentLanguage.code)
+                },
                 text = "Edit",
                 modifier = Modifier
                     .padding(start = 12.dp, end = 12.dp, top = 20.dp),

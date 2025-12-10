@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import com.example.gengolearning.model.Languages
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +59,8 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
     var selectedLanguage by remember { mutableStateOf(currentLanguage.code) }
     val scrollState = rememberScrollState()
     val languages = Languages.languagesList
+    val scope = rememberCoroutineScope()
+
 
 
     LaunchedEffect(mainLanguage) {
@@ -142,11 +146,13 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
 
                 Button(
                     onClick = {
+                        scope.launch {
                         viewModel.setLanguage(selectedLanguage)
                         navController.navigate("home") {
                             popUpTo(navController.graph.startDestinationId) { saveState = false }
                             launchSingleTop = true
                             restoreState = true
+                        }
 
 
                         }

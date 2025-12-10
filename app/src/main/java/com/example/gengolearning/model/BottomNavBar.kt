@@ -39,7 +39,8 @@ fun BottomNavBar(navController: NavController) {
         .clip(RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp))
     )
         {
-    NavigationBar(containerColor = BgBlue) {
+    NavigationBar(containerColor = BgBlue,
+        tonalElevation = 10.dp) {
         items.forEach { item->
             NavigationBarItem(
                 selected = currentRoute == item.route,

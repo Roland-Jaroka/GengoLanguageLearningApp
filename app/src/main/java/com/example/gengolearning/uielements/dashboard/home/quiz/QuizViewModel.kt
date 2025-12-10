@@ -2,6 +2,7 @@ package com.example.gengolearning.uielements.dashboard.home.quiz
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -12,22 +13,24 @@ import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
 import com.example.gengolearning.model.quizWrongAnswers
 import com.example.gengolearning.words.LanguageWords
-import com.example.gengolearning.words.WordsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
-    private val repository: LanguageWords,
-    private val userSettingsRepository: UserSettingsRepository
+    repository: LanguageWords,
+    userSettingsRepository: UserSettingsRepository
 ): ViewModel() {
 
+    val _currentList = MutableStateFlow<List<Words>>(emptyList())
+    val currentList = _currentList.asStateFlow()
 
-    val wordsList = if (quizzes.isNotEmpty()) quizzes else repository.words.value
 
     val currentLanguage = userSettingsRepository.selectedLanguage.stateIn(
         viewModelScope,
@@ -35,7 +38,7 @@ class QuizViewModel @Inject constructor(
         userSettingsRepository.languages[0]
     )
 
-    var currentIndex by mutableStateOf(0)
+    var currentIndex by mutableIntStateOf(0)
         private set
 
     var currentWord = mutableStateOf<Words?>(null)
@@ -45,7 +48,7 @@ class QuizViewModel @Inject constructor(
     var answer by mutableStateOf("")
         private set
 
-    var points by mutableStateOf(0)
+    var points by mutableIntStateOf(0)
         private set
 
     var isQuizFinished by mutableStateOf(false)
@@ -62,7 +65,8 @@ class QuizViewModel @Inject constructor(
     init {
         if (quizzes.isNotEmpty()){
             currentIndex = 0
-            currentWord.value = quizzes[0]
+            _currentList.value = quizzes
+            currentWord.value = currentList.value[0]
             progress.floatValue = 0f
             answer= ""
         }
@@ -71,6 +75,7 @@ class QuizViewModel @Inject constructor(
                 if (list.isNotEmpty()) {
                     currentIndex = 0
                     currentWord.value = list[0]
+                    _currentList.value = list
                     progress.floatValue = 0f
                     answer = ""
                 }
@@ -81,7 +86,7 @@ class QuizViewModel @Inject constructor(
 
     fun onNextClick(currentLanguage: String) {
 
-        if (wordsList.isEmpty()) return
+        if (currentList.value.isEmpty()) return
         if (isQuizFinished) {
             isQuizFinished=false
             points = 0
@@ -92,37 +97,45 @@ class QuizViewModel @Inject constructor(
                 if (isCorrect(currentLanguage)) {
                     points++
                 } else wrongAnswers.add(
-                    quizWrongAnswers (word = wordsList[currentIndex].word,
-                    pronunciation = wordsList[currentIndex].pronunciation,
-                        translation = wordsList[currentIndex].translation,
+                    quizWrongAnswers (word = currentList.value[currentIndex].word,
+                    pronunciation = currentList.value[currentIndex].pronunciation,
+                        translation = currentList.value[currentIndex].translation,
                     input = answer)
 
                 )
             }
         }
 
-        if (currentIndex < wordsList.size - 1) {
+        if (currentIndex < currentList.value.size - 1) {
 
             currentIndex += 1
 
-            currentWord.value = wordsList[currentIndex]
+            currentWord.value = currentList.value[currentIndex]
 
-            progress.floatValue = (currentIndex + 1) / wordsList.size.toFloat()
+            progress.floatValue = (currentIndex + 1) / currentList.value.size.toFloat()
 
             answer = ""
 
         }
         else { isQuizFinished= true
 
-        println("wrong answers ${wrongAnswers}")}
-        println("currentIndex: $currentIndex, Wordlist: ${wordsList[currentIndex]}, ${currentWord.value}")
+        println("wrong answers $wrongAnswers")}
+        println("currentIndex: $currentIndex, Wordlist: ${currentList.value[currentIndex]}, ${currentWord.value}")
     }
 
         fun isCorrect(currentLanguage: String): Boolean {
-            when (currentLanguage) {
-                "jp"-> {return currentWord.value?.pronunciation == answer}
-                "cn" -> {return currentWord.value?.pronunciation == answer}
-                else -> {return currentWord.value?.translation.equals(answer, ignoreCase = true)}
+            return when (currentLanguage) {
+                "jp"-> {
+                    currentWord.value?.pronunciation == answer
+                }
+
+                "cn" -> {
+                    currentWord.value?.pronunciation == answer
+                }
+
+                else -> {
+                    currentWord.value?.translation.equals(answer, ignoreCase = true)
+                }
             }
 
             }

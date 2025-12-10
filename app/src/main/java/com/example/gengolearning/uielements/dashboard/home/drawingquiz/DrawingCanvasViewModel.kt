@@ -1,6 +1,7 @@
 package com.example.gengolearning.uielements.dashboard.home.drawingquiz
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
@@ -14,9 +15,9 @@ import com.example.gengolearning.words.LanguageWords
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 
 data class DrawingState(
@@ -39,8 +40,8 @@ sealed interface DrawingActions{
 }
 @HiltViewModel
 class DrawingCanvasViewModel @Inject constructor(
-    private val repository: LanguageWords,
-    private val userSettingsRepository: UserSettingsRepository
+    repository: LanguageWords,
+    userSettingsRepository: UserSettingsRepository
 ): ViewModel(){
  private val _state= MutableStateFlow(DrawingState())
     val state= _state.asStateFlow()
@@ -95,16 +96,36 @@ class DrawingCanvasViewModel @Inject constructor(
     //Quiz logic
     val currentLanguage= userSettingsRepository.language.value
 
-    val words = repository.words.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = emptyList()
-    )
-    val wordsList = if (quizzes.isNotEmpty()) quizzes else words.value
+    private val _currentList = MutableStateFlow<List<Words>>(emptyList())
+    val currentList = _currentList.asStateFlow()
 
-    var currentIndex by mutableStateOf(0)
+
+    var currentIndex by mutableIntStateOf(0)
         private set
-    var currentWord = mutableStateOf<Words?>(wordsList[0])
+    var currentWord = mutableStateOf<Words?>(null)
+
+
+    init {
+            if (quizzes.isNotEmpty()) {
+                currentIndex = 0
+                _currentList.value = quizzes
+                currentWord.value = currentList.value[0]
+
+            } else {
+                repository.words.onEach { list ->
+                    if (list.isNotEmpty()) {
+                        currentIndex = 0
+                        currentWord.value = list[0]
+                        _currentList.value = list
+
+                    }
+
+                }.launchIn(viewModelScope)
+            }
+
+    }
+
+
 
 
     var isKanjiReveled by mutableStateOf(false)
@@ -112,12 +133,13 @@ class DrawingCanvasViewModel @Inject constructor(
 
     fun onNextClick() {
 
-        if (wordsList.isEmpty()) return
-
-        currentIndex = (currentIndex + 1) % wordsList.size
+        if (currentList.value.isEmpty()) return
 
 
-        currentWord.value = wordsList[currentIndex]
+        currentIndex = (currentIndex + 1) % currentList.value.size
+
+
+        currentWord.value = currentList.value[currentIndex]
 
         isKanjiReveled = false
 
@@ -126,11 +148,13 @@ class DrawingCanvasViewModel @Inject constructor(
     }
 
     fun onBackClick() {
-        if (wordsList.isEmpty()) return
 
-        currentIndex = (currentIndex - 1 + wordsList.size) % wordsList.size
+        if (currentList.value.isEmpty()) return
 
-        currentWord.value = wordsList[currentIndex]
+
+        currentIndex = (currentIndex - 1 + currentList.value.size) % currentList.value.size
+
+        currentWord.value = currentList.value[currentIndex]
 
 
 

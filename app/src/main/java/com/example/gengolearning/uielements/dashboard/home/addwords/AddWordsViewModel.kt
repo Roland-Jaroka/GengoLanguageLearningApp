@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.Tonemarks.toPinyin
 import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
@@ -13,6 +14,7 @@ import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AddWordsViewModel @Inject constructor(
@@ -70,19 +72,28 @@ class AddWordsViewModel @Inject constructor(
             is AddWordResults.BlankWord -> wordInputError = R.string.word_input_error
             is AddWordResults.BlankTranslation -> translationInputError = R.string.translation_input_error
             is AddWordResults.Success -> {
+                viewModelScope.launch {
                 try {
 
-                    val newWord = Words(word, pronunciation, translation, id= java.util.UUID.randomUUID().toString())
+                        val newWord = Words(
+                            word,
+                            pronunciation,
+                            translation,
+                            id = java.util.UUID.randomUUID().toString(),
+                            language = currentLanguage
+                        )
 
-                   repository.addWord(Words(word, pronunciation, translation, id = ""), currentLanguage)
+                        repository.addWord(newWord, currentLanguage)
 
-                    word=""
-                    pronunciation=""
-                    translation=""
-                   error = null
+                        word = ""
+                        pronunciation = ""
+                        translation = ""
+                        error = null
+
                 } catch (e: Exception) {
-                         error = e.message ?: "Unknown error"
-                    }
+                    error = e.message ?: "Unknown error"
+                }
+            }
             }
 
 

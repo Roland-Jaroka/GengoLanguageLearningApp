@@ -7,34 +7,28 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.model.AppSettingsPreferences
-import com.example.gengolearning.model.Language
-import com.example.gengolearning.model.Languages
 import com.example.gengolearning.model.UserSettingsRepository
 import com.example.gengolearning.model.Words
 import com.example.gengolearning.words.LanguageWords
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: LanguageWords,
+    repository: LanguageWords,
    val userSettingsRepository: UserSettingsRepository
 ): ViewModel() {
 
-    var wordsList = repository.words.map{ list->
-        val homeWords = list.filter { it.isOnHomePage==true }
-        if (homeWords.isEmpty()) list else homeWords
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            emptyList()
-        )
+    val _wordsList = MutableStateFlow<List<Words>>(emptyList())
+    val wordsList = _wordsList.asStateFlow()
+
+
 
     var currentIndex = mutableStateOf(0)
 
@@ -48,22 +42,35 @@ class HomeViewModel @Inject constructor(
 
 
     init {
-        //raw repository check
-        repository.words.onEach{ list ->
-            currentIndex.value = 0
-            currentWord.value = list.firstOrNull()
+        repository.words.onEach { list->
+
+            //if word is not empty filter words by isHomePage
+            if (list.isNotEmpty()){
+                val filteredList = list.filter { it.isOnHomePage == true }
+                if (filteredList.isNotEmpty()) {
+                    currentIndex.value = 0
+                    _wordsList.value = filteredList
+                    currentWord.value = wordsList.value[0]
+                }
+
+                //if filtered words is empty which is equals to there are no isOnHomePage== true
+                else {
+                    currentIndex.value = 0
+                    _wordsList.value = list
+                    currentWord.value = wordsList.value[0]
+                }
+
+
+            }
+            //if the word list is empty
+            else {
+                currentIndex.value = 0
+                _wordsList.value = emptyList()
+                currentWord.value = null
+            }
 
         }.launchIn(viewModelScope)
 
-        //after updating with HomePage
-        viewModelScope.launch {
-            wordsList.collect{ list->
-                if (currentIndex.value >= list.size) {
-                    currentIndex.value = 0
-                }
-                currentWord.value = list.getOrNull(currentIndex.value)
-            }
-        }
     }
 
 
