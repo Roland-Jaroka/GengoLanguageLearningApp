@@ -3,18 +3,21 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.kapt")
+    id("com.google.dagger.hilt.android")
+
 }
 
 android {
-    namespace = "com.example.mylanguagelearningapp"
+    namespace = "com.gengolearning.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.mylanguagelearningapp"
-        minSdk = 30
+        applicationId = "com.gengolearning.app"
+        minSdk = 28
         targetSdk = 36
-        versionCode = 4
-        versionName = "4.2"
+        versionCode = 8
+        versionName = "8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -76,4 +79,15 @@ dependencies {
 
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+
+    val room_version = "2.8.3"
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
+    //hilt
+
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    kapt("com.google.dagger:hilt-compiler:2.57.1")
+    kapt("androidx.hilt:hilt-compiler:1.2.0")
 }
