@@ -88,4 +88,17 @@
     <string name="app_setting_alert_dialog_button2">Cancel</string>
     <string name="app_setting_alert_dialog_title">App Settings</string>
     <string name="app_settings_alert_dialog_desc">You can change the language of the app in the OS app settings</string>
+    <string name="add_words_title">Add new words</string>
+    <string name="my_list_title">My list</string>
+    <string name="welcome">Welcome back</string>
+    <string name="drawing_quiz_button_title">Drawing</string>
+    <string name="logout_title">Logout</string>
+    <string name="logout_body">Are you sure you want to logout?</string>
+    <string name="no_internet">It looks like there is no internet connection</string>
+    <string name="user_not_found">This user does not exist yet. Create a user first then try again</string>
+    <string name="invalid_creditentals">The username or password is wrong</string>
+    <string name="login_unkown_error">Something went wrong please try again</string>
+    <string name="weak_password">The password is too weak</string>
+    <string name="invalid_email">The email is not valid</string>
+    <string name="user_already_in_use">This user is already in use</string>
 </resources>

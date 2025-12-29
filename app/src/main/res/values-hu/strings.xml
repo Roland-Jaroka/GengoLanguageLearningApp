@@ -89,4 +89,10 @@
     <string name="app_setting_alert_dialog_button2">Mégsem</string>
     <string name="app_setting_alert_dialog_title">Alkalmazás beállítások</string>
     <string name="app_settings_alert_dialog_desc">Megváltoztathatod az app nyelvét az Alkalmazás beállításokban</string>
+    <string name="add_words_title">Új szavak</string>
+    <string name="my_list_title">Az én listám</string>
+    <string name="welcome">Üdv újra</string>
+    <string name="drawing_quiz_button_title">Rajz</string>
+    <string name="logout_title">Kijelentkezés</string>
+    <string name="logout_body">Biztosan kijelentkezel?</string>
 </resources>

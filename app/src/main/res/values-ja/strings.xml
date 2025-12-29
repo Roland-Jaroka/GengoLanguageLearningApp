@@ -89,4 +89,10 @@
     <string name="app_setting_alert_dialog_button2">戻る</string>
     <string name="app_setting_alert_dialog_title">アップリ設定</string>
     <string name="app_settings_alert_dialog_desc">アップリの言語をアップリ設定で変更できます</string>
+    <string name="add_words_title">新しい言葉</string>
+    <string name="my_list_title">マイリスト</string>
+    <string name="welcome">おかえり</string>
+    <string name="drawing_quiz_button_title">書く</string>
+    <string name="logout_title">ログアウト</string>
+    <string name="logout_body">ログアウトしますか?</string>
 </resources>

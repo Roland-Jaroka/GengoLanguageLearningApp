@@ -14,7 +14,7 @@
         android:theme="@style/Theme.MyLanguageLearningApp"
         android:localeConfig="@xml/locales_config">
         <activity
-            android:name="com.example.gengolearning.MainActivity"
+            android:name="com.example.gengolearning.ui.features.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MyLanguageLearningApp">

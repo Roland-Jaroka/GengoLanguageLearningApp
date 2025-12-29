@@ -1,3 +1,5 @@
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,7 +7,7 @@ plugins {
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
-
+    kotlin("plugin.serialization")
 }
 
 android {
@@ -16,8 +18,8 @@ android {
         applicationId = "com.gengolearning.app"
         minSdk = 28
         targetSdk = 36
-        versionCode = 8
-        versionName = "8.0"
+        versionCode = 10
+        versionName = "10.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -54,6 +56,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.animation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -90,4 +93,13 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     kapt("com.google.dagger:hilt-compiler:2.57.1")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
+
+    //ktor http requests
+    implementation("io.ktor:ktor-client-core:3.3.3")
+    implementation("io.ktor:ktor-client-cio:3.3.3")
+    implementation(platform("io.ktor:ktor-bom:3.3.3"))
+    implementation("io.ktor:ktor-client-content-negotiation:3.3.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
 }
