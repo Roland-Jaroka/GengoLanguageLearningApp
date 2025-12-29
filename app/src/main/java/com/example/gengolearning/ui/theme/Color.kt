@@ -20,7 +20,7 @@ val White = Color(0xFFFFFFFF)
 val BgBlue= Color(0xFF1F69A1)
 val Red= Color(0xFFFA0505)
 
-val LeafGreen = Color(0xFF5E8B4A)
+val LeafGreen = Color(0xFF05FC33)
 val TextDarkBlue = Color(0xFF2C3E50)
 val ButtonBackground = Color(0xFFEFE3C6)
 val ButtonBorder = Color(0xFF4A6B3C)
@@ -33,3 +33,7 @@ val Pink = Color(0xFFF7CFC3)
 val TonedPink = Color(0xFFFF8E74)
 val TransparentBlue = Color(0x8D1E88E5)
 val Transparent = Color(0x00FFFFFF)
+
+val CardBlue = Color(0x3B0091FF)
+
+val TransParentBackground = Color(0x603D3D3D)

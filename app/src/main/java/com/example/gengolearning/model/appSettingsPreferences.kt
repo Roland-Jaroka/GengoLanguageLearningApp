@@ -15,6 +15,9 @@ object AppSettingsPreferences {
     // region Keys
     private val WELCOME_TUTORIAL = booleanPreferencesKey("welcome_tutorial")
     private val MY_LIST_TUTORIAL = booleanPreferencesKey("my_list_tutorial")
+
+    private val JISHO_SEARCH_TUTORIAL = booleanPreferencesKey("jisho_search_tutorial")
+
    // endregion
 
     // region Getters
@@ -28,6 +31,13 @@ object AppSettingsPreferences {
         return context.dataStore.data.map { preferences ->
             preferences[MY_LIST_TUTORIAL] ?: true
         }
+    }
+
+    fun showJishoSearchTutorial(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { preferences ->
+            preferences[JISHO_SEARCH_TUTORIAL] ?: true
+        }
+
     }
 
      // endregion
@@ -44,6 +54,12 @@ object AppSettingsPreferences {
     suspend fun setMyListTutorialShown (context: Context, shown: Boolean){
         context.dataStore.edit { preferences ->
             preferences[MY_LIST_TUTORIAL] = shown
+        }
+    }
+
+    suspend fun setJishoSearchTutorialShown(context: Context, shown: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[JISHO_SEARCH_TUTORIAL] = shown
         }
     }
 
