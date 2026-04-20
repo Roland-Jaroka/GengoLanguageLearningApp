@@ -92,11 +92,7 @@ fun SignUpUi(navController: NavController,
 
     LaunchedEffect(signUpState) {
         if (signUpState is SignUpState.Success){
-            navController.navigate("login") {
-                popUpTo("signup") {
-                    inclusive = true
-                }
-            }
+            navController.popBackStack()
             Toast.makeText(context,"Account created successfully", Toast.LENGTH_SHORT).show()
         }
     }
@@ -121,7 +117,7 @@ Box(modifier = Modifier
 
         OutlinedTextField(
             value = name,
-            onValueChange = {viewModel.onNameChange(it)},
+            onValueChange = {viewModel.onNameChange(it.take(10))},
             label = { Text(stringResource(R.string.name_field_hint)) },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -316,16 +312,21 @@ Box(modifier = Modifier
         ) {
                 Column {
                     Image(
-                        painter = painterResource(R.drawable.alert_icon),
+                        painter = painterResource(R.drawable.infoicon100dp),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(90.dp)
+                            .size(70.dp)
                             .align(Alignment.CenterHorizontally)
                     )
                     Text(text = stringResource(R.string.be_careful_sign),
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 10.dp),
                         fontSize = 25.sp,
-                        fontWeight = FontWeight.Bold)
+                        fontWeight = FontWeight.Bold,
+
+                    )
+
                     Text(text = stringResource(R.string.sing_up_modal_body),
                         modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 10.dp),
                         fontSize = 18.sp,

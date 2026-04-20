@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,7 @@ fun ErrorModal(onClick : () -> Unit) {
             )
 
             Text(
-                text = "Oops",
+                text = stringResource(R.string.common_error_internet_title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 modifier = Modifier
@@ -56,14 +57,14 @@ fun ErrorModal(onClick : () -> Unit) {
 
             )
             Text(
-                text = "It seems like you have no internet connection",
+                text = stringResource(R.string.common_error_internet_description),
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(bottom = 10.dp,start = 20.dp, end = 20.dp)
             )
 
             MyAppButton(
-                text = "Okay",
+                text = stringResource(R.string.common_error_internet_button),
                 onClick = {
                     onClick()
                 },

@@ -15,6 +15,7 @@ import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -53,6 +54,13 @@ class AddWordsViewModel @Inject constructor(
     var isOnHomePage by mutableStateOf(true)
         private set
 
+    var showWordInLibraryDialog by mutableStateOf(false)
+        private set
+
+    var existingWordInLibrary by mutableStateOf<Words?>(null)
+        private set
+
+
 
     fun onTranslationChange(newTranslation: String) {
         translation = newTranslation
@@ -74,42 +82,38 @@ class AddWordsViewModel @Inject constructor(
         isOnHomePage = !isOnHomePage
     }
 
-    fun fieldValidation(word: String, translation: String): AddWordResults {
+    fun onDismissDialog() {
+        showWordInLibraryDialog = false
+    }
+
+
+  private suspend fun fieldValidation(word: String, translation: String): AddWordResults {
+      val wordList = repository.words.first()
+      val existingWord = wordList.find { it.word == word }
+
        if (word.isBlank()) return AddWordResults.BlankWord
        if (translation.isBlank()) return AddWordResults.BlankTranslation
+       if (wordList.any{it.word == word}) {
+
+           existingWordInLibrary = existingWord
+
+           return AddWordResults.WordAlreadyExits }
+
         return AddWordResults.Success
 
     }
     fun addWordToList() {
-
+        viewModelScope.launch {
         val result = fieldValidation(word, translation)
         when (result) {
             is AddWordResults.BlankWord -> wordInputError = R.string.word_input_error
             is AddWordResults.BlankTranslation -> translationInputError = R.string.translation_input_error
+            is AddWordResults.WordAlreadyExits -> showWordInLibraryDialog = true
             is AddWordResults.Success -> {
-                viewModelScope.launch {
-                try {
 
-                        val newWord = Words(
-                            word,
-                            pronunciation,
-                            translation,
-                            id = UUID.randomUUID().toString(),
-                            language = currentLanguage,
-                            isOnHomePage = isOnHomePage
-                        )
-
-                        repository.addWord(newWord, currentLanguage)
-
-                        word = ""
-                        pronunciation = ""
-                        translation = ""
-                        error = null
-
-                } catch (e: Exception) {
-                    error = e.message ?: "Unknown error"
-                }
+                       addWordToListAndFirebase()
             }
+
             }
 
 
@@ -118,6 +122,30 @@ class AddWordsViewModel @Inject constructor(
 
     }
 
+    fun addWordToListAndFirebase() {
+      viewModelScope.launch {
+          try {
+              val newWord = Words(
+                  word,
+                  pronunciation,
+                  translation,
+                  id = UUID.randomUUID().toString(),
+                  language = currentLanguage,
+                  isOnHomePage = isOnHomePage
+              )
+
+              repository.addWord(newWord, currentLanguage)
+
+              word = ""
+              pronunciation = ""
+              translation = ""
+              error = null
+
+          } catch (e: Exception) {
+              error = e.message ?: "Unknown error"
+          }
+      }
+    }
 
 
 

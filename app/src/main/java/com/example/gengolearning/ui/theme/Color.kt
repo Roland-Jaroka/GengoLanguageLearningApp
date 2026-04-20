@@ -37,3 +37,9 @@ val Transparent = Color(0x00FFFFFF)
 val CardBlue = Color(0x3B0091FF)
 
 val TransParentBackground = Color(0x603D3D3D)
+
+val SecondaryBlue = Color(0xFF4A9FF1)
+
+val TransparentWhite = Color(0xCDFFFFFF)
+
+

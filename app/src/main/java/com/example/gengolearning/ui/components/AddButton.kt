@@ -28,7 +28,7 @@ fun AddButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         modifier= modifier
             .scale(scale)
             .then(modifier),
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
     ) {
         Image(
             painter = painterResource(R.drawable.plus),

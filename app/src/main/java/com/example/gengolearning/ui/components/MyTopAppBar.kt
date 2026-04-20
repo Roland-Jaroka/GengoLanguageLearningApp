@@ -23,7 +23,8 @@ fun MyTopAppBar(modifier: Modifier,
                 route: String,
                 navController: NavController,
                 scrollBehavior: TopAppBarScrollBehavior? = null,
-                actions: @Composable () -> Unit = {}
+                actions: @Composable () -> Unit = {},
+                onBackAction: () -> Unit = {}
 ) {
     TopAppBar(
         modifier = modifier,
@@ -33,6 +34,7 @@ fun MyTopAppBar(modifier: Modifier,
         navigationIcon = {
             IconButton({
                 navController.popBackStack()
+                onBackAction()
             }) {
                 Image(
                     painter = painterResource(R.drawable.arrow_back2),

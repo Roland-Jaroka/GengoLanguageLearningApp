@@ -32,15 +32,16 @@ interface WordsDao {
 
     //Get the number of words in the database
     @Query("SELECT COUNT(*) FROM words")
-   suspend fun getWordCount(): Int
+   fun getWordCount():Flow<Int>
 
    //Get the number of languages that has a word at least in database
    @Query("SELECT COUNT(DISTINCT language) FROM words")
-   suspend fun getLanguageCount(): Int
+    fun getLanguageCount(): Flow<Int>
 
    //Delete all on sign out
    @Query("DELETE FROM words")
    suspend fun clearWords()
+
 
 
 

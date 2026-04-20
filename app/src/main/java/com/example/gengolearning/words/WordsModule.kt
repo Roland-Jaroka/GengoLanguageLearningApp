@@ -2,17 +2,21 @@ package com.example.gengolearning.words
 
 import android.app.Application
 import androidx.room.Room
-import com.example.gengolearning.data.repositories.LanguageWords
+import com.example.gengolearning.data.local.CategoryDatabase
 import com.example.gengolearning.data.local.GrammarDao
-import com.example.gengolearning.data.repositories.UserSettingsRepository
+import com.example.gengolearning.data.local.Migrations
+import com.example.gengolearning.data.local.ProfileDao
 import com.example.gengolearning.data.local.WordsDao
 import com.example.gengolearning.data.local.WordsDatabase
+import com.example.gengolearning.data.repositories.LanguageWords
+import com.example.gengolearning.data.repositories.UserSettingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
@@ -34,7 +38,7 @@ object WordsModule {
                 app,
                 WordsDatabase::class.java,
                 "word_database"
-            ).fallbackToDestructiveMigration(true)
+            ).addMigrations(Migrations.MIGRATION_1_2)
             .build()
     }
 
@@ -52,15 +56,33 @@ object WordsModule {
 
     @Provides
     @Singleton
-    fun provideRepository(dao: WordsDao, userRepo: UserSettingsRepository, client: HttpClient) : LanguageWords {
-        return LanguageWords(dao, userRepo, client)
+    fun provideProfileDao(db: WordsDatabase): ProfileDao{
+        return db.profileDao
     }
 
     @Provides
     @Singleton
-    fun provideUserSettingsRepository(context: Application) : UserSettingsRepository {
-        return UserSettingsRepository(context)
+    fun provideWordCategoriesDao(db: WordsDatabase): CategoryDatabase {
+        return db.categoryDao
     }
+
+
+    @Provides
+    @Singleton
+    fun provideRepository(dao: WordsDao, userRepo: UserSettingsRepository, client: HttpClient, categoriesDao: CategoryDatabase) : LanguageWords {
+        return LanguageWords(dao, userRepo, client, categoriesDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserSettingsRepository(context: Application, profileDao: ProfileDao) : UserSettingsRepository {
+        return UserSettingsRepository(context, profileDao)
+    }
+
+
+
+
+
 
     @Provides
     @Singleton
@@ -72,6 +94,17 @@ object WordsModule {
                     ignoreUnknownKeys = true
                 })
             }
+
+//            install(Logging){
+//                logger = Logger.SIMPLE
+//                level= LogLevel.ALL
+//            }
+
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10_000
+            }
+
+
 
 
             defaultRequest {

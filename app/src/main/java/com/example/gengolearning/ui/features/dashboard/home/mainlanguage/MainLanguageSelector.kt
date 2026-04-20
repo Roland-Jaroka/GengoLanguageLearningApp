@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +28,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,26 +41,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.gengolearning.model.utils.AnalyticsHelper
+import com.example.gengolearning.model.AppSettingsPreferences
 import com.example.gengolearning.model.appmodels.Languages
+import com.example.gengolearning.model.utils.AnalyticsHelper
+import com.example.gengolearning.ui.components.MyAppButton
+import com.example.gengolearning.ui.features.dashboard.home.quiz.ErrorModal
+import com.example.gengolearning.ui.features.navigation.Route
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.Pink
 import com.example.gengolearning.ui.theme.TonedPink
 import com.example.gengolearning.ui.theme.White
-import com.example.gengolearning.ui.components.MyAppButton
 import com.gengolearning.app.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainLanguageSelector(navController: NavController,
                          viewModel: MainLanguageSelectorViewModel = hiltViewModel()) {
     val languages = Languages.languagesList
     var selectedLanguage by remember{mutableStateOf("")}
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     var visible by remember { mutableStateOf(false) }
     val state by viewModel.uiState.collectAsState()
-
+    val context = LocalContext.current
 
 
     LaunchedEffect(Unit) {
@@ -67,8 +70,9 @@ fun MainLanguageSelector(navController: NavController,
     }
     LaunchedEffect(state) {
         if (state is UiState.Success){
-            navController.navigate("dashboard") {
-                popUpTo("mainLanguageSelector") {
+            AppSettingsPreferences.setLoginDone(context, true)
+            navController.navigate(Route.OnBoarding) {
+                popUpTo(Route.MainLanguageSelector) {
                     inclusive = true
                 }
             }
@@ -124,7 +128,7 @@ fun MainLanguageSelector(navController: NavController,
 
                         )
                         Text(
-                            text = language.name,
+                            text = stringResource(language.name),
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .padding(start = 20.dp)
@@ -179,24 +183,37 @@ fun MainLanguageSelector(navController: NavController,
             {
                 MyAppButton(
                     onClick = {
-                        if (selectedLanguage != "")
 
-                             viewModel.setMainLanguage(selectedLanguage)
-                                viewModel.setLanguage(selectedLanguage)
-                        AnalyticsHelper.logEvent("selected_language_$selectedLanguage")
+                        if (selectedLanguage != "") {
+
+                            viewModel.setMainLanguage(selectedLanguage)
+
+                            viewModel.setLanguage(selectedLanguage, context)
+
+
+                            AnalyticsHelper.logEvent("selected_language_$selectedLanguage")
+                        }
                     },
                     text = stringResource(R.string.select_button),
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(bottom = 30.dp),
+                        .navigationBarsPadding(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Blue,
                         contentColor = White
                     ),
-                    isLoading = state == UiState.Loading
+                    isLoading = state is UiState.Loading,
+
                 )
             }
         }
+    }
+    if (state is UiState.Error ) {
+        ErrorModal(
+            onClick = {
+                viewModel.resetSate()
+            }
+        )
     }
         }
 

@@ -11,14 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,19 +35,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.gengolearning.model.utils.AnalyticsHelper
+import coil.compose.rememberAsyncImagePainter
 import com.example.gengolearning.model.appmodels.Languages
+import com.example.gengolearning.model.utils.AnalyticsHelper
+import com.example.gengolearning.ui.components.LogoutDialog
+import com.example.gengolearning.ui.components.MyAppButton
+import com.example.gengolearning.ui.features.navigation.Route
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
-import com.example.gengolearning.ui.components.AppSettingsAlertDialog
-import com.example.gengolearning.ui.components.InfoModal
-import com.example.gengolearning.ui.components.LogoutDialog
-import com.example.gengolearning.ui.components.MyAppButton
 import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 
@@ -59,31 +61,37 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
     val currentLanguage by viewModel.currentLanguage.collectAsState(
         Languages.languagesList[0]
     )
-    val sheetState= rememberModalBottomSheetState()
-    var infoModal by rememberSaveable { mutableStateOf(false) }
-    val openAlertDialog = remember{mutableStateOf(false)}
     var logoutDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
 
-    Box(modifier = Modifier
+    val image by viewModel.profileImage.collectAsState()
+
+
+    Column(modifier = Modifier
         .fillMaxSize()
-        .background(White)) {
+        .background(BgBlue)
+        .statusBarsPadding()) {
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(90.dp)
-                .clip(RoundedCornerShape(bottomStart = 50.dp, bottomEnd = 50.dp))
-                .background(BgBlue)
-        ){
+
             Text( text = stringResource(R.string.setting_button),
                 fontSize = 50.sp,
                 modifier = Modifier
-                    .padding(top = 30.dp, start = 20.dp)
-                    .align(Alignment.Center),
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                textAlign = TextAlign.Center,
                 fontFamily = FontFamily.Cursive,
                 fontWeight = FontWeight.Bold,
                 color = White)
-        }
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = White,
+            shape = RoundedCornerShape(topStart = 90.dp),
+            shadowElevation = 10.dp
+        ) {
+
 
         Column(modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,9 +108,21 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                     SettingItems(
                         icon = {
                             Image(
-                                painter= painterResource(R.drawable.profile),
+                                painter= when (val state = image) {
+                                    null -> painterResource(R.drawable.profile)
+                                    else ->  {
+                                        rememberAsyncImagePainter(state.image)
+                                    }
+
+                                },
                                 contentDescription = "profile",
-                                modifier = Modifier.size(80.dp)
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .padding(top = 5.dp, bottom = 5.dp)
+                                    .clip(RoundedCornerShape(30.dp))
+
+
+
                             )
                         },
                         title =stringResource(R.string.profile),
@@ -112,7 +132,7 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                                 contentDescription = "arrow")
                         },
                         onClick= {
-                            navController.navigate("profile")
+                            navController.navigate(Route.Profile)
                         }
 
                     )
@@ -147,7 +167,7 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                                 contentDescription = null)
                         },
                         onClick = {
-                            navController.navigate("learningLanguage")
+                            navController.navigate(Route.LearningLanguage)
                             AnalyticsHelper.logEvent("language_change_menu")
                         })
 
@@ -166,7 +186,8 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                         },
                         onClick = {
 
-                           openAlertDialog.value = true
+//                           openAlertDialog.value = true
+                            showLanguageDialog = true
 
 
                         },
@@ -212,8 +233,7 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
 
         }
     }
-    if (infoModal){
-    InfoModal(sheetState, onClick = { infoModal = false })}
+
 
     if (logoutDialog) {
         LogoutDialog(
@@ -224,8 +244,8 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                 auth.signOut()
                 viewModel.clearUserPreferences(context)
                 logoutDialog = false
-                navController.navigate("authentication") {
-                    popUpTo("dashboard") { inclusive = true }
+                navController.navigate(Route.Authentication) {
+                    popUpTo(Route.Dashboard) { inclusive = true }
 
                     AnalyticsHelper.logEvent("logout_button")
                 }
@@ -238,17 +258,12 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
         )
     }
 
-    when{
-        openAlertDialog.value->{
-            AppSettingsAlertDialog(
-                onConfirmation = { viewModel.openAppLanguages(context)
-                                 openAlertDialog.value = false
-                    AnalyticsHelper.logEvent("change_app_language")},
-                onDismissRequest = {
-                    openAlertDialog.value = false
-                }
-            )
-        }
+    if (showLanguageDialog) {
+        AppLanguageSelectorBottomSheet(
+            onDismiss = { showLanguageDialog = false }
+        )
+    }
+
     }
 
 }

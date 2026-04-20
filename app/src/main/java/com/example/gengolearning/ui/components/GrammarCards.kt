@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gengolearning.ui.theme.BgBlue
+import com.example.gengolearning.ui.theme.JapaneseFontFamily
 import com.example.gengolearning.ui.theme.White
 
 @Composable
@@ -34,7 +35,7 @@ fun GrammarCards(grammar: String, explanation: String, example: String, onClick:
                 modifier = Modifier
                     .padding(top= 10.dp, start = 20.dp),
                 fontSize = 40.sp,
-                fontFamily = FontFamily.SansSerif,
+                fontFamily = JapaneseFontFamily,
                 fontWeight = FontWeight.Bold,
                 color = BgBlue
             )

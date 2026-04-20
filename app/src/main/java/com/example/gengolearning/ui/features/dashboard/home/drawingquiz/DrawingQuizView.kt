@@ -17,12 +17,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,6 +43,7 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                     navController: NavController) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val currentWord by viewModel.currentWord
+    val list by viewModel.currentList.collectAsState()
 
     Scaffold(
         topBar = { MyTopAppBar(
@@ -73,25 +76,38 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(top = 5.dp, bottom = 1.dp)
+                    .padding(top = 5.dp, bottom = 1.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
-            Button(
-                modifier = Modifier
-                    .width(150.dp)
-                    .align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = if (viewModel.isKanjiReveled) White else BgBlue,
-                    containerColor = if (viewModel.isKanjiReveled) BgBlue else White
-                ),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(2.dp, BgBlue),
-                onClick = {
-                    viewModel.isKanjiReveled = !viewModel.isKanjiReveled
+
+
+                Button(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = if (viewModel.isKanjiReveled) White else BgBlue,
+                        containerColor = if (viewModel.isKanjiReveled) BgBlue else White
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(2.dp, BgBlue),
+                    onClick = {
+                        viewModel.isKanjiReveled = !viewModel.isKanjiReveled
+                    }
+                ) {
+                    Text(text = "Kanji")
                 }
-            ) {
-                Text(text = "Kanji")
-            }
+
+            Text(
+                text = "${viewModel.currentIndex + 1} / ${list.size }",
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(end = 20.dp)
+            )
+
+
 
 
 

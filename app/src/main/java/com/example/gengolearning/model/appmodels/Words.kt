@@ -14,8 +14,8 @@ data class Words(
     val translation: String="",
     @PrimaryKey
     val id: String="",
-    val label: String? = null,
     val isOnHomePage: Boolean?= false,
-    val language: String=""
+    val language: String="",
+    val category: List<String> = emptyList()
 )
 

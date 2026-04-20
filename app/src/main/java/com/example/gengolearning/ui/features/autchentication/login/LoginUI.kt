@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,6 +58,7 @@ import com.example.gengolearning.ui.theme.BlueGray
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.ui.components.ErrorModal
 import com.example.gengolearning.ui.components.MyAppButton
+import com.example.gengolearning.ui.features.navigation.Route
 import com.gengolearning.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +69,6 @@ fun LoginUi(navController: NavController,
 
     val email= viewModel.email
     val password= viewModel.password
-    val scope = rememberCoroutineScope()
     val emailError = viewModel.emailError?.let { id-> stringResource(id) }
     val passwordError = viewModel.passwordError?.let { id-> stringResource(id) }
 
@@ -89,8 +90,8 @@ fun LoginUi(navController: NavController,
 
     LaunchedEffect(loginState) {
        if (loginState is LoginStates.Success){
-           navController.navigate("mainLanguageSelector"){
-               popUpTo("authentication"){
+           navController.navigate(Route.MainLanguageSelector){
+               popUpTo(Route.MainLanguageSelector){
                    inclusive= true
                }
            }
@@ -142,7 +143,8 @@ fun LoginUi(navController: NavController,
             }
         }
 
-        Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+        Box(modifier = Modifier
+            .align(Alignment.CenterHorizontally)) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
@@ -268,7 +270,7 @@ fun LoginUi(navController: NavController,
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
-                                navController.navigate("forgot_password")
+                                navController.navigate(Route.ForgotPassword)
 
                                 AnalyticsHelper.logEvent("forgot_password_click")
 
@@ -287,7 +289,7 @@ fun LoginUi(navController: NavController,
                             .clickable(
                                 indication = null,
                                 interactionSource = remember { MutableInteractionSource() }) {
-                                navController.navigate("signup")
+                                navController.navigate(Route.SignUp)
                             },
                         fontSize = 20.sp,
                         fontFamily = FontFamily.SansSerif,
