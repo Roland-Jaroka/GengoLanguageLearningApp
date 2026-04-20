@@ -19,80 +19,94 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.gengolearning.model.appmodels.DashboardFeatures
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.White
 
 @Composable
 fun ButtonCards(modifier: Modifier = Modifier,
-                onClick: () -> Unit = {},
-                title: String,
-                buttonText: String,
-                id: Int,
-                buttonId: Int,
-                buttonModifier: Modifier = Modifier) {
+                navController: NavController,
+                features: DashboardFeatures,
+                flag: Int,
+                language: String,
+                onClick: () -> Unit = {}) {
     Card(colors = CardDefaults.cardColors(
         containerColor = White
     ),
         elevation = CardDefaults.cardElevation(5.dp),
         modifier = modifier
-            .width(170.dp)
-            .height(180.dp)
+            .height(180.dp),
     ) {
 
         Column(
             modifier = Modifier
-                .fillMaxSize()){
+                .fillMaxSize()) {
             Image(
-                painter = painterResource(id),
+                painter = painterResource(features.icon),
                 contentDescription = null,
                 modifier = Modifier
                     .padding(10.dp)
-                    .size(50.dp)
-                   ,
+                    .size(50.dp),
                 alignment = Alignment.TopStart
             )
-            Text(text = title,
+            Text(
+                text = stringResource(features.title),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
                 modifier = Modifier.padding(start = 5.dp)
             )
 
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
-                    ,
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = White,
-                    containerColor = BgBlue
-                ),
-                elevation = ButtonDefaults.buttonElevation(
-                    hoveredElevation = 10.dp,
-                    pressedElevation = 10.dp,
-                    defaultElevation = 5.dp
-                ),
-                shape = RoundedCornerShape(20.dp),
-                onClick = {
-                    onClick()
-                },
+            if (features.id != "LanguageChange") {
 
-                ) {
-                Icon(
-                    painter = painterResource(buttonId),
-                    contentDescription = null,
-                    modifier = buttonModifier,
-                    tint = White
-                )
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = White,
+                        containerColor = BgBlue
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        hoveredElevation = 10.dp,
+                        pressedElevation = 10.dp,
+                        defaultElevation = 5.dp
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    onClick = {
+                        onClick()
+                    },
 
-                Text(
-                    text = buttonText
-                )
-            }
+                    ) {
+                    Icon(
+                        painter = painterResource(features.buttonIcon),
+                        contentDescription = null,
+                        modifier = if (features.buttonSize != null) Modifier.size(features.buttonSize) else Modifier,
+                        tint = White
+                    )
+
+                    Text(
+                        text = stringResource(features.buttonText),
+                        modifier = Modifier
+                            .padding(start = 2.dp)
+                    )
+                }
+        } else {
+                   LanguageSelectionDashboardRow(
+                       flag,
+                       language = language,
+                       onClick = {
+                           navController.navigate(features.route)
+                       }
+                   )
+        }
+
 
 
         }

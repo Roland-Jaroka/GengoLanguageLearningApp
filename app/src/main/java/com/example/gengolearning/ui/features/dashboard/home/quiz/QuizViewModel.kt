@@ -8,6 +8,7 @@ import com.example.gengolearning.data.repositories.UserSettingsRepository
 import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.model.appmodels.quizWrongAnswers
 import com.example.gengolearning.data.repositories.LanguageWords
+import com.example.gengolearning.model.appmodels.QuizModes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
@@ -29,7 +30,11 @@ data class UiState(
     val isCorrect: Boolean = false,
     val isError: Boolean = false,
     val isQuizFinished: Boolean = false,
-    val isProcessing: Boolean = false
+    val isProcessing: Boolean = false,
+    val quizMode: QuizModes = QuizModes.TranslationQuiz,
+    val cardModeList: List<String> = emptyList(),
+    val tappedWord: String = "",
+    val shuffleMode: Boolean = false
         )
 @HiltViewModel
 class QuizViewModel @Inject constructor(
@@ -39,6 +44,8 @@ class QuizViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
+
+    var initialList = emptyList<Words>()
 
 
     val currentLanguage = userSettingsRepository.selectedLanguage.stateIn(
@@ -52,10 +59,13 @@ class QuizViewModel @Inject constructor(
 
 
     fun onAnswerChange(newvalue: String) {
-        _uiState.update {
-            it.copy(
-                answer = toPinyin(newvalue)
-            )
+
+        if (newvalue.length < 200) {
+            _uiState.update {
+                it.copy(
+                    answer = toPinyin(newvalue)
+                )
+            }
         }
     }
 
@@ -66,11 +76,12 @@ class QuizViewModel @Inject constructor(
 
             _uiState.update {
                 it.copy(
-                    wordList = quizzes,
+                    wordList = quizzes.shuffled(),
                     currentIndex = 0,
                     progress = 0f,
                 )
             }
+            initialList = quizzes
         }
         //if there is no custom quiz
         else {
@@ -84,11 +95,12 @@ class QuizViewModel @Inject constructor(
 
                         _uiState.update {
                             it.copy(
-                                wordList = filteredList,
+                                wordList = filteredList.shuffled(),
                                 currentIndex = 0,
                                 progress = 0f
                             )
                         }
+                        initialList = filteredList
                     }
                     //if there are no words that has isOnHomePage == true
                     //only possible after login if the user has not done filtering yet
@@ -96,11 +108,12 @@ class QuizViewModel @Inject constructor(
 
                         _uiState.update {
                             it.copy(
-                                wordList = list,
+                                wordList = list.shuffled(),
                                 currentIndex = 0,
                                 progress = 0f
                             )
                         }
+                        initialList = list
                     }
                 }
 
@@ -112,7 +125,17 @@ class QuizViewModel @Inject constructor(
 
          if (_uiState.value.isProcessing) return
 
+        if (_uiState.value.wordList.isEmpty()) return
+
+        if (_uiState.value.quizMode == QuizModes.CardPlay) {
+            _uiState.update {
+                it.copy(
+                    tappedWord = answer
+                )
+            }
+        }
             viewModelScope.launch {
+
                 if (isCorrect(currentLanguage, answer)) {
                     _uiState.update {
                         it.copy(
@@ -132,8 +155,8 @@ class QuizViewModel @Inject constructor(
                     wrongAnswers.add(
                         quizWrongAnswers(
                             uiState.value.wordList[uiState.value.currentIndex].word,
-                            uiState.value.wordList[uiState.value.currentIndex].translation,
                             uiState.value.wordList[uiState.value.currentIndex].pronunciation,
+                            uiState.value.wordList[uiState.value.currentIndex].translation,
                             answer
                         )
                     )
@@ -149,27 +172,36 @@ class QuizViewModel @Inject constructor(
 
     }
 
-    fun isCorrect(currentLanguage: String, answer: String): Boolean {
+    fun isCorrect(currentLanguage: String,
+                  answer: String): Boolean {
         val state = uiState.value
         val wordList = state.wordList
         val currentIndex = state.currentIndex
 
-        return when (currentLanguage) {
-            "jp" -> {
-                wordList[currentIndex].pronunciation == answer
+        return when (_uiState.value.quizMode) {
+
+            QuizModes.TranslationQuiz -> {
+                wordList[currentIndex].translation
+                    .split(",")
+                    .map { it.trim() }
+                    .any { it.equals(answer.trim(), ignoreCase = true) }
             }
 
-            "cn" -> {
-                wordList[currentIndex].pronunciation == answer
+             QuizModes.PronounciationQuiz -> {
+                wordList[currentIndex].pronunciation.equals(answer, ignoreCase = true)
             }
 
-            else -> {
-                wordList[currentIndex].translation.equals(
-                    answer,
-                    ignoreCase = true
-                )
+            QuizModes.WordQuiz -> {
+                wordList[currentIndex].word.equals(answer, ignoreCase = true)
+            }
+
+            QuizModes.CardPlay -> {
+                wordList[currentIndex].word == answer
             }
         }
+
+
+
 
     }
 
@@ -199,15 +231,27 @@ class QuizViewModel @Inject constructor(
                 isCorrect = false,
                 isError = false,
                 answer = "",
+                tappedWord = "",
                 progress = (currentIndex + 1) / wordList.size.toFloat()
             )
         }
+
+        if (state.shuffleMode) {
+            shuffleQuizModes()
+        }
+
+        if (state.quizMode == QuizModes.CardPlay) {
+            cardModeList()
+        }
+
+
 
     }
 
     fun onRestart() {
         _uiState.update {
             it.copy(
+                wordList = initialList.shuffled(),
                 points = 0,
                 currentIndex = 0,
                 progress = 0f,
@@ -216,6 +260,86 @@ class QuizViewModel @Inject constructor(
         }
         wrongAnswers.clear()
     }
+
+    fun onOnlyWrongAnswersRestart(){
+        _uiState.update {
+            it.copy(
+                wordList = wrongAnswers.map { wrongAnswers ->
+                    Words(
+                        word = wrongAnswers.word,
+                        translation = wrongAnswers.translation,
+                        pronunciation = wrongAnswers.pronunciation,
+                    )
+                }.shuffled(),
+                points = 0,
+                currentIndex = 0,
+                progress = 0f,
+                isQuizFinished = false
+            )
+        }
+
+        wrongAnswers.clear()
+    }
+
+    fun onQuizModeChange(quizModes: QuizModes) {
+        _uiState.update {
+            it.copy(
+                quizMode = quizModes
+
+            )
+        }
+    }
+
+    fun cardModeList() {
+        val state = _uiState.value
+        val list = state.wordList
+        val currentWord = state.wordList[state.currentIndex]
+        val currentlyPlayingList = mutableListOf<String>()
+
+        currentlyPlayingList.add(currentWord.word)
+
+        try {
+
+        repeat(3) {currentlyPlayingList.add(
+            list.filter { it.word != currentWord.word && it.word !in currentlyPlayingList}.random().word
+        )
+        }
+
+        } catch (e: Exception) {
+
+        }
+
+
+        _uiState.update {
+            it.copy(
+                cardModeList = currentlyPlayingList.shuffled()
+            )
+        }
+    }
+
+    fun shuffleQuizModes(){
+        val modes = QuizModes.entries
+        val currentLang = currentLanguage.value
+        val mode = if (currentLang.code == "jp" || currentLang.code == "cn") {
+            modes.filter { it != QuizModes.PronounciationQuiz }
+        } else {
+            modes
+        }
+        _uiState.update {
+            it.copy(
+                quizMode = mode.random()
+            )
+        }
+    }
+
+    fun setShuffleQuizMode(){
+        _uiState.update {
+            it.copy(
+                shuffleMode = true
+            )
+        }
+    }
+
 
 
 

@@ -18,6 +18,8 @@ object AppSettingsPreferences {
 
     private val JISHO_SEARCH_TUTORIAL = booleanPreferencesKey("jisho_search_tutorial")
 
+    private val LOGIN_IS_DONE = booleanPreferencesKey("login_is_done")
+
    // endregion
 
     // region Getters
@@ -40,6 +42,13 @@ object AppSettingsPreferences {
 
     }
 
+    fun loginIsDone(context: Context): Flow<Boolean> {
+        return context.dataStore.data.map { preferences ->
+            preferences[LOGIN_IS_DONE] ?: false
+        }
+    }
+
+
      // endregion
 
     // region Setters
@@ -61,6 +70,14 @@ object AppSettingsPreferences {
         context.dataStore.edit { preferences ->
             preferences[JISHO_SEARCH_TUTORIAL] = shown
         }
+    }
+
+ suspend  fun setLoginDone(context: Context, done: Boolean) {
+          context.dataStore.edit { preferences ->
+              preferences[LOGIN_IS_DONE] = done
+          }
+
+        println("Login is done")
     }
 
     // endregion

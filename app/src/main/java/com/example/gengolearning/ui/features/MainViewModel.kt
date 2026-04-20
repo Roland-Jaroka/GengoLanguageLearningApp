@@ -23,17 +23,26 @@ class MainViewModel @Inject constructor(
     init {
         loadMainLanguage()
     }
+
+
     private fun  loadMainLanguage(){
 
         if (FirebaseAuth.getInstance().currentUser == null) return
 
         viewModelScope.launch {
+
             userSettingsRepository.loadMainLanguage()
-            repo.loadWords(userSettingsRepository.language.first())
-            grammarRepo.loadGrammar(userSettingsRepository.language.first())
+
+            launch {
+                repo.loadWords(userSettingsRepository.language.first())
+                repo.loadCategories(userSettingsRepository.language.first())
+            }
+
+            launch {  grammarRepo.loadGrammar(userSettingsRepository.language.first()) }
+
 
 
         }
-        println("Main language loaded from Dashboard")
+
     }
 }

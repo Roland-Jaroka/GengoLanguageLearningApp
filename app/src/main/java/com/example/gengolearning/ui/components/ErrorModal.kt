@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,7 @@ fun ErrorModal(sheetState: SheetState, onClick: () -> Unit, text: String) {
                     .size(90.dp)
                     .align(Alignment.CenterHorizontally)
             )
-            Text(text= "Oops",
+            Text(text= stringResource(R.string.oops),
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 fontSize = 25.sp,
                 fontWeight = FontWeight.Bold)
@@ -52,7 +53,7 @@ fun ErrorModal(sheetState: SheetState, onClick: () -> Unit, text: String) {
                 onClick = {
                     onClick()
                 },
-                text = "Alright",
+                text = stringResource(R.string.okay_button),
                 colors = ButtonDefaults.buttonColors(BgBlue),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)

@@ -48,11 +48,7 @@ fun ForgotPasswordScr(viewModel: ForgotPasswordViewModel = viewModel(),
 
     LaunchedEffect(state) {
         if (state is uiState.Success) {
-            navController.navigate("login") {
-                popUpTo("forgot_password") {
-                    inclusive = true
-                }
-            }
+            navController.popBackStack()
 
         }
     }

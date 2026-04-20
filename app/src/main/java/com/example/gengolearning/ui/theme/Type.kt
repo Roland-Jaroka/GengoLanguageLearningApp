@@ -1,12 +1,28 @@
 package com.example.gengolearning.ui.theme
 
+
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.gengolearning.app.R
 
 // Set of Material typography styles to start with
+
+
+val Inter = FontFamily(
+    Font(R.font.inter_light, FontWeight.Light),
+    Font(R.font.inter_bold, FontWeight.Bold),
+    Font(R.font.inter_regular, FontWeight.Normal)
+)
+
+val JapaneseFontFamily = FontFamily(
+    Font(R.font.japanese_light, FontWeight.Light),
+    Font(R.font.japanese_bold, FontWeight.Bold),
+    Font(R.font.japanese_regular, FontWeight.Normal)
+)
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -15,6 +31,7 @@ val Typography = Typography(
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
     )
+
     /* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,

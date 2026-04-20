@@ -5,7 +5,7 @@ import com.gengolearning.app.R
 
 data class Language(
     val code: String,
-    val name: String,
+    val name: Int,
     val flag: Int
 )
 
@@ -17,15 +17,15 @@ data class Language(
 object Languages {
 
     val languagesList = listOf(
-        Language("jp", "Japanese", R.drawable.japanese),
-        Language("cn", "Chinese", R.drawable.chinese),
-        Language("es", "Spanish", R.drawable.spanish),
-        Language("en", "English", R.drawable.english),
-        Language("nw", "Norwegian", R.drawable.norwegianflagresized),
-        Language("fr", "French", R.drawable.france),
-        Language("de", "German", R.drawable.germany),
-        Language("kr", "Korean", R.drawable.korea),
-        Language ("sv", "Swedish",R.drawable.sweden),
-        Language("it", "Italian", R.drawable.italy)
+        Language("jp", R.string.jp, R.drawable.japanese),
+        Language("cn", R.string.cn, R.drawable.chinese),
+        Language("es", R.string.sp, R.drawable.spanish),
+        Language("en", R.string.en, R.drawable.english),
+        Language("nw", R.string.norwegian, R.drawable.norwegianflagresized),
+        Language("fr", R.string.fr, R.drawable.france),
+        Language("de", R.string.gr, R.drawable.germany),
+        Language("kr", R.string.korean, R.drawable.korea),
+        Language ("sv", R.string.sw,R.drawable.sweden),
+        Language("it", R.string.it, R.drawable.italy)
     )
 }

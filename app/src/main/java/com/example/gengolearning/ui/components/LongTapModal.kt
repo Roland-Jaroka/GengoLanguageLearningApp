@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +31,9 @@ import com.gengolearning.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LongTapBottomModal(modifier: Modifier = Modifier, onDismiss: () -> Unit, onClick: () -> Unit) {
+fun LongTapBottomModal(modifier: Modifier = Modifier,
+                       onDismiss: () -> Unit,
+                       onClick: () -> Unit) {
     val sheetState = rememberModalBottomSheetState()
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -42,34 +46,37 @@ fun LongTapBottomModal(modifier: Modifier = Modifier, onDismiss: () -> Unit, onC
         containerColor = White
     ) {
 
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    onClick()
-                }
+        Column {
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        onClick()
+                    }
 
-        ) {
-            Image(
-                painter = painterResource(R.drawable.edit),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(40.dp),
-                colorFilter = if (isPressed) ColorFilter.tint(BgBlue) else null
-            )
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.edit),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(40.dp),
+                    colorFilter = if (isPressed) ColorFilter.tint(BgBlue) else null
+                )
 
-            Text(text = "Edit Word",
-                color = if (isPressed) BgBlue else PandaBlack,
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .padding(start = 10.dp, top = 10.dp),
-                fontWeight = FontWeight.Bold
-            )
+                Text(
+                    text = stringResource(R.string.edit_word_title),
+                    color = if (isPressed) BgBlue else PandaBlack,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .padding(start = 10.dp, top = 10.dp),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
         }
-
     }
 }

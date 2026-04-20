@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.ui.components.MyAppButton
@@ -46,6 +47,7 @@ fun AddWordsUi(navController: NavController,
     val word = viewModel.word
     val translation = viewModel.translation
     val pronunciation = viewModel.pronunciation
+    val existingWordInLibrary = viewModel.existingWordInLibrary
     val scrollstate= rememberScrollState()
     val currentLanguage = viewModel.currentLanguage
 
@@ -57,6 +59,8 @@ fun AddWordsUi(navController: NavController,
     val focusRequester = remember { FocusRequester() }
 
     val checked = viewModel.isOnHomePage
+
+    val showWordInLibraryDialog = viewModel.showWordInLibraryDialog
 
 
 
@@ -169,7 +173,7 @@ fun AddWordsUi(navController: NavController,
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Text(
-                        text = "Show on Homepage",
+                        text = stringResource(R.string.homepage_button),
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .weight(1f)
@@ -214,5 +218,29 @@ fun AddWordsUi(navController: NavController,
 
 
         }
+    }
+
+    if (showWordInLibraryDialog) {
+        WordInLibraryAlertDialog(
+            onDismiss = {
+                viewModel.onDismissDialog()
+            },
+            onConfirm = {
+                viewModel.addWordToListAndFirebase()
+            },
+            currentLanguage = currentLanguage,
+            word1 = Words(
+                word = viewModel.word,
+                translation = viewModel.translation,
+                pronunciation = viewModel.pronunciation,
+            ),
+
+            word2 = Words(
+                word = existingWordInLibrary?.word ?: "",
+                translation = existingWordInLibrary?.translation ?:"",
+                pronunciation = existingWordInLibrary?.pronunciation ?: "",
+            )
+
+        )
     }
 }

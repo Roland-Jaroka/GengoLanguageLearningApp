@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gengolearning.ui.features.dashboard.learning.grammarDetails.ChatGPTState
 import com.example.gengolearning.ui.theme.White
 
 @Composable
