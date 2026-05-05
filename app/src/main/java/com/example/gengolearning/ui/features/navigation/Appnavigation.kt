@@ -34,6 +34,7 @@ import com.example.gengolearning.ui.features.autchentication.login.LoginUi
 import com.example.gengolearning.ui.features.autchentication.signup.SignUpUi
 import com.example.gengolearning.ui.features.dashboard.home.Home
 import com.example.gengolearning.ui.features.dashboard.home.addwords.AddWordsUi
+import com.example.gengolearning.ui.features.dashboard.home.aiquiz.AiQuizUiRoot
 import com.example.gengolearning.ui.features.dashboard.home.apiwords.ApiWordsScreen
 import com.example.gengolearning.ui.features.dashboard.home.drawingquiz.DrawingQuizView
 import com.example.gengolearning.ui.features.dashboard.home.mainlanguage.MainLanguageSelector
@@ -195,6 +196,11 @@ fun AppNavigation() {
                    composable<Route.Profile> { ProfileMenu(navController = navController) }
                    composable<Route.LearningLanguage> { LearningLanguageUi(navController = navController) }
                    composable<Route.Dictionary> { ApiWordsScreen(navController = navController) }
+                   composable<Route.AiQuiz> {
+                       AiQuizUiRoot(
+                           navController = navController
+                       )
+                   }
                }
 
            }

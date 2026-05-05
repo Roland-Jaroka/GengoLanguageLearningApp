@@ -18,8 +18,8 @@ android {
         applicationId = "com.gengolearning.app"
         minSdk = 28
         targetSdk = 36
-        versionCode = 20
-        versionName = "20.0"
+        versionCode = 24
+        versionName = "24.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -65,50 +65,53 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    val nav_version = "2.9.3"
+    val nav_version = "2.9.8"
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("com.firebaseui:firebase-ui-auth:9.0.0")
-    implementation(platform("com.google.firebase:firebase-bom:34.0.0"))
+    implementation("com.firebaseui:firebase-ui-auth:9.1.1")
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
     implementation("com.google.firebase:firebase-analytics")
 
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
-    implementation("com.google.firebase:firebase-firestore-ktx:25.0.0")
+    implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
 
-    implementation("com.google.firebase:firebase-analytics-ktx:21.3.0")
+    implementation("com.google.firebase:firebase-analytics-ktx:22.5.0")
 
     implementation("com.google.firebase:firebase-ai")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.datastore:datastore-preferences:1.2.1")
 
-    val room_version = "2.8.3"
+    val room_version = "2.8.4"
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
 
     //hilt
 
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
-    kapt("com.google.dagger:hilt-compiler:2.57.1")
-    kapt("androidx.hilt:hilt-compiler:1.2.0")
+    implementation("com.google.dagger:hilt-android:2.59.2")
+    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    kapt("com.google.dagger:hilt-compiler:2.59.2")
+    kapt("androidx.hilt:hilt-compiler:1.3.0")
 
     //ktor http requests
-    implementation("io.ktor:ktor-client-core:3.3.3")
-    implementation("io.ktor:ktor-client-cio:3.3.3")
-    implementation(platform("io.ktor:ktor-bom:3.3.3"))
-    implementation("io.ktor:ktor-client-content-negotiation:3.3.3")
+    implementation("io.ktor:ktor-client-core:3.4.3")
+    implementation("io.ktor:ktor-client-cio:3.4.3")
+    implementation(platform("io.ktor:ktor-bom:3.4.3"))
+    implementation("io.ktor:ktor-client-content-negotiation:3.4.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("io.ktor:ktor-client-logging:3.3.3")
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended")
 
-    implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("io.coil-kt:coil-gif:2.6.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-gif:2.7.0")
 
     //Color picker
     implementation("com.github.skydoves:colorpicker-compose:1.1.3")
+
+    //Lottie
+    implementation("com.airbnb.android:lottie-compose:6.7.1")
 }

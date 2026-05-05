@@ -111,8 +111,9 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
             MyTopAppBar(
                 modifier = Modifier,
                 title = stringResource(R.string.quizes_button),
-                route = "home",
-                navController = navController,
+                onBackClick = {
+                    navController.popBackStack()
+                },
                 onBackAction = {
                     quizzes.clear()
                 }

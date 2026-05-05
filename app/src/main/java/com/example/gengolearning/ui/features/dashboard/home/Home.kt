@@ -30,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -74,7 +75,7 @@ import kotlin.math.abs
 fun Home(viewModel: HomeViewModel= hiltViewModel(),
          navController: NavController
 ) {
-
+    val sheetState = rememberModalBottomSheetState()
     var visible by remember { mutableStateOf(false) }
     var wordsVisibilty by remember { mutableStateOf(false) }
     val auth = FirebaseAuth.getInstance()
@@ -359,9 +360,7 @@ fun Home(viewModel: HomeViewModel= hiltViewModel(),
                     maxItemsInEachRow = 2,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(5.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                        .padding(top = 10.dp, end = 10.dp, start = 5.dp)
                 ) {
                     visibleFeatures.forEach { feature ->
                         ButtonCards(
@@ -370,7 +369,8 @@ fun Home(viewModel: HomeViewModel= hiltViewModel(),
                             flag = currentLanguage.flag,
                             language = stringResource(currentLanguage.name),
                             modifier = Modifier
-                                .weight(1f),
+                                .weight(1f)
+                                .padding(5.dp),
                             onClick = {
                                 when (feature.type) {
                                     FeatureType.NewWords -> navController.navigate(feature.route)
@@ -379,43 +379,45 @@ fun Home(viewModel: HomeViewModel= hiltViewModel(),
                                     FeatureType.DrawingQuiz -> navController.navigate(feature.route)
                                     FeatureType.Dictionary -> navController.navigate(feature.route)
                                     FeatureType.LanguageChange -> navController.navigate(feature.route)
+                                    FeatureType.AiQuiz -> navController.navigate(feature.route)
                                 }
                             }
                         )
                     }
 
-                    HorizontalPager(
-                        state = pageState,
-                        contentPadding = PaddingValues(horizontal = 20.dp)
-                    ) { page->
+                }
 
-                        val item = news[page]
 
-                            NewsCard(
-                                imageUrl = item?.imageUrl,
-                                title = when (currentAppLanguage) {
-                                    "en" -> item?.newsEn
-                                    "ja" -> item?.newsJp
-                                    "hu" -> item?.newsHu
-                                    else -> item?.newsEn
-                                },
-                                message = when (currentAppLanguage) {
-                                    "en" -> item?.messageEn
-                                    "ja" -> item?.messageJp
-                                    "hu" -> item?.messageHu
-                                    else -> item?.messageEn
-                                },
-                                clickable = item?.clickable ?: false,
-                                onClick = {
-                                       viewModel.openNewsModal()
-                                }
-                            )
+                HorizontalPager(
+                    state = pageState,
+                    contentPadding = PaddingValues(horizontal = 20.dp)
+                ) { page->
 
-                    }
+                    val item = news[page]
 
-                    Spacer(modifier = Modifier.height(100.dp))
+                    NewsCard(
+                        imageUrl = item?.imageUrl,
+                        title = when (currentAppLanguage) {
+                            "en" -> item?.newsEn
+                            "ja" -> item?.newsJp
+                            "hu" -> item?.newsHu
+                            else -> item?.newsEn
+                        },
+                        message = when (currentAppLanguage) {
+                            "en" -> item?.messageEn
+                            "ja" -> item?.messageJp
+                            "hu" -> item?.messageHu
+                            else -> item?.messageEn
+                        },
+                        clickable = item?.clickable ?: false,
+                        onClick = {
+                            viewModel.openNewsModal()
+                        }
+                    )
 
                 }
+
+                Spacer(modifier = Modifier.height(110.dp))
 
 
             }
@@ -437,6 +439,7 @@ fun Home(viewModel: HomeViewModel= hiltViewModel(),
 
     if (quizIsEmptyModal) {
         QuizIsEmptyModal(
+            sheetState = sheetState,
             onDismiss = {
                 viewModel.dismissQuizIsEmptyModal()
             }

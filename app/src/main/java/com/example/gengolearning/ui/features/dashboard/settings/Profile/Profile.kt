@@ -82,8 +82,9 @@ fun ProfileMenu(navController: NavController, viewModel: ProfileViewModel = hilt
                 MyTopAppBar(
                     modifier = Modifier,
                     title = "Profile",
-                    route = "settings",
-                    navController = navController
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
                 )
             }
         ) { innerPadding ->

@@ -68,6 +68,17 @@ object DashboardFeaturesList {
             buttonIcon = R.drawable.quiz_icon,
             route = Route.LearningLanguage,
             supportedLanguages = null
+        ),
+
+        DashboardFeatures(
+            id = "AiQuiz",
+            type = FeatureType.AiQuiz,
+            icon = R.drawable.learning_icon,
+            title = R.string.aiQuiz_feature_title,
+            buttonText = R.string.aiQuiz_feature_button,
+            buttonIcon = R.drawable.quiz_icon,
+            route = Route.AiQuiz,
+            supportedLanguages = null
         )
     )
 }

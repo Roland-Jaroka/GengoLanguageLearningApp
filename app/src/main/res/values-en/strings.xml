@@ -198,4 +198,15 @@
     <string name="empty_quiz_modal_title">You don\'t have any words yet</string>
     <string name="empty_quiz_modal_description">Add words to your list so you can make a quiz</string>
     <string name="empty_quiz_modal_button">Okay</string>
+    <string name="aiQuiz_feature_title">Language Exam quiz</string>
+    <string name="aiQuiz_feature_button">Exam</string>
+    <string name="ai_quiz_title">Language Exam quiz</string>
+    <string name="review_button">Review the quiz questions</string>
+    <string name="ai_quiz_restart_button">Restart the quiz</string>
+    <string name="ai_quiz_limit_error">It seems the AI has reachd it\'s daily limit. Try again tomorrow. Because this function is still in beta version it\'s daily tokens are limited</string>
+    <string name="loading_tip1">The AI is currently working on creating your test</string>
+    <string name="loading_tip2">If you get an error about daily limit try again tomorrow</string>
+    <string name="loading_tip3">If you get an error about heavy AI enviorment try to load it again</string>
+    <string name="loading_tip4">Almost ready....</string>
+    <string name="ai_quiz_server_error">It seems like the AI agent is under heavy use at the moment. Try opening the function again</string>
 </resources>

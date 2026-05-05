@@ -36,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -84,6 +85,8 @@ fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val sheetState = rememberModalBottomSheetState()
+
     val list by viewModel.words.collectAsState()
 
     var visible by remember { mutableStateOf(false) }
@@ -123,8 +126,9 @@ fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
         topBar= { MyTopAppBar(
             modifier = Modifier,
             title = stringResource(R.string.my_list_button),
-            route = "home",
-            navController = navController,
+            onBackClick = {
+                navController.popBackStack()
+            },
             scrollBehavior = scrollBehavior,
             actions = {
 
@@ -552,7 +556,9 @@ Box(modifier = Modifier
 
 
     if (tutorial){
-        MyListTeachingModal(onClick = { viewModel.setMyListTutorial(context)})
+        MyListTeachingModal(
+            sheetState = sheetState,
+            onClick = { viewModel.setMyListTutorial(context)})
     }
 
     if (state.longTap) {
@@ -579,6 +585,7 @@ Box(modifier = Modifier
 
     if (state.newCategoryModal) {
         InfoModal(
+            sheetState = sheetState,
             onClick = {
                 viewModel.myListActions(MyListActions.OnDismissNewCategoryModal)
             }
@@ -618,6 +625,7 @@ Box(modifier = Modifier
 
     if (state.quizIsEmptyModal) {
         QuizIsEmptyModal(
+            sheetState = sheetState,
             onDismiss = {
                 viewModel.myListActions(MyListActions.OnDismissQuizIsEmptyModal)
             }

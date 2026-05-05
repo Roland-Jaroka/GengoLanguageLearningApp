@@ -198,4 +198,15 @@
     <string name="empty_quiz_modal_title">単語リストは空です</string>
     <string name="empty_quiz_modal_description">リストに単語を追加してからクイズを作成できるようになります</string>
     <string name="empty_quiz_modal_button">了解しました</string>
+    <string name="aiQuiz_feature_title">能力試験クイズ</string>
+    <string name="aiQuiz_feature_button">能力試験</string>
+    <string name="ai_quiz_title">言語能力試験</string>
+    <string name="review_button">問題を復習する</string>
+    <string name="ai_quiz_restart_button">リスタート</string>
+    <string name="ai_quiz_limit_error">AIが今日のリミットに達したみたいです。この機能はまだベータなので明日改めてお試しください。</string>
+    <string name="loading_tip1">AIがあなたのテストを作成しています</string>
+    <string name="loading_tip2">リミットについての問題が出たら明日改めてお試しください</string>
+    <string name="loading_tip3">重いAI環境についての問題が出たらもう一度お試しください</string>
+    <string name="loading_tip4">もう少しお待ち頂ければ...</string>
+    <string name="ai_quiz_server_error">AIのサーバーは重いみたいです。この機能をもう一度開いてみてください</string>
 </resources>

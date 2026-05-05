@@ -49,8 +49,9 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
         topBar = { MyTopAppBar(
             modifier = Modifier,
             title = stringResource(R.string.drawing_quiz_button),
-            route = "Home",
-            navController = navController
+            onBackClick = {
+                navController.popBackStack()
+            }
         ) }
     ) { paddingValues ->
         Column(

@@ -21,6 +21,8 @@ enum class FeatureType {
     Quizzes,
     DrawingQuiz,
     Dictionary,
-    LanguageChange
+    LanguageChange,
+
+    AiQuiz
 }
 

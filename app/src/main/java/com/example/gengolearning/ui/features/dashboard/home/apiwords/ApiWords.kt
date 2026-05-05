@@ -62,8 +62,9 @@ fun ApiWordsScreen (viewModel: ApiWordsViewModel = hiltViewModel(),
         topBar = {
             MyTopAppBar(
                 title = stringResource(R.string.dictionary),
-                route = "home",
-                navController = navController,
+                onBackClick = {
+                    navController.popBackStack()
+                },
                 modifier = Modifier,
                 actions = {
                     Image(
