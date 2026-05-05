@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,11 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.wear.compose.material.Text
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.gengolearning.ui.components.global.NavBarAnimatedIcon
 import com.example.gengolearning.ui.features.navigation.Route
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.White
@@ -35,10 +41,12 @@ import com.gengolearning.app.R
 fun BottomNavBar(navController: NavController) {
 
     val items= listOf(
-        BottomNavBarItems(stringResource(R.string.home_button), Route.Home, R.drawable.home),
-        BottomNavBarItems(stringResource(R.string.learning_button), Route.GrammarList, R.drawable.study),
-        BottomNavBarItems(stringResource(R.string.setting_button), Route.Settings, R.drawable.settings)
+        BottomNavBarItems(stringResource(R.string.home_button), Route.Home, R.drawable.home, R.raw.home),
+        BottomNavBarItems(stringResource(R.string.learning_button), Route.GrammarList, R.drawable.study, R.raw.book),
+        BottomNavBarItems(stringResource(R.string.setting_button), Route.Settings, R.drawable.settings, R.raw.settings)
     )
+
+
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute= navBackStackEntry?.destination
@@ -54,6 +62,8 @@ fun BottomNavBar(navController: NavController) {
     NavigationBar(containerColor = White,
         modifier = Modifier) {
         items.forEach { item->
+
+
             NavigationBarItem(
                 selected = false,
                 onClick = {
@@ -63,10 +73,23 @@ fun BottomNavBar(navController: NavController) {
                         restoreState= true
                     }
                 },
-                icon= { Image(painter = painterResource(id = item.icon),
-                    contentDescription = item.title,
-                    modifier = Modifier
-                        .size(30.dp))},
+                icon= {
+
+//                    Image(painter = painterResource(id = item.icon),
+//                    contentDescription = item.title,
+//                    modifier = Modifier
+//                        .size(30.dp))
+
+                    NavBarAnimatedIcon(
+                        itemPath = item.animation,
+                        isSelected = currentRoute?.hierarchy?.any {
+                            it.hasRoute(item.route::class)
+                        } == true
+                    )
+
+
+
+                      },
                 label =  {
                     if (currentRoute?.hierarchy?.any{
                         it.hasRoute(item.route::class)

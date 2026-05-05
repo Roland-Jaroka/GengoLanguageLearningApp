@@ -10,6 +10,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -21,10 +22,15 @@ import androidx.compose.ui.unit.sp
 import com.gengolearning.app.R
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.White
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ErrorModal(sheetState: SheetState, onClick: () -> Unit, text: String) {
+fun ErrorModal(sheetState: SheetState,
+               onClick: () -> Unit,
+               text: String) {
+
+            val scope = rememberCoroutineScope()
 
     ModalBottomSheet(
         onDismissRequest =  {
@@ -51,7 +57,16 @@ fun ErrorModal(sheetState: SheetState, onClick: () -> Unit, text: String) {
                 modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 10.dp))
             MyAppButton(
                 onClick = {
-                    onClick()
+
+                    scope.launch {
+                        sheetState.hide()
+
+                    }.invokeOnCompletion {
+
+                        if (!sheetState.isVisible) {
+                            onClick()
+                        }
+                    }
                 },
                 text = stringResource(R.string.okay_button),
                 colors = ButtonDefaults.buttonColors(BgBlue),

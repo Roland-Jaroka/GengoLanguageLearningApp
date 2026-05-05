@@ -35,6 +35,7 @@ class LearningLanguageViewModel @Inject constructor(
         viewModelScope.launch {
             userSettingsRepository.setLanguage(selectedLanguage)
             repository.loadWords(selectedLanguage)
+            repository.loadCategories(selectedLanguage)
             grammarRepo.loadGrammar(selectedLanguage)
 
             println("Selected language: $selectedLanguage")

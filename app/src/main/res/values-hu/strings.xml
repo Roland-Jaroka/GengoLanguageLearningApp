@@ -198,4 +198,15 @@
     <string name="empty_quiz_modal_title">Még nincsenek szavaid</string>
     <string name="empty_quiz_modal_description">Adj szavakat a listádhoz, hogy qvízeket csinálhass belőlük</string>
     <string name="empty_quiz_modal_button">Rendben</string>
+    <string name="aiQuiz_feature_button">Vizsga</string>
+    <string name="ai_quiz_title">Nyelvvizsga kvíz</string>
+    <string name="aiQuiz_feature_title">Nyelvvizsga kvíz</string>
+    <string name="review_button">Átnézem a kérdéseket</string>
+    <string name="ai_quiz_restart_button">Újrakezdem a kvízt</string>
+    <string name="ai_quiz_limit_error">Úgytűnik az AI elérte a napi limitet. Próbáld újra holnap. Ez a funkció még jelenleg csak béta verzió.</string>
+    <string name="loading_tip1">Az AI jelenleg készíti a tesztet</string>
+    <string name="loading_tip2">Ha hibát kapsz a napi limitről próbáld újra holnap</string>
+    <string name="loading_tip3">Ha hibát kapsz a szerver terheltségéről próbáld meg újratölteni a tesztet</string>
+    <string name="loading_tip4">Mindjárt kész....</string>
+    <string name="ai_quiz_server_error">Úgytűnik az AI ügynök jelenleg nagyon leterhelt. Próbáld meg újranyitni a funkciót</string>
 </resources>

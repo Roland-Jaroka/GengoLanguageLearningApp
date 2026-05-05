@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -20,16 +22,21 @@ import androidx.compose.ui.unit.sp
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InfoModal( onClick: () -> Unit) {
+fun InfoModal(
+    sheetState: SheetState,
+    onClick: () -> Unit) {
+    val scope = rememberCoroutineScope()
 
     ModalBottomSheet(
         onDismissRequest =  {
             onClick()
         },
-        containerColor = White
+        containerColor = White,
+        sheetState = sheetState
     ) {
         Column {
             Image(
@@ -49,7 +56,14 @@ fun InfoModal( onClick: () -> Unit) {
                 modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 10.dp))
             MyAppButton(
                 onClick = {
-                    onClick()
+
+                    scope.launch {
+                         sheetState.hide()
+                        }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                onClick()
+                            }
+                    }
                 },
                 text = stringResource(R.string.okay_button),
                 colors = ButtonDefaults.buttonColors(BgBlue),

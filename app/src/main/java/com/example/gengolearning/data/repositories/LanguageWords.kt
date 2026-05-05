@@ -1,13 +1,17 @@
 package com.example.gengolearning.data.repositories
 
 
+import android.util.Log
 import com.example.gengolearning.data.local.CategoryDatabase
 import com.example.gengolearning.data.local.WordsDao
 import com.example.gengolearning.data.remote.JishoResponse
 import com.example.gengolearning.model.appmodels.NewsResponse
 import com.example.gengolearning.model.appmodels.WordCategories
 import com.example.gengolearning.model.appmodels.Words
+import com.example.gengolearning.ui.features.dashboard.home.aiquiz.AiQuiz
 import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.firestore
@@ -17,6 +21,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -357,6 +362,44 @@ class LanguageWords @Inject constructor(
 
 
         return Json { ignoreUnknownKeys = true }.decodeFromString(response)
+    }
+
+
+    suspend fun getAiquiz(language: String, level: String): List<AiQuiz> {
+        val model = Firebase.ai(backend = GenerativeBackend.googleAI())
+            .generativeModel("gemini-2.5-flash")
+        val prompt = """
+             You are a JSON generator.
+
+             Return ONLY valid JSON.
+             No markdown, no explanations, no extra text.
+
+             Generate exactly 5 $level reading comprehension questions.
+
+             Each item must follow this structure:
+
+             {
+               "question": "string",
+               "options": ["string", "string", "string", "string"],
+               "correctAnswer": "string"
+             }
+
+             Rules:
+             - question must be a medium-length $language reading passage + question
+             - $level level difficulty
+             - 4 answer options exactly
+             - only one correct answer
+             - correctAnswer must match one option exactly
+             - all content must be in natural $language
+
+             Return ONLY a JSON array.
+        """.trimIndent()
+
+        val response = model.generateContent(prompt)
+        Log.d("Ai_Quiz", prompt)
+        Log.d("Ai_Quiz", response.text ?: "")
+
+        return  Json { ignoreUnknownKeys = true }.decodeFromString<List<AiQuiz>>(response.text ?: "")
     }
 
 

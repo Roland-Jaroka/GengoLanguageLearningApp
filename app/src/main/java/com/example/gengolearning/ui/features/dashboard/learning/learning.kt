@@ -48,7 +48,7 @@ import com.gengolearning.app.R
 @Composable
 fun LearningUi(navController: NavController,
                viewModel: LearningViewModel= hiltViewModel()){
-//TODO learning UI and functions
+
 
     val grammarList by viewModel.grammar.collectAsState()
     val searchInput = viewModel.search

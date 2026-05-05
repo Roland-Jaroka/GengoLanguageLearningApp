@@ -12,20 +12,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.gengolearning.app.R
 import com.example.gengolearning.ui.theme.White
+import com.gengolearning.app.R
 
 @ExperimentalMaterial3Api
 @Composable
 fun MyTopAppBar(modifier: Modifier,
                 title: String,
-                route: String,
-                navController: NavController,
                 scrollBehavior: TopAppBarScrollBehavior? = null,
                 actions: @Composable () -> Unit = {},
+                onBackClick: () -> Unit = {},
                 onBackAction: () -> Unit = {}
 ) {
+
     TopAppBar(
         modifier = modifier,
         title = {
@@ -33,8 +32,9 @@ fun MyTopAppBar(modifier: Modifier,
         },
         navigationIcon = {
             IconButton({
-                navController.popBackStack()
-                onBackAction()
+                    onBackClick()
+                    onBackAction()
+
             }) {
                 Image(
                     painter = painterResource(R.drawable.arrow_back2),
