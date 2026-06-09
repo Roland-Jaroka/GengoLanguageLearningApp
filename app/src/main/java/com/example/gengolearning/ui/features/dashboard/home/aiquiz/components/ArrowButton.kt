@@ -1,4 +1,4 @@
-package com.example.gengolearning.ui.features.dashboard.home.aiquiz
+package com.example.gengolearning.ui.features.dashboard.home.aiquiz.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.gengolearning.app.R
 

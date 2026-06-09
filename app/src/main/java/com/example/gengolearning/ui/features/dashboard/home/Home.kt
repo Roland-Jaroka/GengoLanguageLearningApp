@@ -111,7 +111,7 @@ fun Home(viewModel: HomeViewModel= hiltViewModel(),
 
     val currentAppLanguage =  AppCompatDelegate.getApplicationLocales()[0]?.toLanguageTag() ?: "en"
 
-
+   val state by viewModel.uiState.collectAsState()
 
 
 
@@ -386,7 +386,6 @@ fun Home(viewModel: HomeViewModel= hiltViewModel(),
                     }
 
                 }
-
 
                 HorizontalPager(
                     state = pageState,

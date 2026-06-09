@@ -38,12 +38,17 @@ sealed interface AiQuizActions {
     data object onNextClick: AiQuizActions
     data object onBackQuizClick: AiQuizActions
 
+    data object  onRetry: AiQuizActions
+
 }
 
 sealed class AiQuizModals {
     object LimitError: AiQuizModals()
     object ServerError: AiQuizModals()
+
     data class UnknownError(val error: String): AiQuizModals()
+
+    object NoInternet: AiQuizModals()
 
 
 }

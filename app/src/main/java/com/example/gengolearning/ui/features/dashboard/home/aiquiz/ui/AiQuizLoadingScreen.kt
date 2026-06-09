@@ -1,4 +1,4 @@
-package com.example.gengolearning.ui.features.dashboard.home.aiquiz
+package com.example.gengolearning.ui.features.dashboard.home.aiquiz.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween

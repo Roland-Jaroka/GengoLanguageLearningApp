@@ -6,24 +6,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gengolearning.model.AppSettingsPreferences
-import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.data.repositories.LanguageWords
+import com.example.gengolearning.model.AppSettingsPreferences
+import com.example.gengolearning.model.appmodels.ErrorModalText
+import com.example.gengolearning.model.appmodels.Words
+import com.example.gengolearning.model.errors.NetworkError
+import com.example.gengolearning.model.results.Response
+import com.gengolearning.app.R
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.util.network.UnresolvedAddressException
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import okio.IOException
-import java.net.ConnectException
-import java.net.URLEncoder
 
 data class UiState(
     val isLoading: Boolean = false,
     val wordList: List<Words> = emptyList(),
-    val error: String? = null
+    val error: Boolean? = null,
+    val modalText: ErrorModalText? = null
+
 )
 @HiltViewModel
 class ApiWordsViewModel @Inject constructor(
@@ -54,56 +56,83 @@ class ApiWordsViewModel @Inject constructor(
 
     fun loadWordsFromApi(searchKey: String = "house") {
 
-           val searchKeyEncoding = URLEncoder.encode(searchKey, "UTF-8")
-
-
             viewModelScope.launch {
-
-
                 _uiState.update {
                     it.copy(
                         isLoading = true
                     )
                 }
+                val data = repository.getWordsFromApi(searchKey)
 
-                try {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            wordList = repository.getWordsFromApi(searchKeyEncoding)
-                        )
-                    }
-                }
+                   _uiState.update {
 
-                catch (e: Throwable) {
+                       when (data) {
 
-                    when (e) {
-                        is ConnectException,
-                        is IOException,
-                        is UnresolvedAddressException    -> {
+                           is Response.Success -> {
+                               it.copy(
+                                   isLoading = false,
+                                   wordList = data.data
+                               )
 
-                            println("Error loading words: no internet")
+                           }
 
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = "no internet"
-                                )
-                            }
-                        }
+                           is Response.Error -> {
+                               when (data.error) {
+                                   NetworkError.BasicNetworkError.NO_INTERNET -> {
+                                       it.copy(
+                                           isLoading = false,
+                                           error = true,
+                                           modalText = ErrorModalText(
+                                               text = R.string.common_error_internet_description,
+                                               title = R.string.common_error_internet_title,
+                                               buttonText = R.string.common_error_internet_button
+                                           )
+                                       )
 
-                        else -> {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = e.message
-                                )
-                            }
-                            println("Error loading words: ${e.message}")
-                        }
+                                   }
 
-                    }
-                }
+                                   NetworkError.BasicNetworkError.SERVER_DOWN -> {
+                                       it.copy(
+                                           isLoading = false,
+                                           error = true,
+                                           modalText = ErrorModalText(
+                                               text = R.string.common_error_server,
+                                               title = R.string.common_error_internet_title,
+                                               buttonText = R.string.common_error_internet_button
+                                           )
+                                       )
+
+                                   }
+
+                                   NetworkError.BasicNetworkError.RATE_LIMIT_REACHED -> {
+                                       it.copy(
+                                           isLoading = false,
+                                           error = true,
+                                           modalText = ErrorModalText(
+                                               text = R.string.common_error_internet_title,
+                                               title = R.string.common_error_internet_description,
+                                               buttonText = R.string.common_error_internet_button
+                                           )
+                                       )
+
+                                   }
+
+                                   NetworkError.BasicNetworkError.UNKOWN_ERROR -> {
+                                       it.copy(
+                                           isLoading = false,
+                                           error = true,
+                                           modalText = ErrorModalText(
+                                               text = R.string.common_error_internet_title,
+                                               title = R.string.login_unkown_error,
+                                               buttonText = R.string.common_error_internet_button
+                                           )
+                                       )
+                                   }
+                               }
+                           }
+                       }
+                   }
+
             }
 
     }
@@ -117,7 +146,8 @@ class ApiWordsViewModel @Inject constructor(
     fun resetError() {
         _uiState.update {
             it.copy(
-                error = null
+                error = null,
+                modalText = null
             )
         }
     }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Text
@@ -23,9 +24,10 @@ fun TextButton(modifier: Modifier = Modifier, text: String, onClick: () -> Unit)
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     Button(
-        onClick = {
+        onClick = dropUnlessResumed {
             onClick()
-        },
+        }
+        ,
         interactionSource = interactionSource,
         colors = ButtonDefaults.buttonColors(
            backgroundColor = if (isPressed) TransparentBlue else Transparent,

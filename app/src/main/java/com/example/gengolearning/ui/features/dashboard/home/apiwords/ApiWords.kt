@@ -202,11 +202,12 @@ fun ApiWordsScreen (viewModel: ApiWordsViewModel = hiltViewModel(),
         )
     }
 
-    if (uiState.error != null) {
+    if (uiState.error == true) {
         ErrorModal(
             onClick = {
                 viewModel.resetError()
-            }
+            },
+            text = uiState.modalText!!.text
         )
     }
 

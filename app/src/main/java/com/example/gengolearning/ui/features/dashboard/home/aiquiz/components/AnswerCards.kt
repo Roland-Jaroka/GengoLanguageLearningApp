@@ -1,4 +1,4 @@
-package com.example.gengolearning.ui.features.dashboard.home.aiquiz
+package com.example.gengolearning.ui.features.dashboard.home.aiquiz.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,7 +34,7 @@ fun AnswerCard(modifier: Modifier = Modifier,
         elevation = CardDefaults.cardElevation(10.dp),
         modifier = modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .heightIn(min = 80.dp)
             .padding(horizontal = 10.dp)
             .clickable{
                 onClick()
@@ -53,7 +54,8 @@ fun AnswerCard(modifier: Modifier = Modifier,
             Text(
                 text = answer,
                 textAlign = TextAlign.Center,
-                fontSize = 15.sp
+                fontSize = 15.sp,
+                overflow = TextOverflow.Clip
             )
         }
     }

@@ -4,12 +4,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,10 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import com.example.gengolearning.model.appmodels.Languages
 import com.example.gengolearning.model.utils.AnalyticsHelper
@@ -62,9 +60,6 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
     val scrollState = rememberScrollState()
     val languages = Languages.languagesList
     val scope = rememberCoroutineScope()
-    var expanded by remember { mutableStateOf(false) }
-    var secondCardExpanded by remember { mutableStateOf(false) }
-    val collapsedHeight = 100.dp
 
 
 
@@ -81,9 +76,10 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                     Text(stringResource(R.string.learning_language))
                 },
                 navigationIcon = {
-                    IconButton({
+                    IconButton(onClick = dropUnlessResumed {
                         navController.popBackStack()
-                    }) {
+                    }
+                    ) {
                         Image(
                             painter = painterResource(R.drawable.arrow_back2),
                             contentDescription = null,
@@ -106,15 +102,8 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .width(300.dp)
-                    .heightIn(if (expanded) Dp.Unspecified else collapsedHeight)
                     .animateContentSize()
-                    .padding(12.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = null
-                    ){
-                        expanded = !expanded
-                    },
+                    .padding(12.dp),
                 colors = CardDefaults.cardColors(White),
                 border = BorderStroke(1.dp, Blue),
                 elevation = CardDefaults.cardElevation(5.dp)
@@ -132,9 +121,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
 
                     // if the list is expanded it shows all the languages if its not it shows only
                     //the one that is the current language
-                    val visibleLanguages = if (expanded) languages
-                    else listOfNotNull(
-                        languages.find { it.code == currentLanguage.code } )
+                    val visibleLanguages = languages
 
                     visibleLanguages.forEach { language ->
 
@@ -169,16 +156,9 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
             Card(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .heightIn(if(secondCardExpanded) Dp.Unspecified else collapsedHeight)
                     .animateContentSize()
                     .width(300.dp)
-                    .padding(12.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = null
-                    ){
-                        secondCardExpanded = !secondCardExpanded
-                    },
+                    .padding(12.dp),
                 colors = CardDefaults.cardColors(White),
                 border = BorderStroke(1.dp, Blue),
                 elevation = CardDefaults.cardElevation(5.dp)
@@ -192,37 +172,23 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                     fontWeight = FontWeight.Bold
                 )
 
-                val visibleLang = if (secondCardExpanded) languages
-                else listOfNotNull(
-                    languages.find { it.code == mainLanguage }
-                )
+                languages.forEach { language ->
 
-               visibleLang.forEach { language ->
+                    LanguageSelectionRow(
+                        flag = language.flag,
+                        language = stringResource(language.name),
+                        selected = language.code == selectedMainLanguage,
+                        onSelect = {
+                            selectedMainLanguage = language.code
 
-                   LanguageSelectionRow(
-                       flag = language.flag,
-                       language = stringResource(language.name),
-                       selected = language.code == selectedMainLanguage,
-                       onSelect = {
-                           selectedMainLanguage = language.code
+                            scope.launch {
+                                viewModel.setMainLanguage(selectedMainLanguage)
+                            }
 
-                           scope.launch {
-                               delay(200)
-                               viewModel.setMainLanguage(selectedMainLanguage)
-                               navController.navigate(Route.Settings) {
-                                   popUpTo(navController.graph.startDestinationId) {
-                                       saveState = false
-                                   }
-                                   launchSingleTop = true
-                                   restoreState = true
-
-                               }
-                           }
-
-                           AnalyticsHelper.logEvent("main_language_changed")
-                       }
-                   )
-               }
+                            AnalyticsHelper.logEvent("main_language_changed")
+                        }
+                    )
+                }
                 Spacer(modifier = Modifier.height(15.dp))
 
             }

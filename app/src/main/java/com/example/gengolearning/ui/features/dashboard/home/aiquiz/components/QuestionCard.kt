@@ -1,4 +1,4 @@
-package com.example.gengolearning.ui.features.dashboard.home.aiquiz
+package com.example.gengolearning.ui.features.dashboard.home.aiquiz.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

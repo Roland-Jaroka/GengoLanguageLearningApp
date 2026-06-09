@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.dropUnlessResumed
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
 
@@ -31,11 +32,12 @@ fun MyTopAppBar(modifier: Modifier,
             Text(title)
         },
         navigationIcon = {
-            IconButton({
-                    onBackClick()
-                    onBackAction()
+            IconButton(onClick = dropUnlessResumed {
+                onBackClick()
+                onBackAction()
+            }
 
-            }) {
+            ) {
                 Image(
                     painter = painterResource(R.drawable.arrow_back2),
                     contentDescription = null,

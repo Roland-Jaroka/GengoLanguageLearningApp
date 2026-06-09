@@ -7,10 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.data.repositories.LanguageGrammar
 import com.example.gengolearning.data.repositories.UserSettingsRepository
 import com.example.gengolearning.model.appmodels.Grammar
+import com.example.gengolearning.model.results.Response
 import com.gengolearning.app.R
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,20 +84,34 @@ class GrammarDetailsViewModel @Inject constructor(
 
         _chatGPTState.value = ChatGPTState.Loading
 
-        try {
-            val model = Firebase.ai(backend = GenerativeBackend.googleAI())
-                .generativeModel("gemini-2.5-flash")
-            val prompt =
-                "Give me an example sentence from $currentLanguage language using the following grammar: $grammar and use $appLanguage for explanation"
-            val response = model.generateContent(prompt)
-             _chatGPTState.value = ChatGPTState.Success(response.text ?: "")
-        } catch (e: Exception) {
-            _chatGPTState.value = ChatGPTState.Error(e.message ?: "Unknown error")
+//        try {
+//            val model = Firebase.ai(backend = GenerativeBackend.googleAI())
+//                .generativeModel("gemini-2.5-flash")
+//            val prompt =
+//                "Give me an example sentence from $currentLanguage language using the following grammar: $grammar and use $appLanguage for explanation"
+//            val response = model.generateContent(prompt)
+//             _chatGPTState.value = ChatGPTState.Success(response.text ?: "")
+//        } catch (e: Exception) {
+//            _chatGPTState.value = ChatGPTState.Error(e.message ?: "Unknown error")
+//
+//            println("The error is: ${e.message}")
+//
+//
+//
+//        }
 
-            println("The error is: ${e.message}")
+        val response = languageGrammar.getGeminiaiGrammar(
+            language = currentLanguage,
+            grammarTopic = grammar
+        )
 
-
-
+        when(response) {
+            is Response.Success -> {
+                _chatGPTState.value = ChatGPTState.Success(response.data.explanation)
+            }
+            is Response.Error -> {
+                _chatGPTState.value = ChatGPTState.Error(response.error.toString())
+            }
         }
 
     }

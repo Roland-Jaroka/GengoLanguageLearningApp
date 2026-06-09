@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.data.repositories.LanguageWords
 import com.example.gengolearning.data.repositories.UserSettingsRepository
+import com.example.gengolearning.model.errors.NetworkError
+import com.example.gengolearning.model.results.Response
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
@@ -38,6 +40,10 @@ class AiQuizViewmodel @Inject constructor(
 
     private var currentIndex = 0
 
+    init {
+        onStart()
+    }
+
 
     fun onAction(action: AiQuizActions) {
         when (action) {
@@ -65,6 +71,10 @@ class AiQuizViewmodel @Inject constructor(
 
             is AiQuizActions.onBackQuizClick -> {
                 onBackClick()
+            }
+
+            is AiQuizActions.onRetry -> {
+                onStart()
             }
         }
     }
@@ -117,65 +127,105 @@ class AiQuizViewmodel @Inject constructor(
       }
     }
 
-    fun onStart() {
+   private fun onStart() {
         _uiState.update { it.copy(
-            showLevelSelectorModal = true
+            showLevelSelectorModal = true,
+            isError = false,
+            modals = null
         ) }
     }
 
     private fun getAiQuiz(language: String, level: String) {
-        _uiState.update { it.copy(
-            isLoading = true,
-            showLevelSelectorModal = false
-        )
+        _uiState.update {
+            it.copy(
+                isLoading = true,
+                showLevelSelectorModal = false,
+            )
 
         }
 
-      viewModelScope.launch {
-          try {
-             val result = repository.getAiquiz(language, level)
-              quizList = result
+        viewModelScope.launch {
 
-              println("Result of quiz: ${result.size}")
+            val result = repository.getAiQuiz(language, level)
 
-              _uiState.update { it.copy(
-                  quiz = quizList[currentIndex],
-                  isLoading = false,
-                  totalPoints = result.size
-              ) }
+            when (result) {
+                is Response.Success -> {
+                    quizList = result.data
 
-          } catch(e: Exception) {
-              if (e.message?.contains("you exceeded your current quota") ?: false) {
-                  _uiState.update { it.copy(
-                      isLoading = false,
-                      isError = true,
-                      modals = AiQuizModals.LimitError
-                  )
-                  }
-              } else if (e.message?.contains(("Gemini Developer API is overloaded")) ?: false ||
-                  e.message?.contains("This model is currently experiencing high demand") ?: false) {
+                    repository.uploadQuizToFirebase(
+                        quizList = quizList,
+                        language = language,
+                        level = level
+                    )
 
-                  _uiState.update { it.copy(
-                      isLoading = false,
-                      isError = true,
-                      modals = AiQuizModals.ServerError
-                  )
-                  }
-              }
+                    _uiState.update {
+                        it.copy(
+                            quiz = quizList[currentIndex],
+                            isLoading = false,
+                            totalPoints = quizList.size
+                        )
+                    }
+                }
 
-              else {
+                is Response.Error -> {
 
-              _uiState.update {
-                  it.copy(
-                      isLoading = false,
-                      isError = true,
-                      modals = AiQuizModals.UnknownError(e.message ?: "Unknown error")
-                  )
-              }
+                    when (result.error) {
+                        NetworkError.GeminaiNetworkError.TOO_MANY_REQUEST -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isError = true,
+                                    modals = AiQuizModals.ServerError
+                                )
+                            }
+                        }
 
-              }
-          }
-      }
+                        NetworkError.GeminaiNetworkError.HEAVY_SERVERS -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isError = true,
+                                    modals = AiQuizModals.ServerError
+                                )
+                            }
+                        }
+
+                        NetworkError.GeminaiNetworkError.RATE_LIMIT_REACHED -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isError = true,
+                                    modals = AiQuizModals.LimitError
+                                )
+                            }
+                        }
+
+                        NetworkError.GeminaiNetworkError.UNKOWN_ERROR -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isError = true,
+                                    modals = AiQuizModals.UnknownError(
+                                        "Unknown error"
+                                    )
+                                )
+                            }
+                        }
+
+                        NetworkError.GeminaiNetworkError.NO_INTERNET -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isError = true,
+                                    modals = AiQuizModals.NoInternet
+                                )
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     private fun  resetState() {

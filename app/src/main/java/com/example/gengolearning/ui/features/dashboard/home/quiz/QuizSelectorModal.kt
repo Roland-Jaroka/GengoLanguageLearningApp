@@ -1,5 +1,6 @@
 package com.example.gengolearning.ui.features.dashboard.home.quiz
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -89,7 +91,12 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                     color = White,
                     shadowElevation = 4.dp,
                     modifier = Modifier
+                        .clickable{
+                            selectedQuizMode.value = quizModes
+                            shuffledQuizMode = false
+                        }
                         .padding(bottom = 5.dp)
+
                 ) {
                     Row(
                         modifier = Modifier
@@ -110,7 +117,9 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                                 selectedQuizMode.value = quizModes
                                 shuffledQuizMode = false
                             },
-                            modifier = Modifier
+                            colors = CheckboxDefaults.colors(
+                               checkedColor = Blue
+                            )
                         )
                     }
                 }
@@ -128,8 +137,13 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                 ) {
                     Row(
                         modifier = Modifier
+                            .clickable{
+                                shuffledQuizMode = true
+                                selectedQuizMode.value = null
+                            }
                             .padding(start = 5.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            ,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
@@ -144,7 +158,10 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                             onCheckedChange = {
                                     shuffledQuizMode = true
                                 selectedQuizMode.value = null
-                            }
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = Blue
+                            )
                         )
                     }
                 }

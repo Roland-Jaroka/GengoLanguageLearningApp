@@ -171,7 +171,7 @@
     <string name="category_card_words">Number of words</string>
     <string name="edit_category_color">Change color</string>
     <string name="edit_category_button">Edit</string>
-    <string name="delete_word_dialog_title">Delet word</string>
+    <string name="delete_word_dialog_title">Delete word</string>
     <string name="delete_word_dialog_description">Are you sure you want to delete the selected words?</string>
     <string name="delete_word_dialog_button">Delete</string>
     <string name="delete_word_dialog_cancel">Cancel</string>
@@ -209,4 +209,7 @@
     <string name="loading_tip3">If you get an error about heavy AI enviorment try to load it again</string>
     <string name="loading_tip4">Almost ready....</string>
     <string name="ai_quiz_server_error">It seems like the AI agent is under heavy use at the moment. Try opening the function again</string>
+    <string name="common_error_server">It seems like something went wrong on the server. Try again.</string>
+    <string name="common_try_again">Try again</string>
+    <string name="common_go_back">Go back</string>
 </resources>

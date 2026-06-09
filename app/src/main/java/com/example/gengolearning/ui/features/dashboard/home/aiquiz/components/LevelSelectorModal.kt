@@ -1,5 +1,6 @@
-package com.example.gengolearning.ui.features.dashboard.home.aiquiz
+package com.example.gengolearning.ui.features.dashboard.home.aiquiz.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,6 +81,9 @@ fun LevelSelectorModal(currentLanguage: Language,
                     ) {
                         Row(
                             modifier = Modifier
+                                .clickable{
+                                    selectedLevel.value = level.name
+                                }
                                 .padding(start = 5.dp)
                                 .fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -95,6 +100,9 @@ fun LevelSelectorModal(currentLanguage: Language,
                                 onCheckedChange = {
                                     selectedLevel.value = level.name
                                 },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = Blue
+                                )
                             )
                         }
                     }
