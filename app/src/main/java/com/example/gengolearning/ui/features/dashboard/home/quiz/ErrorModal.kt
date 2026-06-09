@@ -1,5 +1,6 @@
 package com.example.gengolearning.ui.features.dashboard.home.quiz
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +26,10 @@ import com.gengolearning.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ErrorModal(onClick : () -> Unit) {
+fun ErrorModal(onClick : () -> Unit,
+               @StringRes title: Int = R.string.common_error_internet_title,
+               @StringRes  text: Int = R.string.common_error_internet_description,
+               @StringRes  buttonText: Int = R.string.common_error_internet_button ) {
 
     ModalBottomSheet(
         onDismissRequest = {
@@ -49,7 +53,7 @@ fun ErrorModal(onClick : () -> Unit) {
             )
 
             Text(
-                text = stringResource(R.string.common_error_internet_title),
+                text = stringResource(title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp,
                 modifier = Modifier
@@ -57,14 +61,14 @@ fun ErrorModal(onClick : () -> Unit) {
 
             )
             Text(
-                text = stringResource(R.string.common_error_internet_description),
+                text = stringResource(text),
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(bottom = 10.dp,start = 20.dp, end = 20.dp)
             )
 
             MyAppButton(
-                text = stringResource(R.string.common_error_internet_button),
+                text = stringResource(buttonText),
                 onClick = {
                     onClick()
                 },

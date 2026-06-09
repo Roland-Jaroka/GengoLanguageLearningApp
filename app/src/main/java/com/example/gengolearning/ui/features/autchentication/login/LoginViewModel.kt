@@ -45,36 +45,53 @@ class LoginViewModel @Inject constructor(
     var isPasswordVisible by mutableStateOf(false)
         private set
 
+    var isLanguageSelection by mutableStateOf(false)
+        private set
+
+    fun loginActions(action: LoginActions) {
+        when (action) {
+            LoginActions.OnForgotPassword -> TODO()
+            LoginActions.OnGoogleSignUp -> TODO()
+            LoginActions.OnLanguage -> onLanguage()
+            is LoginActions.OnLogin -> {
+                login(action.email, action.password)
+            }
+            LoginActions.OnSignUp -> TODO()
+            is LoginActions.OnEmailChange ->
+                onEmailChange(action.newInput)
+            is LoginActions.OnPasswordChange -> onPasswordChange(action.newInput)
+            LoginActions.OnRevealPassword -> setPasswordVisibility()
+            LoginActions.OnResetState -> resetState()
+        }
+    }
 
 
-
-
-    fun onEmailChange(newEmail: String) {
+ private   fun onEmailChange(newEmail: String) {
         email = newEmail
         emailError = null
     }
 
-    fun onPasswordChange(newPassword: String) {
+   private fun onPasswordChange(newPassword: String) {
         password= newPassword
         passwordError = null
     }
 
 
-    fun setPasswordVisibility(){
+   private fun setPasswordVisibility(){
         isPasswordVisible = !isPasswordVisible
     }
 
     private val _loginState= MutableStateFlow<LoginStates>(LoginStates.Idle)
     val loginState= _loginState.asStateFlow()
 
-    fun fieldValidation(email: String, password: String): FieldValidationResult {
+   private fun fieldValidation(email: String, password: String): FieldValidationResult {
         if (email.isBlank()) return FieldValidationResult.BlankEmail
         if (password.isBlank()) return FieldValidationResult.BlankPassword
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) return FieldValidationResult.InvalidEmail
         return FieldValidationResult.Success
     }
 
-     fun login(email:String, password: String) {
+   private  fun login(email:String, password: String) {
       val auth= FirebaseAuth.getInstance()
         val result = fieldValidation(email, password)
 
@@ -86,7 +103,7 @@ class LoginViewModel @Inject constructor(
                 _loginState.value = LoginStates.Loading
                 viewModelScope.launch {
                 try {
-                    auth.signInWithEmailAndPassword(email, password).await()
+                    auth.signInWithEmailAndPassword(email.trim(), password.trim()).await()
 
                     userSettingsRepository.getUserName()
 
@@ -107,9 +124,13 @@ class LoginViewModel @Inject constructor(
 
     }
 
-    fun resetState(){
+  private fun resetState(){
         _loginState.value= LoginStates.Idle
 
+    }
+
+    private fun onLanguage() {
+        isLanguageSelection = !isLanguageSelection
     }
 
     }

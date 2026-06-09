@@ -14,6 +14,7 @@ import com.example.gengolearning.model.AppSettingsPreferences
 import com.example.gengolearning.model.appmodels.NewsResponse
 import com.example.gengolearning.model.appmodels.ProfileImageState
 import com.example.gengolearning.model.appmodels.Words
+import com.example.gengolearning.ui.features.navigation.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,6 +33,12 @@ import kotlinx.coroutines.launch
 sealed class HomeUiEvents {
     object NavigateToQuiz: HomeUiEvents()
 }
+
+sealed class HomeUiState {
+    object Loading : HomeUiState()
+    object Idl: HomeUiState()
+}
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
    val repository: LanguageWords,
@@ -61,6 +68,8 @@ class HomeViewModel @Inject constructor(
     var quizIsEmptyModal by mutableStateOf(false)
         private set
 
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Idl)
+    val uiState = _uiState.asStateFlow()
 
     val username = userSettingsRepository.username.stateIn(
         scope = viewModelScope,
@@ -231,6 +240,18 @@ class HomeViewModel @Inject constructor(
 
     fun dismissQuizIsEmptyModal() {
         quizIsEmptyModal = false
+    }
+
+    fun testApi() {
+        _uiState.value = HomeUiState.Loading
+
+            repository.getFirebaseToken { token ->
+                viewModelScope.launch {
+                    repository.testAPI(token)
+                    _uiState.value = HomeUiState.Idl
+                }
+            }
+
     }
 
 

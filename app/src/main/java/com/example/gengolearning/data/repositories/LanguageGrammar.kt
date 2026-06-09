@@ -1,7 +1,13 @@
 package com.example.gengolearning.data.repositories
 
+import androidx.appcompat.app.AppCompatDelegate
 import com.example.gengolearning.model.appmodels.Grammar
 import com.example.gengolearning.data.local.GrammarDao
+import com.example.gengolearning.model.api_call_interfaces.NetworkInterface
+import com.example.gengolearning.model.appmodels.GeminaiGrammarRequest
+import com.example.gengolearning.model.appmodels.GeminaiGrammarResponse
+import com.example.gengolearning.model.errors.NetworkError
+import com.example.gengolearning.model.results.Response
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -14,7 +20,8 @@ import kotlinx.coroutines.tasks.await
 
 class LanguageGrammar @Inject constructor(
     private val dao: GrammarDao,
-    private val userSettingsRepository: UserSettingsRepository
+    private val userSettingsRepository: UserSettingsRepository,
+    private val api: NetworkInterface
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -175,6 +182,25 @@ class LanguageGrammar @Inject constructor(
     //Clear on sign out
     suspend fun clearGrammar() {
         dao.clearGrammar()
+    }
+
+    suspend fun getGeminiaiGrammar(language: String, grammarTopic: String): Response<GeminaiGrammarResponse, NetworkError.GeminaiNetworkError>{
+
+        val appLanguage = AppCompatDelegate.getApplicationLocales()[0]?.toLanguageTag() ?: "en"
+
+        return try {
+            val response = api.getGrammar(
+                appLanguage = appLanguage,
+                GeminaiGrammarRequest(
+                    language, grammarTopic
+                )
+            )
+
+            Response.Success(response)
+
+        } catch (e: Exception) {
+            Response.Error(NetworkError.GeminaiNetworkError.UNKOWN_ERROR)
+        }
     }
 
 

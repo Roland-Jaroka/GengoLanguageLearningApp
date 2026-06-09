@@ -15,7 +15,9 @@ import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -59,6 +61,9 @@ class AddWordsViewModel @Inject constructor(
 
     var existingWordInLibrary by mutableStateOf<Words?>(null)
         private set
+
+    private val _events = Channel<AddWordsEvents>()
+    val events = _events.receiveAsFlow()
 
 
 
@@ -112,6 +117,8 @@ class AddWordsViewModel @Inject constructor(
             is AddWordResults.Success -> {
 
                        addWordToListAndFirebase()
+
+                       _events.send(AddWordsEvents.showSnackBar)
             }
 
             }

@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -30,11 +29,11 @@ import com.example.gengolearning.model.BottomNavBar
 import com.example.gengolearning.ui.components.global.OpeningLoadingScreen
 import com.example.gengolearning.ui.components.onBoardongRoot
 import com.example.gengolearning.ui.features.autchentication.forgotpassword.ForgotPasswordScr
-import com.example.gengolearning.ui.features.autchentication.login.LoginUi
+import com.example.gengolearning.ui.features.autchentication.login.LoginUiRoot
 import com.example.gengolearning.ui.features.autchentication.signup.SignUpUi
 import com.example.gengolearning.ui.features.dashboard.home.Home
 import com.example.gengolearning.ui.features.dashboard.home.addwords.AddWordsUi
-import com.example.gengolearning.ui.features.dashboard.home.aiquiz.AiQuizUiRoot
+import com.example.gengolearning.ui.features.dashboard.home.aiquiz.ui.AiQuizUiRoot
 import com.example.gengolearning.ui.features.dashboard.home.apiwords.ApiWordsScreen
 import com.example.gengolearning.ui.features.dashboard.home.drawingquiz.DrawingQuizView
 import com.example.gengolearning.ui.features.dashboard.home.mainlanguage.MainLanguageSelector
@@ -49,7 +48,6 @@ import com.example.gengolearning.ui.features.dashboard.learning.grammarDetails.G
 import com.example.gengolearning.ui.features.dashboard.settings.LearningLanguageUi
 import com.example.gengolearning.ui.features.dashboard.settings.Profile.ProfileMenu
 import com.example.gengolearning.ui.features.dashboard.settings.settingsUi
-import com.google.api.Context
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -98,8 +96,6 @@ fun AppNavigation() {
 
         if (isLoginDone != null) {
 
-            println("Login screen is Login done = $isLoginDone")
-
         NavHost(
             navController= navController,
             startDestination= startDestination,
@@ -113,7 +109,7 @@ fun AppNavigation() {
                 startDestination = Route.Login
             ) {
                 composable<Route.Login>(
-                    exitTransition ={ slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> -fullWidth} } ) { LoginUi(navController = navController) }
+                    exitTransition ={ slideOutHorizontally(animationSpec = tween(durationMillis = 1000)){fullWidth -> -fullWidth} } ) { LoginUiRoot(navController = navController) }
                 composable<Route.ForgotPassword> { ForgotPasswordScr(navController = navController) }
                 composable<Route.SignUp> { SignUpUi(navController = navController) }
 

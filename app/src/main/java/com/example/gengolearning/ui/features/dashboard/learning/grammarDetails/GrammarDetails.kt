@@ -56,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import com.example.gengolearning.model.utils.AnalyticsHelper
 import com.example.gengolearning.ui.components.ErrorModal
@@ -124,9 +125,10 @@ fun GrammarDetails(
                     Text(stringResource(R.string.grammar_details))
                 },
                 navigationIcon = {
-                    IconButton({
+                    IconButton(onClick = dropUnlessResumed {
                         navController.popBackStack()
-                    }) {
+                    }
+                    ) {
                         Image(
                             painter = painterResource(R.drawable.arrow_back2),
                             contentDescription = null,

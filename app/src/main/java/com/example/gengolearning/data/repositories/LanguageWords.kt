@@ -5,34 +5,42 @@ import android.util.Log
 import com.example.gengolearning.data.local.CategoryDatabase
 import com.example.gengolearning.data.local.WordsDao
 import com.example.gengolearning.data.remote.JishoResponse
+import com.example.gengolearning.model.api_call_interfaces.NetworkInterface
+import com.example.gengolearning.model.appmodels.DictionaryRequest
 import com.example.gengolearning.model.appmodels.NewsResponse
+import com.example.gengolearning.model.appmodels.QuizRequest
 import com.example.gengolearning.model.appmodels.WordCategories
 import com.example.gengolearning.model.appmodels.Words
+import com.example.gengolearning.model.errors.NetworkError
+import com.example.gengolearning.model.results.Response
+import com.example.gengolearning.model.tokens.TokenProvider
 import com.example.gengolearning.ui.features.dashboard.home.aiquiz.AiQuiz
 import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.firestore
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.tasks.await
-import kotlinx.serialization.json.Json
+import okio.IOException
+import retrofit2.HttpException
 
 class LanguageWords @Inject constructor(
     private val dao: WordsDao,
     userSettingsRepository: UserSettingsRepository,
     private val client: HttpClient,
-    private val categoriesDao: CategoryDatabase
+    private val categoriesDao: CategoryDatabase,
+    private val tokenProvider: TokenProvider,
+    private val api: NetworkInterface
 ) {
 
 
@@ -320,23 +328,17 @@ class LanguageWords @Inject constructor(
 
 
 
-    suspend fun getWordsFromApi(searchKey: String): List<Words> {
-
-
-        //Get the words of my own repository Json file
-//      val jsonText= client.get("https://raw.githubusercontent.com/Roland-Jaroka/LanguageWordsApi/refs/heads/main/japanese_words_repository.json")
-//            .bodyAsText()
-//
-//        return Json {ignoreUnknownKeys = true}.decodeFromString(jsonText)
-
-
+    suspend fun getWordsFromApi(searchKey: String): Response<List<Words>, NetworkError.BasicNetworkError> {
         //Get the words from Jisho API
-        val response: JishoResponse = client.get("https://jisho.org/api/v1/search/words?keyword=$searchKey")
-            .body()
-
-
         //sorted by is common cause it is the same in Jisho web
-        return response.data.sortedByDescending{ it.isCommon }.flatMap { entry ->
+        return try {
+
+            val response: JishoResponse = api.getJishoWords(
+                request = DictionaryRequest(
+                    word = searchKey
+                ))
+
+     val data =  response.data.sortedByDescending{ it.isCommon }.flatMap { entry ->
 
             //Gets the first element of the Jisho API Japanese cause there are words which has
             //Different forms
@@ -352,57 +354,110 @@ class LanguageWords @Inject constructor(
             )
         }
 
+         Response.Success(data)
+
+        } catch (e: IOException) {
+            Response.Error(error = NetworkError.BasicNetworkError.NO_INTERNET)
+        } catch (e: HttpException){
+            Response.Error(NetworkError.BasicNetworkError.SERVER_DOWN)
+        } catch (e: Exception) {
+            Response.Error(NetworkError.BasicNetworkError.UNKOWN_ERROR)
+        }
+
 
     }
 
     suspend fun getNews(): List<NewsResponse> {
-        val response = client.get("https://raw.githubusercontent.com/Roland-Jaroka/LanguageWordsApi/refs/heads/main/News.json")
-            .bodyAsText()
 
+        return api.getNews()
+    }
 
+    suspend fun getAiQuiz(language: String, level: String): Response<List<AiQuiz>, NetworkError.GeminaiNetworkError> {
+        return try {
+            val token = tokenProvider.getToken()
 
-        return Json { ignoreUnknownKeys = true }.decodeFromString(response)
+            val response = api.getGeminiQuiz(token = "Bearer $token",
+                request = QuizRequest(
+                language, level
+            ))
+
+            Response.Success(response)
+        } catch (e: HttpException) {
+            when (e.code()){
+                429 -> {
+                    if(e.message?.contains("you exceeded your current quota", ignoreCase = true) ?: false) {
+                        Response.Error(NetworkError.GeminaiNetworkError.RATE_LIMIT_REACHED)} else {
+                        Response.Error(NetworkError.GeminaiNetworkError.HEAVY_SERVERS)
+                    }
+                }
+
+                in 500..599 -> {
+                    Response.Error(NetworkError.GeminaiNetworkError.HEAVY_SERVERS)
+                }
+
+                else -> {
+                    Response.Error(NetworkError.GeminaiNetworkError.UNKOWN_ERROR)
+                }
+            }
+        } catch (e: IOException) {
+            Response.Error(NetworkError.GeminaiNetworkError.NO_INTERNET)
+        }
+
+        catch (e: Exception) {
+            Response.Error(NetworkError.GeminaiNetworkError.UNKOWN_ERROR)
+        }
+    }
+
+    fun uploadQuizToFirebase(quizList: List<AiQuiz>, language: String, level: String) {
+        val auth = FirebaseAuth.getInstance()
+        val db = Firebase.firestore
+
+        val batch = db.batch()
+        quizList.forEach { quiz ->
+            val docRef = db.collection("aiQuiz")
+                .document(language)
+                .collection("levels")
+                .document(level)
+                .collection("questions")
+                .document()
+
+            batch.set(
+                docRef,
+                mapOf(
+                    "question" to quiz.question,
+                    "option" to quiz.options,
+                    "correctAnswer" to quiz.correctAnswer
+                )
+            )
+        }
+
+        batch.commit()
+            .addOnSuccessListener {
+                Log.d("Firestore", "QuizUploaded")
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Upload failed", e)
+            }
+
+    }
+
+    fun getFirebaseToken(onResult: (String?) -> Unit ){
+        FirebaseAuth.getInstance().currentUser
+            ?.getIdToken(true)
+            ?.addOnSuccessListener { result ->
+                onResult(result.token)
+                Log.d("Token", result.token.toString())
+            }
     }
 
 
-    suspend fun getAiquiz(language: String, level: String): List<AiQuiz> {
-        val model = Firebase.ai(backend = GenerativeBackend.googleAI())
-            .generativeModel("gemini-2.5-flash")
-        val prompt = """
-             You are a JSON generator.
+    suspend fun testAPI(token: String?) {
+       val response = client.get("https://gengolearningbackend.jaroka-roland.workers.dev/test") {
+           header("Authorization", "Bearer $token")
+           contentType(ContentType.Application.Json)
+       }
 
-             Return ONLY valid JSON.
-             No markdown, no explanations, no extra text.
-
-             Generate exactly 5 $level reading comprehension questions.
-
-             Each item must follow this structure:
-
-             {
-               "question": "string",
-               "options": ["string", "string", "string", "string"],
-               "correctAnswer": "string"
-             }
-
-             Rules:
-             - question must be a medium-length $language reading passage + question
-             - $level level difficulty
-             - 4 answer options exactly
-             - only one correct answer
-             - correctAnswer must match one option exactly
-             - all content must be in natural $language
-
-             Return ONLY a JSON array.
-        """.trimIndent()
-
-        val response = model.generateContent(prompt)
-        Log.d("Ai_Quiz", prompt)
-        Log.d("Ai_Quiz", response.text ?: "")
-
-        return  Json { ignoreUnknownKeys = true }.decodeFromString<List<AiQuiz>>(response.text ?: "")
+        print("API status: ${response.bodyAsText()}")
+        Log.d("API response", response.bodyAsText())
     }
-
-
-
-
 }

@@ -4,7 +4,7 @@
     <string name="Login_button">Belépés</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Jelszó</string>
-    <string name="forgotpassword_button">Elfelejtette jelszavát?</string>
+    <string name="forgotpassword_button">Elfelejtett jelszó?</string>
     <string name="sign_up_button">Regisztrálj</string>
     <string name="be_careful_sign">Légy óvatos</string>
     <string name="sing_up_modal_body">Itt megadhatsz egy nem létező email címet is, de ebben az esetben\nha elfelejtenéd a jelszavad nincs mód annak visszaállítására</string>

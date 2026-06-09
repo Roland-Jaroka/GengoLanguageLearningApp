@@ -18,8 +18,8 @@ android {
         applicationId = "com.gengolearning.app"
         minSdk = 28
         targetSdk = 36
-        versionCode = 24
-        versionName = "24.0"
+        versionCode = 25
+        versionName = "25.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,6 +39,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
     buildFeatures {
         compose = true
@@ -58,6 +59,7 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.appcompat)
+    implementation(libs.litertlm.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -114,4 +116,15 @@ dependencies {
 
     //Lottie
     implementation("com.airbnb.android:lottie-compose:6.7.1")
+
+    //Chucker
+    implementation("com.github.chuckerteam.chucker:library:4.2.0")
+
+    //okhttp
+    implementation("io.ktor:ktor-client-okhttp:2.3.7")
+
+    //Retrofit
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+
 }

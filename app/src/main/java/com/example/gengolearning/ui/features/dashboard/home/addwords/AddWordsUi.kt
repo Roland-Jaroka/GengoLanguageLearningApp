@@ -15,11 +15,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.ui.theme.Blue
@@ -62,185 +68,211 @@ fun AddWordsUi(navController: NavController,
 
     val showWordInLibraryDialog = viewModel.showWordInLibraryDialog
 
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    val snackbarText = stringResource(R.string.add_words_snackbar)
 
-
-
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(scrollstate)) {
-
-        Column(modifier = Modifier.align(Alignment.Center)) {
-
-            Text(
-                text = stringResource(R.string.add_words_button),
-                fontSize = 30.sp,
-                color = Blue,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = stringResource(R.string.add_words_tolist),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 10.dp)
-            )
-
-            OutlinedTextField(
-                value = word,
-                onValueChange = { viewModel.onWordChange(newWord = it)
-                },
-                label = { Text(stringResource(R.string.word_button)) },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                singleLine = true,
-                isError = wordInputError != null,
-                supportingText = {
-                    if (wordInputError != null) {
-                        Text(
-                            text = "*$wordInputError",
-                            color = Color.Red
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(20.dp),
-
-            )
-
-
-
-            if(currentLanguage == "jp" || currentLanguage == "cn") {
-                OutlinedTextField(
-                    value = pronunciation,
-                    onValueChange = {
-                        viewModel.onPronunciationChange(it)
-                    },
-                    label = { Text(stringResource(R.string.pronuncitaon_button)) },
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(start = 30.dp, end = 30.dp)
-                        .fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(20.dp),
-                )
-            }
-
-            OutlinedTextField(
-                value = translation,
-                onValueChange = { viewModel.onTranslationChange(it)
-                },
-                label = { Text(stringResource(R.string.translation_button)) },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                    .fillMaxWidth(),
-                isError = translationInputError != null,
-                supportingText = {
-                    if (translationInputError != null) {
-                        Text(
-                            text = "*$translationInputError",
-                            color = Color.Red
-                        )
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(20.dp),
-
-                )
-            Surface (
-                shape = RoundedCornerShape(15.dp),
-                color = White,
-                shadowElevation = 2.dp ,
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp, end = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.cardsicon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(30.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Text(
-                        text = stringResource(R.string.homepage_button),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                    Switch(
-                        checked = checked,
-                        onCheckedChange = {
-                            viewModel.setIsOnHomePage()
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedTrackColor = Blue
-                        )
-
-
-                    )
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event->
+            when (event) {
+                AddWordsEvents.showSnackBar-> {
+                    snackbarHostState.showSnackbar(message = snackbarText, duration = SnackbarDuration.Short)
                 }
             }
-
-
-            MyAppButton(
-                modifier = Modifier
-                    .padding(start = 12.dp, end = 12.dp, top = 20.dp),
-                text= stringResource(R.string.add),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = White,
-                    containerColor = Blue
-                ),
-                onClick = {
-                    viewModel.addWordToList()
-
-                    //Puts the cursor to the first Outlined Text field
-                    focusRequester.requestFocus()
-                }
-            )
-
-            TextButton(
-                onClick = {
-                    navController.popBackStack()
-                },
-                text = stringResource(R.string.back_to_home)
-            )
-
-
         }
     }
 
-    if (showWordInLibraryDialog) {
-        WordInLibraryAlertDialog(
-            onDismiss = {
-                viewModel.onDismissDialog()
-            },
-            onConfirm = {
-                viewModel.addWordToListAndFirebase()
-            },
-            currentLanguage = currentLanguage,
-            word1 = Words(
-                word = viewModel.word,
-                translation = viewModel.translation,
-                pronunciation = viewModel.pronunciation,
-            ),
-
-            word2 = Words(
-                word = existingWordInLibrary?.word ?: "",
-                translation = existingWordInLibrary?.translation ?:"",
-                pronunciation = existingWordInLibrary?.pronunciation ?: "",
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                snackbarHostState
             )
+        }
 
-        )
+    )
+    { paddingValues ->
+
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollstate)
+                .padding(paddingValues)
+        ) {
+
+            Column(modifier = Modifier.align(Alignment.Center)) {
+
+                Text(
+                    text = stringResource(R.string.add_words_button),
+                    fontSize = 30.sp,
+                    color = Blue,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = stringResource(R.string.add_words_tolist),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 10.dp)
+                )
+
+                OutlinedTextField(
+                    value = word,
+                    onValueChange = {
+                        viewModel.onWordChange(newWord = it)
+                    },
+                    label = { Text(stringResource(R.string.word_button)) },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(start = 30.dp, end = 30.dp, top = 20.dp)
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
+                    singleLine = true,
+                    isError = wordInputError != null,
+                    supportingText = {
+                        if (wordInputError != null) {
+                            Text(
+                                text = "*$wordInputError",
+                                color = Color.Red
+                            )
+                        }
+                    },
+                    shape = RoundedCornerShape(20.dp),
+
+                    )
+
+
+
+                if (currentLanguage == "jp" || currentLanguage == "cn") {
+                    OutlinedTextField(
+                        value = pronunciation,
+                        onValueChange = {
+                            viewModel.onPronunciationChange(it)
+                        },
+                        label = { Text(stringResource(R.string.pronuncitaon_button)) },
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(start = 30.dp, end = 30.dp)
+                            .fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(20.dp),
+                    )
+                }
+
+                OutlinedTextField(
+                    value = translation,
+                    onValueChange = {
+                        viewModel.onTranslationChange(it)
+                    },
+                    label = { Text(stringResource(R.string.translation_button)) },
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(start = 30.dp, end = 30.dp, top = 20.dp)
+                        .fillMaxWidth(),
+                    isError = translationInputError != null,
+                    supportingText = {
+                        if (translationInputError != null) {
+                            Text(
+                                text = "*$translationInputError",
+                                color = Color.Red
+                            )
+                        }
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(20.dp),
+
+                    )
+                Surface(
+                    shape = RoundedCornerShape(15.dp),
+                    color = White,
+                    shadowElevation = 2.dp,
+                    modifier = Modifier
+                        .padding(start = 20.dp, end = 20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 10.dp, end = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.cardsicon),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(30.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            text = stringResource(R.string.homepage_button),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .weight(1f)
+                        )
+                        Switch(
+                            checked = checked,
+                            onCheckedChange = {
+                                viewModel.setIsOnHomePage()
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedTrackColor = Blue
+                            )
+
+
+                        )
+                    }
+                }
+
+
+                MyAppButton(
+                    modifier = Modifier
+                        .padding(start = 12.dp, end = 12.dp, top = 20.dp),
+                    text = stringResource(R.string.add),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = White,
+                        containerColor = Blue
+                    ),
+                    onClick = {
+                        viewModel.addWordToList()
+
+                        //Puts the cursor to the first Outlined Text field
+//                        focusRequester.requestFocus()
+                    }
+                )
+
+                TextButton(
+                    onClick = dropUnlessResumed {  navController.popBackStack() }
+                    ,
+                    text = stringResource(R.string.back_to_home)
+                )
+
+
+            }
+        }
+
+        if (showWordInLibraryDialog) {
+            WordInLibraryAlertDialog(
+                onDismiss = {
+                    viewModel.onDismissDialog()
+                },
+                onConfirm = {
+                    viewModel.addWordToListAndFirebase()
+                },
+                currentLanguage = currentLanguage,
+                word1 = Words(
+                    word = viewModel.word,
+                    translation = viewModel.translation,
+                    pronunciation = viewModel.pronunciation,
+                ),
+
+                word2 = Words(
+                    word = existingWordInLibrary?.word ?: "",
+                    translation = existingWordInLibrary?.translation ?: "",
+                    pronunciation = existingWordInLibrary?.pronunciation ?: "",
+                )
+
+            )
+        }
     }
 }
