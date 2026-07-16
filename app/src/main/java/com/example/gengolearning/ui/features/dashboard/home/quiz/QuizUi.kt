@@ -33,6 +33,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -130,7 +131,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
 
                         },
                         text = stringResource(R.string.next_Button),
-                        colors = ButtonDefaults.buttonColors(Blue),
+                        colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary),
                         modifier = Modifier
                             .navigationBarsPadding()
                             .imePadding()
@@ -151,7 +152,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 10.dp, end = 10.dp, bottom = 10.dp),
-                        color = Blue
+                        color = MaterialTheme.colorScheme.secondary
                     )
 
 
@@ -161,7 +162,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
                             .fillMaxWidth()
                             .padding(20.dp)
                             .height(230.dp),
-                        colors = CardDefaults.cardColors(White),
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background),
                         elevation = CardDefaults.cardElevation(20.dp),
                         border = if (uiState.isError) {
                             BorderStroke(2.dp, Red)
@@ -320,7 +321,7 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
                                .animateContentSize(),
                            shadowElevation = 10.dp,
                            shape = RoundedCornerShape(10.dp),
-                           color = White
+                           color = MaterialTheme.colorScheme.background
                        ) {
                            if (!isQuizFinished) {
 
@@ -344,10 +345,10 @@ fun QuizUi(viewModel: QuizViewModel = hiltViewModel(),
                                    },
                                    isError = uiState.isError,
                                    colors = TextFieldDefaults.colors(
-                                       focusedIndicatorColor = Blue,
+                                       focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
                                        focusedContainerColor = White,
                                        unfocusedContainerColor = White,
-                                       cursorColor = Blue,
+                                       cursorColor = MaterialTheme.colorScheme.secondary,
                                        errorContainerColor = White,
                                    ),
                                )

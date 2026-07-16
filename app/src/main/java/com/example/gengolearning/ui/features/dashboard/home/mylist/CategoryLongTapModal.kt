@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -47,7 +48,7 @@ fun CategoryLongTapModal(
             onDismiss()
         },
         sheetState = sheetState,
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
     ) {
 
         Column {
@@ -70,12 +71,12 @@ fun CategoryLongTapModal(
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .size(30.dp),
-                    colorFilter = if (isPressed) ColorFilter.tint(BgBlue) else null
+                    colorFilter = if (isPressed) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null
                 )
 
                 Text(
                     text = stringResource(R.string.edit_category_title),
-                    color = if (isPressed) BgBlue else PandaBlack,
+                    color = if (isPressed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                     fontSize = 20.sp,
                     modifier = Modifier
                         .padding(start = 8.dp)
@@ -83,6 +84,8 @@ fun CategoryLongTapModal(
                     fontWeight = FontWeight.Bold
                 )
             }
+
+
 
         }
     }

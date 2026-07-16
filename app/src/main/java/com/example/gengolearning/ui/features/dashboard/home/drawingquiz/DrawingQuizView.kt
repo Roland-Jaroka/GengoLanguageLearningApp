@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -89,11 +90,11 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                         .width(150.dp)
                         .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = if (viewModel.isKanjiReveled) White else BgBlue,
-                        containerColor = if (viewModel.isKanjiReveled) BgBlue else White
+                        contentColor = if (viewModel.isKanjiReveled) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.primary,
+                        containerColor = if (viewModel.isKanjiReveled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background
                     ),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(2.dp, BgBlue),
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
                     onClick = {
                         viewModel.isKanjiReveled = !viewModel.isKanjiReveled
                     }
@@ -127,8 +128,8 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                         .height(50.dp)
                         .weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = White,
-                        containerColor = Blue
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                        containerColor = MaterialTheme.colorScheme.secondary
                     ),
                     elevation = ButtonDefaults.buttonElevation(
                         hoveredElevation = 10.dp,
@@ -156,8 +157,8 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                         .height(50.dp)
                         .align(Alignment.CenterVertically),
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = White,
-                        containerColor = Blue
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                        containerColor = MaterialTheme.colorScheme.secondary
                     ),
                     elevation = ButtonDefaults.buttonElevation(
                         hoveredElevation = 10.dp,
@@ -189,8 +190,8 @@ fun DrawingQuizView(viewModel:DrawingCanvasViewModel= hiltViewModel(),
                         .height(50.dp)
                         .weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = White,
-                        containerColor = Blue
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                        containerColor = MaterialTheme.colorScheme.secondary
                     ),
                     elevation = ButtonDefaults.buttonElevation(
                         hoveredElevation = 10.dp,

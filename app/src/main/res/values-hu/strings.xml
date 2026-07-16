@@ -209,4 +209,19 @@
     <string name="loading_tip3">Ha hibát kapsz a szerver terheltségéről próbáld meg újratölteni a tesztet</string>
     <string name="loading_tip4">Mindjárt kész....</string>
     <string name="ai_quiz_server_error">Úgytűnik az AI ügynök jelenleg nagyon leterhelt. Próbáld meg újranyitni a funkciót</string>
+    <string name="common_error_server">Úgytűnik valami nem stimmel a szerver oldalon. Probáld újra</string>
+    <string name="common_try_again">Probáld újra</string>
+    <string name="common_go_back">Vissza</string>
+    <string name="no_internet_title">Nincs internet</string>
+    <string name="add_words_snackbar">A szó hozzáadásra került a listádhoz</string>
+    <string name="synced_modal_title">Az app szinkronizálva van a felhővel</string>
+    <string name="synced_modal_text">Az app szinkronizálva lett a felhővel, így bármilyen módosítás, amit egy másik eszközön végeztél most már itt is elérhető</string>
+    <string name="common_common_modal_button_text">Rendben</string>
+    <string name="basic_theme">Alap téma</string>
+    <string name="sunset_theme">Naplemente</string>
+    <string name="midnight_teal_theme">Éjjel</string>
+    <string name="autumn_theme">Ősz</string>
+    <string name="synced_card_text">Az alkalamazás szikronizálva lett a felhővel</string>
+    <string name="synced_card_error_text">A szinkornizálás nem sikerült</string>
+    <string name="change_theme">App téma módosítás</string>
 </resources>

@@ -30,6 +30,10 @@ interface WordsDao {
     @Query("SELECT * FROM words WHERE language = :language ORDER BY word ASC")
     fun getAllWords(language: String): Flow<List<Words>>
 
+    @Query("SELECT * FROM words WHERE isOnHomePage = true AND language = :language ORDER BY word ASC")
+    fun getHomePageWords(language: String): Flow<List<Words>>
+
+
     //Get the number of words in the database
     @Query("SELECT COUNT(*) FROM words")
    fun getWordCount():Flow<Int>

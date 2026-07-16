@@ -8,9 +8,16 @@ import com.example.gengolearning.data.repositories.LanguageWords
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+sealed class MainApp{
 
+    object Loading : MainApp()
+    object Success: MainApp()
+}
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userSettingsRepository: UserSettingsRepository,
@@ -19,6 +26,8 @@ class MainViewModel @Inject constructor(
     private val grammarRepo: LanguageGrammar
 ): ViewModel() {
 
+    private  val _state = MutableStateFlow<MainApp>(MainApp.Loading)
+      val state = _state.asStateFlow()
 
     init {
         loadMainLanguage()
@@ -30,6 +39,10 @@ class MainViewModel @Inject constructor(
         if (FirebaseAuth.getInstance().currentUser == null) return
 
         viewModelScope.launch {
+            _state.value = MainApp.Loading
+
+            try {
+
 
             userSettingsRepository.loadMainLanguage()
 
@@ -40,7 +53,9 @@ class MainViewModel @Inject constructor(
 
             launch {  grammarRepo.loadGrammar(userSettingsRepository.language.first()) }
 
-
+              _state.value = MainApp.Success } catch (e: Exception) {
+                  _state.value = MainApp.Success
+              }
 
         }
 

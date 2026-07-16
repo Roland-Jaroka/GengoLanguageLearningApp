@@ -70,14 +70,23 @@ class EditCategoryViewModel @Inject constructor(
 
     }
 
-    fun onNameChange(newName: String) {
+    fun onAction(action: EditCategoryActions) {
+        when(action) {
+            is EditCategoryActions.OnColorChange -> onColorChange(action.newColor)
+            is EditCategoryActions.OnEdit -> onEdit(action.categoryName)
+            is EditCategoryActions.OnNameChange -> onNameChange(action.newName)
+            EditCategoryActions.ShowColorPicker -> showColorPicker()
+        }
+    }
+
+   private fun onNameChange(newName: String) {
         _editCategoryUiState.update {
             it.copy(category = newName,
                 error = null)
         }
     }
 
-    fun onColorChange(newColor: Color) {
+   private fun onColorChange(newColor: Color) {
         _editCategoryUiState.update {
             it.copy(
                 color = newColor.toArgb()
@@ -95,7 +104,7 @@ class EditCategoryViewModel @Inject constructor(
         }
     }
 
-    fun onEdit(categoryName: String){
+  private  fun onEdit(categoryName: String){
         val error = validation(categoryName)
 
         if (error != null) {
@@ -144,6 +153,14 @@ class EditCategoryViewModel @Inject constructor(
 
 
 
+    }
+
+  private  fun showColorPicker() {
+        _editCategoryUiState.update {
+            it.copy(
+                showColorPicker = !it.showColorPicker
+            )
+        }
     }
 
 

@@ -42,4 +42,44 @@ val SecondaryBlue = Color(0xFF4A9FF1)
 
 val TransparentWhite = Color(0xCDFFFFFF)
 
+val CoralPrimary = Color(0xFFE76F51)
+val CoralDark = Color(0xFFD1493F)
+
+val PeachSecondary = Color(0xFFFFB4A2)
+
+val PeachSecondaryTransparent = Color(0x7EFFB4A2)
+val SoftCream = Color(0xFFFFF8F3)
+
+val DarkBrown = Color(0xFF3D2B1F)
+
+val GoldAccent = Color(0xFFF4A261)
+
+val SoftPinkSurface = Color(0xFFFFE8E0)
+
+val TealPrimary = Color(0xFF00796B)
+val TealDark = Color(0xFF00695C)
+
+val AquaSecondary = Color(0xFF4DB6AC)
+val AquaSecondaryTransparent = Color(0x7E4DB6AC)
+
+val CyanAccent = Color(0xFF80DEEA)
+
+val MistBackground = Color(0xFFF4FAFA)
+val DarkTealText = Color(0xFF1F2D2A)
+
+val SoftTealSurface = Color(0xFFE0F2F1)
+
+val AmberPrimary = Color(0xFFEF6C00)
+val AmberDark = Color(0xFFE65100)
+
+val HoneySecondary = Color(0xFFFFCC80)
+val HoneySecondaryTransparent = Color(0x7EFFCC80)
+
+val CaramelAccent = Color(0xFFFFB74D)
+
+val WarmBackground = Color(0xFFFFFAF5)
+val DarkCoffeeText = Color(0xFF3E2723)
+
+val SoftAmberSurface = Color(0xFFFFF3E0)
+
 

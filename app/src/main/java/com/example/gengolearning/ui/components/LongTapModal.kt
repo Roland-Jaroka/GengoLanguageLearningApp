@@ -1,82 +1,111 @@
 package com.example.gengolearning.ui.components
 
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.wear.compose.material.Text
-import com.example.gengolearning.ui.theme.BgBlue
-import com.example.gengolearning.ui.theme.PandaBlack
+import com.example.gengolearning.ui.components.global.PressableRow
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LongTapBottomModal(modifier: Modifier = Modifier,
-                       onDismiss: () -> Unit,
-                       onClick: () -> Unit) {
+                       onDismiss: () -> Unit = {},
+                       onClick: () -> Unit = {},
+                       onCopyWord: () -> Unit = {},
+                       onCopyPronounciation: () -> Unit = {},
+                       onCopyTranslation: () -> Unit  = {},
+                       currentLanguage: String) {
+
     val sheetState = rememberModalBottomSheetState()
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
+    val scope = rememberCoroutineScope()
 
     ModalBottomSheet(
         onDismissRequest = {
             onDismiss()
         },
         sheetState = sheetState,
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
     ) {
 
-        Column {
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        onClick()
-                    }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = modifier) {
 
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.edit),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(40.dp),
-                    colorFilter = if (isPressed) ColorFilter.tint(BgBlue) else null
-                )
+            PressableRow(
+                onClick = {
+                    onClick()
+                    onDismissAnimation(scope, sheetState, onDismiss)
 
-                Text(
-                    text = stringResource(R.string.edit_word_title),
-                    color = if (isPressed) BgBlue else PandaBlack,
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .padding(start = 10.dp, top = 10.dp),
-                    fontWeight = FontWeight.Bold
+                },
+                image = painterResource(R.drawable.edit),
+                text = stringResource(R.string.edit_word_title)
+            )
+            PressableRow(
+                onClick = {onCopyWord()
+                    onDismissAnimation(scope, sheetState, onDismiss)
+                          },
+                image = painterResource(R.drawable.copy_icon),
+                text = "Copy Word"
+            )
+
+            if (currentLanguage == "jp" || currentLanguage == "cn") {
+
+                PressableRow(
+                    onClick = {
+                        onCopyPronounciation()
+                        onDismissAnimation(scope, sheetState, onDismiss)
+                    },
+                    image = painterResource(R.drawable.copy_icon),
+                    text = "Copy pronounciation"
                 )
             }
 
+            PressableRow(
+                onClick = {onCopyTranslation()
+                    onDismissAnimation(scope, sheetState, onDismiss)},
+                image = painterResource(R.drawable.copy_icon),
+                text = "Copy Translation"
+            )
+
         }
     }
+
+
+
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+fun onDismissAnimation(scope: CoroutineScope,
+                       sheetState: SheetState,
+                       onDismiss: () -> Unit) {
+    scope.launch {
+        sheetState.hide()
+    }.invokeOnCompletion {
+        if (!sheetState.isVisible) {
+            onDismiss()
+        }
+    }
+}
+
+
+@Preview
+@Composable
+private fun Preview() {
+    LongTapBottomModal(currentLanguage = "jp")
+
 }

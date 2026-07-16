@@ -1,6 +1,8 @@
 package com.example.gengolearning.ui.features.dashboard.home.mylist
 
 import android.content.Context
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gengolearning.data.repositories.LanguageWords
@@ -98,6 +100,18 @@ class MyListViewModel @Inject constructor(
             MyListActions.OnDismissCategoryBottomSheet -> dismissCategoryBottomSheet()
             MyListActions.OnEditCategory -> onEditCategory()
             MyListActions.OnDismissQuizIsEmptyModal -> onDismissQuizIsemptyModal()
+            MyListActions.OnPronounciationCopy -> {
+                val longTappedWord = state.value.longTappedWord
+                onCopy(longTappedWord?.pronunciation ?: "", CopyOperations.COPY_PRONOUNCIATION)
+            }
+           MyListActions.OnTranslationCopy -> {
+                val longTappedWord = state.value.longTappedWord
+                onCopy(longTappedWord?.translation ?: "", CopyOperations.COPY_TRANSLATION)
+            }
+           MyListActions.OnWordCopy -> {
+                val longTappedWord = state.value.longTappedWord
+                onCopy(longTappedWord?.word ?: "", CopyOperations.COPY_WORD)
+            }
         }
     }
    private fun onInputChanged(newInput: String) {
@@ -508,6 +522,13 @@ class MyListViewModel @Inject constructor(
             it.copy(
                 quizIsEmptyModal = false
             )
+        }
+    }
+
+    private fun onCopy(word: String, copyOperations: CopyOperations) {
+
+        viewModelScope.launch {
+            _uiEvents.emit(MyListUiEvents.CopyToClipboard(word, copyOperations))
         }
     }
 

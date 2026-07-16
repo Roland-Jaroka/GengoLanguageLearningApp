@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -65,8 +66,8 @@ fun MyListCard(modifier: Modifier = Modifier,
                     .fillMaxWidth()
                     .padding(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = White,
-                    containerColor = BgBlue
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    containerColor = MaterialTheme.colorScheme.primary
                 ),
                 elevation = ButtonDefaults.buttonElevation(
                     hoveredElevation = 10.dp,

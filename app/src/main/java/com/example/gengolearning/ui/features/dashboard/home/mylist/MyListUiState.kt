@@ -30,6 +30,8 @@ sealed class MyListUiEvents{
     object NavigateToNewCategory: MyListUiEvents()
 
     object NavigateToQuiz: MyListUiEvents()
+
+    data class CopyToClipboard(val word: String, val copyOperations: CopyOperations): MyListUiEvents()
 }
 
 sealed interface MyListActions{
@@ -69,4 +71,16 @@ sealed interface MyListActions{
 
     data object OnDismissQuizIsEmptyModal: MyListActions
 
+    data object OnWordCopy: MyListActions
+
+    data object OnPronounciationCopy: MyListActions
+
+    data object OnTranslationCopy: MyListActions
+
+}
+
+enum class CopyOperations {
+    COPY_WORD,
+    COPY_PRONOUNCIATION,
+    COPY_TRANSLATION
 }

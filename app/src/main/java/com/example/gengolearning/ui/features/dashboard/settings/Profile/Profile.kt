@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -100,7 +101,7 @@ fun ProfileMenu(navController: NavController, viewModel: ProfileViewModel = hilt
                             .fillMaxWidth()
                             .padding(start = 10.dp, end = 10.dp, top = 100.dp),
                         elevation = CardDefaults.cardElevation(10.dp),
-                        colors = CardDefaults.cardColors(White)
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background)
                     ) {
                         //Elements:
                         Column(modifier = Modifier.padding(top = 50.dp, start = 50.dp)) {
@@ -170,9 +171,9 @@ fun ProfileMenu(navController: NavController, viewModel: ProfileViewModel = hilt
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .background(White)
+                            .background(MaterialTheme.colorScheme.background)
                             .clip(RoundedCornerShape(30.dp))
-                            .border(2.dp, Blue, RoundedCornerShape(30.dp))
+                            .border(2.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(30.dp))
                             .clickable {
                                 launcher.launch("image/*")
                             }

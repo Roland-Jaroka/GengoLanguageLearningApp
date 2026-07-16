@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -54,7 +55,8 @@ fun AiQuizUI(
                     onBackClick()
                 }
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box {
             Column(
@@ -99,7 +101,7 @@ fun AiQuizUI(
                         },
                         text = stringResource(R.string.review_button),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Blue
+                            containerColor = MaterialTheme.colorScheme.secondary
                         )
                     )
 

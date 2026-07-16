@@ -10,6 +10,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,8 +27,6 @@ import com.example.gengolearning.model.appmodels.LanguageLevels
 import com.example.gengolearning.model.appmodels.Languages
 import com.example.gengolearning.ui.components.MyAppButton
 import com.example.gengolearning.ui.components.TextButton
-import com.example.gengolearning.ui.theme.Blue
-import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
 
 @Composable
@@ -50,7 +49,7 @@ fun LevelSelectorModal(currentLanguage: Language,
                     onClick(selectedLevel.value)
                 },
                 text = stringResource(R.string.quiz_selector_modal_button),
-                colors = ButtonDefaults.buttonColors(Blue),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary),
                 enabled = selectedLevel.value != ""
             )
         },
@@ -62,7 +61,7 @@ fun LevelSelectorModal(currentLanguage: Language,
                 text = stringResource(R.string.back_button)
             )
         },
-        containerColor = White,
+        containerColor = MaterialTheme.colorScheme.background,
         title = {
             Text(
                 stringResource(R.string.quiz_selector_modal_title)
@@ -74,7 +73,7 @@ fun LevelSelectorModal(currentLanguage: Language,
 
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = White,
+                        color = MaterialTheme.colorScheme.background,
                         shadowElevation = 4.dp,
                         modifier = Modifier
                             .padding(bottom = 5.dp)
@@ -101,7 +100,7 @@ fun LevelSelectorModal(currentLanguage: Language,
                                     selectedLevel.value = level.name
                                 },
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = Blue
+                                    checkedColor = MaterialTheme.colorScheme.secondary
                                 )
                             )
                         }

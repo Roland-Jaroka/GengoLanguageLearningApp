@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.gengolearning.ui.theme.PandaBlack
 import com.example.gengolearning.ui.theme.TransparentWhite
 import com.example.gengolearning.ui.theme.White
 
@@ -63,14 +64,16 @@ fun NewsCard(imageUrl: String? = null,
                 ) {
                     Text(
                         text = title ?: "This is the title",
-                        fontSize = 20.sp
+                        fontSize = 20.sp,
+                        color = PandaBlack
                     )
 
                     Text(
                         text = message ?: "This is the message",
                         modifier = Modifier
                             .padding(top = 5.dp),
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
+                        color = PandaBlack
 
                     )
                 }

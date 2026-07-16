@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -17,9 +18,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.gengolearning.ui.theme.BgBlue
-import com.example.gengolearning.ui.theme.Blue
-import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
 
 @Composable
@@ -43,7 +41,7 @@ fun SearchBar(
             if(hasLabel) {
                 Text(
                     stringResource(R.string.search),
-                    color = BgBlue
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         },
@@ -86,10 +84,10 @@ fun SearchBar(
             .then(modifier),
         shape = RoundedCornerShape(20.dp),
         colors = TextFieldDefaults.colors(
-            focusedIndicatorColor = Blue,
-            focusedContainerColor = White,
-            unfocusedContainerColor = White,
-            cursorColor = Blue
+            focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            cursorColor = MaterialTheme.colorScheme.secondary
         )
     )
 }

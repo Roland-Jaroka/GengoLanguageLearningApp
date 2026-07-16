@@ -1,23 +1,23 @@
 package com.example.gengolearning.ui.features.dashboard.home.addwords
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gengolearning.model.utils.Tonemarks.toPinyin
+import com.example.gengolearning.data.repositories.LanguageWords
 import com.example.gengolearning.data.repositories.UserSettingsRepository
 import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.model.results.AddWordResults
-import com.example.gengolearning.data.repositories.LanguageWords
+import com.example.gengolearning.model.utils.Tonemarks.toPinyin
 import com.gengolearning.app.R
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -34,61 +34,81 @@ class AddWordsViewModel @Inject constructor(
   private  val getPronunciation: String = savedStateHandle["pronunciation"]?: ""
     private val getTranslation: String = savedStateHandle["translation"]?: ""
 
-    var word by mutableStateOf(getWord)
-        private set
 
     val currentLanguage= userSettingsRepository.language.value
 
-    var translation by mutableStateOf(getTranslation)
-        private set
 
-    var pronunciation by mutableStateOf(getPronunciation)
-        private set
-
-    var wordInputError by mutableStateOf<Int?>(null)
-        private set
-    var translationInputError by mutableStateOf<Int?>(null)
-        private set
-
-    var error by mutableStateOf<String?>(null)
-        private set
-
-    var isOnHomePage by mutableStateOf(true)
-        private set
-
-    var showWordInLibraryDialog by mutableStateOf(false)
-        private set
-
-    var existingWordInLibrary by mutableStateOf<Words?>(null)
-        private set
+      private val _uiState = MutableStateFlow(AddWordsUiState(
+          word = getWord, translation = getTranslation, pronunciation = getPronunciation
+      ))
+      val state = _uiState.asStateFlow()
 
     private val _events = Channel<AddWordsEvents>()
     val events = _events.receiveAsFlow()
 
 
-
-    fun onTranslationChange(newTranslation: String) {
-        translation = newTranslation
-        translationInputError = null
+    fun onAction(action: AddWordsActions) {
+        when(action) {
+           is AddWordsActions.OnAddWordToList -> addWordToList(
+               word = action.word, pronunciation = action.pronunciation, translation = action.translation,
+               isOnHomePage = action.isOnHomePage
+           )
+            is  AddWordsActions.OnAddWordsToListAndFirebase -> addWordToListAndFirebase(
+                word = action.word, pronunciation = action.pronunciation, translation = action.translation,
+                isOnHomePage = action.isOnHomePage
+            )
+            AddWordsActions.OnDismissDialog -> onDismissDialog()
+            is AddWordsActions.OnPronunciationChange -> onPronunciationChange(action.newPronunciation)
+            is AddWordsActions.OnTranslationChange -> onTranslationChange(action.newTranslation)
+            is AddWordsActions.OnWordChange -> onWordChange(action.newWord)
+            AddWordsActions.SetIsOnHomepage -> setIsOnHomePage()
+        }
     }
 
-    fun onWordChange(newWord: String) {
-        word = newWord
-        wordInputError = null
+
+  private  fun onTranslationChange(newTranslation: String) {
+
+        _uiState.update { it.copy(
+            translation = newTranslation,
+            translationInputError = null
+        ) }
+    }
+
+   private fun onWordChange(newWord: String) {
+        _uiState.update {
+            it.copy(
+                word = newWord,
+                wordInputError = null
+            )
+        }
     }
 
 
-    fun onPronunciationChange(newPronunciation: String) {
-        pronunciation = toPinyin(newPronunciation)
+    private fun onPronunciationChange(newPronunciation: String) {
+        _uiState.update {
+            it.copy(
+                pronunciation = toPinyin(newPronunciation)
+            )
+        }
 
     }
 
-    fun setIsOnHomePage() {
-        isOnHomePage = !isOnHomePage
+   private fun setIsOnHomePage() {
+
+        _uiState.update {
+            it.copy(
+                isOnHomePage = !it.isOnHomePage
+            )
+        }
     }
 
-    fun onDismissDialog() {
-        showWordInLibraryDialog = false
+  private  fun onDismissDialog() {
+
+        _uiState.update {
+            it.copy(
+                showWordInLibraryDialog = false
+            )
+        }
     }
 
 
@@ -100,23 +120,43 @@ class AddWordsViewModel @Inject constructor(
        if (translation.isBlank()) return AddWordResults.BlankTranslation
        if (wordList.any{it.word == word}) {
 
-           existingWordInLibrary = existingWord
+           _uiState.update { it.copy(
+               existingWordInLibrary = existingWord
+           ) }
 
            return AddWordResults.WordAlreadyExits }
 
         return AddWordResults.Success
 
     }
-    fun addWordToList() {
+   private fun addWordToList(word: String,
+                             translation: String,
+                             pronunciation: String, isOnHomePage: Boolean) {
         viewModelScope.launch {
+
+
         val result = fieldValidation(word, translation)
         when (result) {
-            is AddWordResults.BlankWord -> wordInputError = R.string.word_input_error
-            is AddWordResults.BlankTranslation -> translationInputError = R.string.translation_input_error
-            is AddWordResults.WordAlreadyExits -> showWordInLibraryDialog = true
+            is AddWordResults.BlankWord -> _uiState.update {
+                it.copy(wordInputError = R.string.word_input_error)
+            }
+            is AddWordResults.BlankTranslation ->
+            _uiState.update {
+                it.copy(
+                    translationInputError = R.string.translation_input_error
+                )
+            }
+            is AddWordResults.WordAlreadyExits ->
+            _uiState.update {
+                it.copy(
+                    showWordInLibraryDialog = true
+                )
+            }
             is AddWordResults.Success -> {
 
-                       addWordToListAndFirebase()
+                       addWordToListAndFirebase(
+                           word, pronunciation, translation, isOnHomePage
+                       )
 
                        _events.send(AddWordsEvents.showSnackBar)
             }
@@ -129,8 +169,12 @@ class AddWordsViewModel @Inject constructor(
 
     }
 
-    fun addWordToListAndFirebase() {
+ private fun addWordToListAndFirebase(word: String,
+                                        pronunciation: String,
+                                        translation: String,
+                                        isOnHomePage: Boolean) {
       viewModelScope.launch {
+
           try {
               val newWord = Words(
                   word,
@@ -143,13 +187,21 @@ class AddWordsViewModel @Inject constructor(
 
               repository.addWord(newWord, currentLanguage)
 
-              word = ""
-              pronunciation = ""
-              translation = ""
-              error = null
+              _uiState.update {
+                  it.copy(
+                      word = "",
+                      pronunciation = "",
+                      translation = "",
+                      error = null
+                  )
+              }
 
           } catch (e: Exception) {
-              error = e.message ?: "Unknown error"
+              _uiState.update {
+                  it.copy(
+                      error = e.message ?: "Unkown error"
+                  )
+              }
           }
       }
     }

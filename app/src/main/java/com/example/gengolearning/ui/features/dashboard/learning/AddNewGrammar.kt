@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,7 +65,7 @@ fun AddNewGrammarUi(navController: NavController,
             Text(
                 text = stringResource(R.string.new_grammar),
                 fontSize = 30.sp,
-                color = Blue,
+                color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
             )
@@ -184,8 +185,8 @@ fun AddNewGrammarUi(navController: NavController,
                     .padding(start = 12.dp, end = 12.dp, top = 20.dp),
                 text= stringResource(R.string.add),
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = White,
-                    containerColor = Blue
+                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                    containerColor = MaterialTheme.colorScheme.secondary
                 ),
                 onClick = {
                     viewModel.addGrammarToList()

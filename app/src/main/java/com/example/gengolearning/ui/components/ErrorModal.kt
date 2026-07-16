@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -37,7 +38,7 @@ fun ErrorModal(sheetState: SheetState,
             onClick()
         },
         sheetState = sheetState,
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Column {
             Image(
@@ -69,7 +70,7 @@ fun ErrorModal(sheetState: SheetState,
                     }
                 },
                 text = stringResource(R.string.okay_button),
-                colors = ButtonDefaults.buttonColors(BgBlue),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(start = 18.dp, end = 18.dp, top = 10.dp)

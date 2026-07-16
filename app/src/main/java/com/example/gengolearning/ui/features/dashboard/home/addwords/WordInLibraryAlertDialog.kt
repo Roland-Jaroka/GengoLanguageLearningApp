@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -87,7 +88,7 @@ fun WordInLibraryAlertDialog(
                 },
                 text = stringResource(R.string.wordInLibrary_confrim_Button),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Blue
+                    containerColor = MaterialTheme.colorScheme.secondary
                 )
             )
         },
@@ -99,7 +100,7 @@ fun WordInLibraryAlertDialog(
                 text = stringResource(R.string.wordInLibrary_back)
             )
         },
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
 
     )
 }

@@ -209,4 +209,19 @@
     <string name="loading_tip3">重いAI環境についての問題が出たらもう一度お試しください</string>
     <string name="loading_tip4">もう少しお待ち頂ければ...</string>
     <string name="ai_quiz_server_error">AIのサーバーは重いみたいです。この機能をもう一度開いてみてください</string>
+    <string name="common_error_server">サーバー側に問題が発生したみたいです。改めてお試しください</string>
+    <string name="common_try_again">改めてお試しください</string>
+    <string name="common_go_back">戻る</string>
+    <string name="no_internet_title">インターネット接続がない</string>
+    <string name="add_words_snackbar">単語はリストに追加されました</string>
+    <string name="synced_modal_title">アップリがクラウドと同期されました</string>
+    <string name="synced_modal_text">アップリをクラウドと同期しましたので他のデバイスに編集したことはこのデバイスに同じ状態になりました。</string>
+    <string name="common_common_modal_button_text">了解</string>
+    <string name="basic_theme">基本テーマ</string>
+    <string name="sunset_theme">日の入り</string>
+    <string name="midnight_teal_theme">夜中</string>
+    <string name="autumn_theme">秋</string>
+    <string name="synced_card_text">アップリがクラウドと同期されました</string>
+    <string name="synced_card_error_text">クラウドとの同期は失敗しました</string>
+    <string name="change_theme">アップリ表示テーマ変更</string>
 </resources>

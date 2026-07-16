@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.gengolearning.model.AppSettingsPreferences
 import com.example.gengolearning.model.appmodels.Languages
@@ -61,7 +62,7 @@ fun MainLanguageSelector(navController: NavController,
     val languages = Languages.languagesList
     var selectedLanguage by remember{mutableStateOf("")}
     var visible by remember { mutableStateOf(false) }
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
 

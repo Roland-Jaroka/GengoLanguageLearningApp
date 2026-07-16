@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -120,7 +121,7 @@ val progress by animateLottieCompositionAsState(
             },
             text = stringResource(R.string.common_try_again),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Blue
+                containerColor = MaterialTheme.colorScheme.secondary
             )
 
         )

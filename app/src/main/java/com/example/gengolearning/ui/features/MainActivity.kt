@@ -3,8 +3,10 @@ package com.example.gengolearning.ui.features
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gengolearning.model.utils.AnalyticsHelper
 import com.example.gengolearning.ui.features.navigation.AppNavigation
 import com.example.gengolearning.ui.theme.MyLanguageLearningAppTheme
@@ -13,7 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val mainViewModel: MainViewModel by viewModels()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,17 +23,17 @@ class MainActivity : AppCompatActivity() {
         AnalyticsHelper.init(this)
         enableEdgeToEdge()
 
-        val viewModel: MainViewModel = mainViewModel
 
 
 
                 setContent {
+                val themeViewmodel: ThemeViewModel = hiltViewModel()
+                val appTheme by themeViewmodel.theme.collectAsStateWithLifecycle()
+
+                    MyLanguageLearningAppTheme(appColorTheme = appTheme) {
 
 
-                    MyLanguageLearningAppTheme {
-
-
-                        AppNavigation()
+                        AppNavigation(colorTheme = appTheme)
 
 
                     }

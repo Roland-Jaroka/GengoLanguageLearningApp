@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.gengolearning.model.appmodels.Languages
@@ -46,7 +48,9 @@ import com.example.gengolearning.model.utils.AnalyticsHelper
 import com.example.gengolearning.ui.components.LogoutDialog
 import com.example.gengolearning.ui.components.MyAppButton
 import com.example.gengolearning.ui.features.navigation.Route
+import com.example.gengolearning.ui.theme.AppColorTheme
 import com.example.gengolearning.ui.theme.BgBlue
+import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
@@ -61,15 +65,18 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
     val currentLanguage by viewModel.currentLanguage.collectAsState(
         Languages.languagesList[0]
     )
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
     var logoutDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
 
     val image by viewModel.profileImage.collectAsState()
+    val currentTheme by viewModel.currentTheme.collectAsStateWithLifecycle()
 
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(BgBlue)
+        .background(MaterialTheme.colorScheme.primary)
         .statusBarsPadding()) {
 
 
@@ -87,7 +94,7 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            color = White,
+            color = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(topStart = 90.dp),
             shadowElevation = 10.dp
         ) {
@@ -101,7 +108,7 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
 
             Card(modifier = Modifier
                 .padding(start = 12.dp, end = 12.dp),
-                colors = CardDefaults.cardColors(White),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background),
                 elevation = CardDefaults.cardElevation(10.dp)){
                 Column {
 
@@ -139,26 +146,12 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
 
                     SettingItems(
                         {
-                            Box(modifier = Modifier
-                                .padding(top = 10.dp, start = 10.dp, bottom = 10.dp, end = 5.dp)
-                                .background(White)
-                                .height(65.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                )
-                                {
                                 Image(
                                     painter = painterResource(currentLanguage.flag),
                                     contentDescription = null,
-                                    modifier = if (currentLanguage.code == "jp") {
-                                        Modifier
-                                            .width(70.dp)
-                                            .height(60.dp)
-                                            .border(0.5.dp, BgBlue, shape = RoundedCornerShape(10.dp))
-                                        }
-                                        else Modifier
-                                        .size(70.dp)
+                                    modifier =  Modifier.size(70.dp)
                                 )
-                            }
+
                         },
                         stringResource(R.string.learning_language),
                         {
@@ -185,13 +178,31 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
                                 contentDescription = null)
                         },
                         onClick = {
-
-//                           openAlertDialog.value = true
                             showLanguageDialog = true
 
 
                         },
                         divider = true)
+
+                    SettingItems(
+                        icon = {
+                            Image(
+                                painter = painterResource(R.drawable.app_theme_icon),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(70.dp)
+                                    .padding(start = 10.dp, top = 5.dp)
+                            )
+                        },
+                        title = stringResource(R.string.change_theme),
+                        arrow= {},
+                        onClick = {
+                            viewModel.showAppThemeModal()
+
+                        },
+                        divider = true
+
+                    )
 
                     SettingItems(
                         icon = {
@@ -263,6 +274,16 @@ fun settingsUi(navController: NavController, viewModel: SettingsViewModel= hiltV
             onDismiss = { showLanguageDialog = false }
         )
     }
+
+        if (state.showAppThemeModal) {
+            AppThemeModal(
+                onSelect = {
+                    viewModel.changeAppTheme(it)
+                },
+                currentTheme = currentTheme,
+                onDismiss = {viewModel.dismissAppThemeModal()}
+            )
+        }
 
     }
 

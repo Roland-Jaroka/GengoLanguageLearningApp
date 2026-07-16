@@ -2,6 +2,8 @@ package com.example.gengolearning.ui.features.dashboard.home.mylist
 
 //noinspection SuspiciousImport
 
+import android.content.ClipData
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateContentSize
@@ -34,7 +36,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -48,16 +54,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.wear.compose.material.Text
+import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.model.utils.AnalyticsHelper
 import com.example.gengolearning.ui.components.CategoryDeleteAlertDialog
 import com.example.gengolearning.ui.components.CategoryListCard
@@ -70,9 +80,10 @@ import com.example.gengolearning.ui.components.MyTopAppBar
 import com.example.gengolearning.ui.components.WordCard
 import com.example.gengolearning.ui.components.global.SearchBar
 import com.example.gengolearning.ui.features.navigation.Route
-import com.example.gengolearning.ui.theme.BgBlue
-import com.example.gengolearning.ui.theme.Blue
-import com.example.gengolearning.ui.theme.PandaBlack
+import com.example.gengolearning.ui.features.navigation.Route.EditCategory
+import com.example.gengolearning.ui.features.navigation.Route.EditWord
+import com.example.gengolearning.ui.theme.AppColorTheme
+import com.example.gengolearning.ui.theme.MyLanguageLearningAppTheme
 import com.example.gengolearning.ui.theme.Red
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
@@ -80,54 +91,111 @@ import com.gengolearning.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
+fun MyListUiRoot(viewModel: MyListViewModel = hiltViewModel(),
              navController: NavController
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val sheetState = rememberModalBottomSheetState()
+
 
     val list by viewModel.words.collectAsState()
 
     var visible by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
+
     val currentLanguage by viewModel.currentLanguage.collectAsState()
+    val context = LocalContext.current
 
+    remember { FocusRequester() }
 
-    remember{ FocusRequester() }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val tutorial by viewModel.tutorialModal(context).collectAsState(initial = false)
 
+    val clipBoardManager = LocalClipboard.current
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
 
 
 
 
 
     LaunchedEffect(Unit) {
-        visible= true
+        visible = true
     }
 
     LaunchedEffect(Unit) {
-        viewModel.uiEvents.collect { event->
+        viewModel.uiEvents.collect { event ->
             when (event) {
                 is MyListUiEvents.NavigateToAddWords ->
-                    navController.navigate(Route.EditWord(state.longTappedWord?.id))
+                    navController.navigate(EditWord(state.longTappedWord?.id))
+
                 is MyListUiEvents.NavigateToNewCategory ->
-                    navController.navigate(Route.EditCategory(state.longTappedCategory?.id.toString()))
+                    navController.navigate(EditCategory(state.longTappedCategory?.id.toString()))
+
                 is MyListUiEvents.NavigateToQuiz ->
                     navController.navigate(Route.Quiz)
+
+                is MyListUiEvents.CopyToClipboard -> {
+                    clipBoardManager.setClipEntry(
+                        ClipEntry(
+                            ClipData.newPlainText("Copied to Clipboard", event.word)
+                        )
+                    )
+                    snackbarHostState.showSnackbar(
+                        message = when (event.copyOperations) {
+                            CopyOperations.COPY_WORD -> "Word has been copied"
+                            CopyOperations.COPY_PRONOUNCIATION -> "Pronounciation has been copied"
+                            CopyOperations.COPY_TRANSLATION -> "Translation has been copied"
+                        },
+                        duration = SnackbarDuration.Short
+                    )
+                }
             }
         }
     }
+
+    MyListUi(
+        state = state,
+        onNavigateBack = {navController.popBackStack()},
+        onNavigate = {navController.navigate(it)},
+        onAction = viewModel::myListActions,
+        snackbarHostState = snackbarHostState,
+        visible = visible,
+        currentLanguage = currentLanguage,
+        onSetMyListTutorial = {
+            viewModel.setMyListTutorial(context)
+        },
+        context = context,
+        tutorial = tutorial,
+        list = list
+    )
+}
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun MyListUi(
+        state: MyListUiState,
+        onNavigateBack: () -> Unit,
+        onNavigate: (Route) -> Unit,
+        onAction:(MyListActions) -> Unit,
+        snackbarHostState: SnackbarHostState,
+        visible: Boolean = false,
+        currentLanguage: String,
+        onSetMyListTutorial: (Context)-> Unit = {},
+        context: Context,
+        tutorial: Boolean = false,
+        list: List<Words> = emptyList()
+
+    ) {
+        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        val sheetState = rememberModalBottomSheetState()
+
 
     Scaffold(
         topBar= { MyTopAppBar(
             modifier = Modifier,
             title = stringResource(R.string.my_list_button),
-            onBackClick = {
-                navController.popBackStack()
+            onBackClick = {onNavigateBack()
             },
             scrollBehavior = scrollBehavior,
             actions = {
@@ -135,7 +203,7 @@ fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
                 if (state.words.isNotEmpty()) {
                     IconButton(
                         onClick = {
-                            viewModel.myListActions(MyListActions.OnListViewChange)
+                            onAction(MyListActions.OnListViewChange)
                         }
                     ) {
                         if (!state.categoryListView) {
@@ -156,7 +224,10 @@ fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
                     }
                 }
             }
-        ) },
+        )},
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = !state.onEdit
@@ -164,14 +235,14 @@ fun MyListUi(viewModel: MyListViewModel = hiltViewModel(),
 
                 MyListFloatingActionButton(
                     onAddClick = {
-                        navController.navigate(Route.AddWords(
+                      onNavigate(Route.AddWords(
                             word = null,
                             pronunciation = null,
                             translation = null
                         ))
                     },
                     onNewCategoryClick = {
-                        navController.navigate(Route.NewCategory)
+                        onNavigate(Route.NewCategory)
                     }
                 )
             }
@@ -193,10 +264,10 @@ Box(modifier = Modifier
             SearchBar(
                 searchInput = state.searchInput,
                 onValueChange = {
-                   viewModel.myListActions(MyListActions.OnInputChanged(it))
+                   onAction(MyListActions.OnInputChanged(it))
                 },
                 onClear = {
-                    viewModel.myListActions(MyListActions.OnInputChanged(""))
+                    onAction(MyListActions.OnInputChanged(""))
                 },
                 modifier = Modifier.weight(1f),
                 hasLabel = true
@@ -209,7 +280,7 @@ Box(modifier = Modifier
                 Row {
                     IconButton(
                         onClick = {
-                            viewModel.myListActions(MyListActions.OnHomeCard)
+                            onAction(MyListActions.OnHomeCard)
 
                         },
                     ) {
@@ -223,7 +294,7 @@ Box(modifier = Modifier
 
                     IconButton(
                         onClick = {
-                            viewModel.myListActions(MyListActions.OnSelectAll)
+                            onAction(MyListActions.OnSelectAll)
                         }
 
                         ) {
@@ -233,7 +304,7 @@ Box(modifier = Modifier
                             modifier = Modifier
                                 .size(30.dp),
                             colorFilter = if (state.selectedWords.size == state.words.size) ColorFilter.tint(
-                                BgBlue
+                                MaterialTheme.colorScheme.primary
                             ) else null
                         )
                     }
@@ -243,14 +314,14 @@ Box(modifier = Modifier
             Image(
                 painter = painterResource(android.R.drawable.ic_menu_edit),
                 contentDescription = null,
-                colorFilter = if (state.onEdit) ColorFilter.tint(BgBlue) else null,
+                colorFilter = if (state.onEdit) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null,
                 modifier = Modifier
                     .padding(start = 5.dp, top = 15.dp)
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
                         onClick = {
-                            viewModel.myListActions(MyListActions.OnEdit)
+                            onAction(MyListActions.OnEdit)
                         }
                     )
             )
@@ -264,7 +335,8 @@ Box(modifier = Modifier
             if (!state.categoryListView) {
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .animateContentSize()
                 ) {
                     val maxAnimatedItems = 10
@@ -290,10 +362,10 @@ Box(modifier = Modifier
                                 isSelectable = state.onEdit,
                                 isSelected = state.selectedWords.contains(word.id),
                                 onClick = {
-                                    viewModel.myListActions(MyListActions.OnToggleSelection(word.id))
+                                    onAction(MyListActions.OnToggleSelection(word.id))
                                 },
                                 longTap = {
-                                    viewModel.myListActions(MyListActions.OnLongTap(word))
+                                    onAction(MyListActions.OnLongTap(word))
 
                                 },
                                 currentLanguage = currentLanguage,
@@ -309,7 +381,8 @@ Box(modifier = Modifier
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
                         .animateContentSize()
                 ) {
                     itemsIndexed(state.categories) { index, category ->
@@ -323,18 +396,18 @@ Box(modifier = Modifier
                                 showWords = !showWords
                             },
                             onLongClick = {
-                                viewModel.myListActions(MyListActions.OnCategoryLongTap(category))
+                                onAction(MyListActions.OnCategoryLongTap(category))
                             },
                             showWords = showWords,
                             isEditMode = state.onEdit,
                             isSelected = state.selectedCategories.contains(category.categoryName),
                             onCheckedChange = {
 
-                                viewModel.myListActions(MyListActions.OnToggleCategorySelection(category.categoryName, wordInCategory))
+                                onAction(MyListActions.OnToggleCategorySelection(category.categoryName, wordInCategory))
 
                             },
                             onCategoryDelete = {
-                                viewModel.myListActions(MyListActions.OnCategoryDeleteButton(category))
+                                onAction(MyListActions.OnCategoryDeleteButton(category))
                             }
                         )
                         AnimatedVisibility(
@@ -384,7 +457,7 @@ Box(modifier = Modifier
                         R.string.wordlist_empty_search
                     ),
                     fontSize = 20.sp,
-                    color = PandaBlack,
+                    color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(10.dp)
@@ -393,13 +466,13 @@ Box(modifier = Modifier
 
                 MyAppButton(
                     onClick = {
-                        navController.navigate(Route.AddWords(
+                        onNavigate(Route.AddWords(
                             word = null, translation = null, pronunciation = null
                         ))
                         AnalyticsHelper.logEvent("addwords_button_mylist")
                     },
                     text = stringResource(R.string.add_words_button),
-                    colors = ButtonDefaults.buttonColors(Blue)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
 
                 )
             }
@@ -422,7 +495,7 @@ Box(modifier = Modifier
 
             Button(
                 onClick = {
-                    viewModel.myListActions(MyListActions.OnDeleteCategoryButton)
+                    onAction(MyListActions.OnDeleteCategoryButton)
                     AnalyticsHelper.logEvent("remove_button_mylist")
                 },
                 modifier = Modifier
@@ -445,11 +518,9 @@ Box(modifier = Modifier
 
             Button(
                 onClick = {
-                    viewModel.myListActions(MyListActions.OnHomePage)
+                    onAction(MyListActions.OnHomePage)
                     AnalyticsHelper.logEvent("homePage_button_mylist")
-                    navController.navigate(Route.Home) {
-                        popUpTo("home") { inclusive = true }
-                    }
+                    onNavigate(Route.Home)
 
                 },
                 modifier = Modifier
@@ -457,8 +528,8 @@ Box(modifier = Modifier
                     .height(50.dp)
                     .padding(start = 12.dp, end = 12.dp, top = 5.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BgBlue,
-                    contentColor = White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.background
                 ),
                 elevation = ButtonDefaults.buttonElevation(5.dp)
             ) {
@@ -471,15 +542,15 @@ Box(modifier = Modifier
 
             Button(
                 onClick = {
-                   viewModel.myListActions(MyListActions.OnAddCategoryButton)
+                    onAction(MyListActions.OnAddCategoryButton)
                 },
                 modifier = Modifier
                     .align(Alignment.End)
                     .height(50.dp)
                     .padding(start = 12.dp, end = 12.dp, top = 5.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BgBlue,
-                    contentColor = White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.background
                 ),
                 elevation = ButtonDefaults.buttonElevation(5.dp)
             ) {
@@ -494,7 +565,7 @@ Box(modifier = Modifier
 
             Button(
                 onClick = {
-                    viewModel.myListActions(MyListActions.OnSendWordsToQuiz)
+                    onAction(MyListActions.OnSendWordsToQuiz)
                     AnalyticsHelper.logEvent("quiz_button_mylist")
                 },
                 modifier = Modifier
@@ -502,8 +573,8 @@ Box(modifier = Modifier
                     .height(50.dp)
                     .padding(start = 12.dp, end = 12.dp, top = 5.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BgBlue,
-                    contentColor = White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.background
                 ),
                 elevation = ButtonDefaults.buttonElevation(5.dp)
             ) {
@@ -519,8 +590,8 @@ Box(modifier = Modifier
 
                 Button(
                     onClick = {
-                        viewModel.myListActions(MyListActions.OnSendWordsToDrawingQuiz)
-                        navController.navigate(Route.DrawingQuiz)
+                        onAction(MyListActions.OnSendWordsToDrawingQuiz)
+                        onNavigate(Route.DrawingQuiz)
                         AnalyticsHelper.logEvent("drawing_quiz_button_mylist")
                     },
                     modifier = Modifier
@@ -528,8 +599,8 @@ Box(modifier = Modifier
                         .height(50.dp)
                         .padding(start = 12.dp, end = 12.dp, top = 5.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BgBlue,
-                        contentColor = White
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.background
                     ),
                     elevation = ButtonDefaults.buttonElevation(5.dp)
                 ) {
@@ -558,27 +629,39 @@ Box(modifier = Modifier
     if (tutorial){
         MyListTeachingModal(
             sheetState = sheetState,
-            onClick = { viewModel.setMyListTutorial(context)})
+            onClick = { onSetMyListTutorial(context)
+            })
     }
 
     if (state.longTap) {
         LongTapBottomModal(
-            onDismiss = { viewModel.myListActions(MyListActions.OnDismissWordLongTapModal) },
+            onDismiss = { onAction(MyListActions.OnDismissWordLongTapModal) },
             onClick = {
 
-               viewModel.myListActions(MyListActions.OnEditWord)
+                onAction(MyListActions.OnEditWord)
 
-            }
+            },
+            onCopyWord = {
+                onAction(MyListActions.OnWordCopy)
+            },
+            onCopyPronounciation = {
+                onAction(MyListActions.OnPronounciationCopy)
+            },
+            onCopyTranslation = {
+                onAction(MyListActions.OnTranslationCopy)
+            },
+
+            currentLanguage = currentLanguage
         )
     }
 
     if (state.categoryLongTap) {
         CategoryLongTapModal(
             onDismiss = {
-                viewModel.myListActions(MyListActions.OnDismissCategoryLongTapModal)
+                onAction(MyListActions.OnDismissCategoryLongTapModal)
             },
             onClick = {
-               viewModel.myListActions(MyListActions.OnEditCategory)
+                onAction(MyListActions.OnEditCategory)
             }
         )
     }
@@ -587,7 +670,7 @@ Box(modifier = Modifier
         InfoModal(
             sheetState = sheetState,
             onClick = {
-                viewModel.myListActions(MyListActions.OnDismissNewCategoryModal)
+                onAction(MyListActions.OnDismissNewCategoryModal)
             }
         )
     }
@@ -595,20 +678,20 @@ Box(modifier = Modifier
     if (state.showDeleteDialog) {
         DeleteWordAlertDialog(
             onConfirm = {
-                viewModel.myListActions(MyListActions.OnRemove)
+                onAction(MyListActions.OnRemove)
                         },
-            onDismiss = { viewModel.myListActions(MyListActions.OnHideDeleteWordDialog) }
+            onDismiss = { onAction(MyListActions.OnHideDeleteWordDialog) }
         )
     }
 
     if(state.showCategoryDeleteDialog) {
         CategoryDeleteAlertDialog(
             onConfirm = {
-                viewModel.myListActions(MyListActions.OnDeleteCategory(state.categoryToDelete!!))
+                onAction(MyListActions.OnDeleteCategory(state.categoryToDelete!!))
 
             },
             onDismiss = {
-                viewModel.myListActions(MyListActions.OnDismissCategoryDeleteDialog)
+                onAction(MyListActions.OnDismissCategoryDeleteDialog)
             }
         )
     }
@@ -616,9 +699,9 @@ Box(modifier = Modifier
     if (state.showCategoryBottomSheet) {
         CategorySelectorBottomSheet(
             categories = state.categories,
-            onDismiss = { viewModel.myListActions(MyListActions.OnDismissCategoryBottomSheet) },
+            onDismiss = { onAction(MyListActions.OnDismissCategoryBottomSheet) },
             onClick = {
-                viewModel.myListActions(MyListActions.OnAddCategoryToSelectedWords(it.categoryName))
+                onAction(MyListActions.OnAddCategoryToSelectedWords(it.categoryName))
             }
         )
     }
@@ -627,8 +710,39 @@ Box(modifier = Modifier
         QuizIsEmptyModal(
             sheetState = sheetState,
             onDismiss = {
-                viewModel.myListActions(MyListActions.OnDismissQuizIsEmptyModal)
+                onAction(MyListActions.OnDismissQuizIsEmptyModal)
             }
+        )
+    }
+
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    MyLanguageLearningAppTheme(appColorTheme = AppColorTheme.SUNSET) {
+        MyListUi(
+            state = MyListUiState(
+                words = listOf(
+                    Words(
+                        "Test",
+                        "Test",
+                        "Test"
+                    )
+                )
+            ),
+            onNavigateBack = {},
+            onNavigate = {},
+            onAction = {},
+            snackbarHostState = SnackbarHostState(),
+            visible = true,
+            currentLanguage = "jp",
+            onSetMyListTutorial = {
+
+            },
+            context = LocalContext.current,
+            tutorial = false,
+            list = emptyList()
         )
     }
 }

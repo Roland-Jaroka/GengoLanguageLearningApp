@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.gengolearning.ui.theme.BgBlue
+import com.example.gengolearning.ui.theme.MyLanguageLearningAppTheme
 import com.example.gengolearning.ui.theme.White
 
 @Composable
@@ -29,18 +31,20 @@ fun WordFilterChips(selected: Boolean, title: String, onClick: () -> Unit, modif
         border = FilterChipDefaults.filterChipBorder(
             enabled = true,
             selected = selected,
-            borderColor = BgBlue
+            borderColor = MaterialTheme.colorScheme.primary
         ),
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = BgBlue,
-            selectedLabelColor = White,
-            selectedLeadingIconColor = White),
+            selectedContainerColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.background,
+            selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary),
         leadingIcon = {
             if (selected) {
                 Icon(
                     imageVector = Icons.Filled.Done,
                     contentDescription = null,
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                    modifier = Modifier.size(FilterChipDefaults.IconSize),
+                    tint = MaterialTheme.colorScheme.onSecondary
                 )
             }
         },
@@ -54,6 +58,7 @@ fun WordFilterChips(selected: Boolean, title: String, onClick: () -> Unit, modif
 @Preview
 @Composable
 private fun Preview() {
-    WordFilterChips(selected = false, title = "Translation", onClick = {})
-
+    MyLanguageLearningAppTheme {
+        WordFilterChips(selected = false, title = "Translation", onClick = {})
+    }
 }

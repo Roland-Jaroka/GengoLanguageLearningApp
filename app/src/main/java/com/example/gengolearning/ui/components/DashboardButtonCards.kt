@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,20 +25,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.gengolearning.model.appmodels.DashboardFeatures
-import com.example.gengolearning.ui.theme.BgBlue
-import com.example.gengolearning.ui.theme.White
+import com.example.gengolearning.ui.features.navigation.Route
 
 @Composable
 fun ButtonCards(modifier: Modifier = Modifier,
-                navController: NavController,
                 features: DashboardFeatures,
                 flag: Int,
                 language: String,
-                onClick: () -> Unit = {}) {
+                onClick: () -> Unit = {},
+                onNavigate: (Route) -> Unit
+                 ) {
     Card(colors = CardDefaults.cardColors(
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.surface
     ),
         elevation = CardDefaults.cardElevation(5.dp),
         modifier = modifier
@@ -71,8 +70,8 @@ fun ButtonCards(modifier: Modifier = Modifier,
                         .fillMaxWidth()
                         .padding(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = White,
-                        containerColor = BgBlue
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.primary
                     ),
                     elevation = ButtonDefaults.buttonElevation(
                         hoveredElevation = 10.dp,
@@ -89,7 +88,7 @@ fun ButtonCards(modifier: Modifier = Modifier,
                         painter = painterResource(features.buttonIcon),
                         contentDescription = null,
                         modifier = if (features.buttonSize != null) Modifier.size(features.buttonSize) else Modifier,
-                        tint = White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
 
                     Text(
@@ -97,7 +96,8 @@ fun ButtonCards(modifier: Modifier = Modifier,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         modifier = Modifier
-                            .padding(start = 2.dp)
+                            .padding(start = 2.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
         } else {
@@ -105,7 +105,7 @@ fun ButtonCards(modifier: Modifier = Modifier,
                        flag,
                        language = language,
                        onClick = {
-                           navController.navigate(features.route)
+                           onNavigate(features.route)
                        }
                    )
         }

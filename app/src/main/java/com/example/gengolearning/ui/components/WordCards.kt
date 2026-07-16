@@ -18,7 +18,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,9 +37,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gengolearning.model.appmodels.WordCategories
+import com.example.gengolearning.ui.theme.AppColorTheme
 import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.JapaneseFontFamily
+import com.example.gengolearning.ui.theme.MyLanguageLearningAppTheme
 import com.example.gengolearning.ui.theme.White
 
 
@@ -78,7 +82,7 @@ if (!isLoading) {
                 interactionSource = null
             ),
         elevation = CardDefaults.cardElevation(5.dp),
-        colors = CardDefaults.cardColors(White)
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
     ) {
 
         Box {
@@ -97,7 +101,7 @@ if (!isLoading) {
                     fontSize = 40.sp,
                     fontFamily = JapaneseFontFamily,
                     fontWeight = FontWeight.Bold,
-                    color = BgBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = if (expanded) Int.MAX_VALUE else 1,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 45.sp
@@ -111,7 +115,7 @@ if (!isLoading) {
                             .padding(top = 5.dp, start = 20.dp),
                         fontSize = 30.sp,
                         fontFamily = FontFamily.SansSerif,
-                        color = BgBlue
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -142,7 +146,7 @@ if (!isLoading) {
                                colors = if (category.color != null) FilterChipDefaults.filterChipColors(
                                    Color(category.color)
                                ) else FilterChipDefaults.filterChipColors(
-                                   containerColor = Blue
+                                   containerColor = MaterialTheme.colorScheme.secondary
                                ),
                                modifier = Modifier
                                    .padding(5.dp),
@@ -173,7 +177,7 @@ if (!isLoading) {
                    .padding(10.dp)
                    .height(150.dp),
                elevation = CardDefaults.cardElevation(5.dp),
-               colors = CardDefaults.cardColors(White)
+               colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface)
            ) {
                Column {
                    Spacer(
@@ -228,11 +232,13 @@ if (!isLoading) {
 @Preview
 @Composable
 private fun Preview() {
-    WordCard(
-        word = "日本語",
-        pronunciation = "pronunciation",
-        translation = "translation",
-        currentLanguage = "jp",
-        isLoading = false
-    )
+    MyLanguageLearningAppTheme(appColorTheme = AppColorTheme.BASIC) {
+        WordCard(
+            word = "日本語",
+            pronunciation = "pronunciation",
+            translation = "translation",
+            currentLanguage = "jp",
+            isLoading = false
+        )
+    }
 }

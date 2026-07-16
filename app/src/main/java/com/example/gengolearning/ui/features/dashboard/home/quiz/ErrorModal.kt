@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -23,6 +26,7 @@ import com.example.gengolearning.ui.theme.BgBlue
 import com.example.gengolearning.ui.theme.White
 import com.example.gengolearning.ui.components.MyAppButton
 import com.gengolearning.app.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,12 +35,16 @@ fun ErrorModal(onClick : () -> Unit,
                @StringRes  text: Int = R.string.common_error_internet_description,
                @StringRes  buttonText: Int = R.string.common_error_internet_button ) {
 
+              val scope = rememberCoroutineScope()
+              val sheetState = rememberModalBottomSheetState()
+
     ModalBottomSheet(
         onDismissRequest = {
             onClick()
         },
         modifier = Modifier,
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background,
+        sheetState = sheetState
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -70,22 +78,20 @@ fun ErrorModal(onClick : () -> Unit,
             MyAppButton(
                 text = stringResource(buttonText),
                 onClick = {
-                    onClick()
+                    scope.launch {
+                        sheetState.hide()
+                    }.invokeOnCompletion {
+                        if(!sheetState.isVisible) {
+                            onClick()
+                        }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = BgBlue
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
 
     }
 
-}
-
-@Preview
-@Composable
-private fun Preview() {
-    ErrorModal(
-        onClick = {}
-    )
 }

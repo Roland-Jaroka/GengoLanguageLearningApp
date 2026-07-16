@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,7 +67,7 @@ fun LearningUi(navController: NavController,
     Column(
         modifier = Modifier
         .fillMaxSize()
-        .background(BgBlue)
+        .background(MaterialTheme.colorScheme.primary)
         .statusBarsPadding()
         ) {
 
@@ -85,7 +86,7 @@ fun LearningUi(navController: NavController,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            color = White,
+            color = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(topStart = 90.dp),
             shadowElevation = 10.dp
         ) {
@@ -159,7 +160,7 @@ fun LearningUi(navController: NavController,
                                 AnalyticsHelper.logEvent("add_grammar_button")
                             },
                             text = stringResource(R.string.add),
-                            colors = ButtonDefaults.buttonColors(Blue)
+                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)
 
                         )
 

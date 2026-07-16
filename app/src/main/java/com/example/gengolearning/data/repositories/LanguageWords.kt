@@ -12,6 +12,7 @@ import com.example.gengolearning.model.appmodels.QuizRequest
 import com.example.gengolearning.model.appmodels.WordCategories
 import com.example.gengolearning.model.appmodels.Words
 import com.example.gengolearning.model.errors.NetworkError
+import com.example.gengolearning.model.results.CloudSyncResults
 import com.example.gengolearning.model.results.Response
 import com.example.gengolearning.model.tokens.TokenProvider
 import com.example.gengolearning.ui.features.dashboard.home.aiquiz.AiQuiz
@@ -28,6 +29,7 @@ import io.ktor.http.contentType
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.tasks.await
@@ -36,7 +38,7 @@ import retrofit2.HttpException
 
 class LanguageWords @Inject constructor(
     private val dao: WordsDao,
-    userSettingsRepository: UserSettingsRepository,
+    private val userSettingsRepository: UserSettingsRepository,
     private val client: HttpClient,
     private val categoriesDao: CategoryDatabase,
     private val tokenProvider: TokenProvider,
@@ -56,10 +58,27 @@ class LanguageWords @Inject constructor(
         categoriesDao.getAllCategories(language.code)
     }
 
+    val cloudSyncWasSuccess = MutableSharedFlow<CloudSyncResults>(replay = 1)
 
 
 
 
+
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getHomePageWord(): Flow<List<Words>> {
+      return userSettingsRepository.selectedLanguage.flatMapLatest { language ->
+           dao.getHomePageWords(language.code)
+       }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getAllWords(): Flow<List<Words>> {
+        return userSettingsRepository.selectedLanguage.flatMapLatest { language ->
+            dao.getAllWords(language.code)
+        }
+    }
 
 
   suspend fun loadWords(language: String, forceServerLoad: Boolean = false){
@@ -99,7 +118,19 @@ class LanguageWords @Inject constructor(
 
                 }
 
-                dao.upsertWords(list)
+      if (result.metadata.isFromCache) {
+          Log.d("Sync", "Emmit a value")
+
+          cloudSyncWasSuccess.emit(CloudSyncResults.Failure)
+
+      } else {
+
+          cloudSyncWasSuccess.emit(CloudSyncResults.Success)
+
+
+          dao.upsertWords(list)
+      }
+
 
     }
 

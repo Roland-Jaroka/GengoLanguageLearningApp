@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -71,7 +72,7 @@ fun LogoutDialog(onDismiss: () -> Unit,
             )
 
         },
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
 
     )
 

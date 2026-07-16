@@ -1,6 +1,7 @@
 package com.example.gengolearning.data.repositories
 
 import android.content.Context
+import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -8,6 +9,7 @@ import com.example.gengolearning.data.local.ProfileDao
 import com.example.gengolearning.model.appmodels.Language
 import com.example.gengolearning.model.appmodels.Languages
 import com.example.gengolearning.model.appmodels.ProfilePicture
+import com.example.gengolearning.ui.theme.AppColorTheme
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -32,14 +34,21 @@ class UserSettingsRepository @Inject constructor(
 
     private val USERNAME_KEY= stringPreferencesKey("username")
 
+    private val THEME_KEY = stringPreferencesKey("app_theme")
+
 
     val languages = Languages.languagesList
 
     val profileImage :Flow<ProfilePicture?> = profileDao.getProfilePicture(1)
 
-
-
-
+    val theme: Flow<AppColorTheme> = context.dataStore.data.map { preferences ->
+        when (preferences[THEME_KEY]) {
+            "SUNSET" -> AppColorTheme.SUNSET
+            "MIDNIGHT_TEAL" -> AppColorTheme.MIDNIGHT_TEAL
+            "Autumn" -> AppColorTheme.Autumn
+            else -> AppColorTheme.BASIC
+        }
+    }
 
 
 
@@ -63,7 +72,11 @@ class UserSettingsRepository @Inject constructor(
 
 
 
-
+    suspend fun saveTheme(theme: AppColorTheme) {
+        context.dataStore.edit { preferences ->
+            preferences[THEME_KEY] = theme.name
+        }
+    }
 
    suspend fun setLanguage(selectedLanguage: String?) {
         if (selectedLanguage != null) {

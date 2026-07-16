@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -43,7 +44,7 @@ fun AppLanguageSelectorBottomSheet(modifier: Modifier = Modifier,
             onDismiss()
         },
         modifier = modifier,
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -67,8 +68,8 @@ fun AppLanguageSelectorBottomSheet(modifier: Modifier = Modifier,
                             )
                         },
                         colors = RadioButtonDefaults.colors(
-                            selectedColor = BgBlue,
-                            unselectedColor = Blue
+                            selectedColor = MaterialTheme.colorScheme.primary,
+                            unselectedColor = MaterialTheme.colorScheme.secondary
                         )
                     )
 

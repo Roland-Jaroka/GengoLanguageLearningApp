@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -43,7 +44,7 @@ fun QuizIsEmptyModal(
         onDismissRequest = {
             onDismiss()
         },
-        containerColor = White,
+        containerColor = MaterialTheme.colorScheme.background,
         sheetState = sheetState
     ) {
         Column(
@@ -87,7 +88,7 @@ fun QuizIsEmptyModal(
                 },
                 text = stringResource(R.string.empty_quiz_modal_button),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Blue
+                    containerColor = MaterialTheme.colorScheme.secondary
                 ),
                 modifier = Modifier
                     .navigationBarsPadding()

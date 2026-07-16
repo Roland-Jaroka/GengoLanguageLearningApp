@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -48,7 +49,7 @@ fun EditGrammar(onDismiss: () -> Unit = {},
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .pointerInput(Unit) {}
     ) {
         Column(modifier = Modifier
@@ -66,7 +67,7 @@ fun EditGrammar(onDismiss: () -> Unit = {},
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = null,
-                tint = BgBlue
+                tint = MaterialTheme.colorScheme.primary
             )
         }
             Text(
@@ -95,9 +96,9 @@ fun EditGrammar(onDismiss: () -> Unit = {},
                 shape = RoundedCornerShape(20.dp),
                 maxLines = 1,
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Blue,
-                    unfocusedContainerColor = White,
-                    focusedContainerColor = White),
+                    focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.onSecondary,
+                    focusedContainerColor = MaterialTheme.colorScheme.onSecondary),
                 isError = state.titleFieldValidation,
                 supportingText = {
                     if (state.titleFieldValidation) {
@@ -134,9 +135,9 @@ fun EditGrammar(onDismiss: () -> Unit = {},
                      .padding(10.dp),
                  shape = RoundedCornerShape(20.dp),
                  colors = TextFieldDefaults.colors(
-                     focusedIndicatorColor = Blue,
-                     unfocusedContainerColor = White,
-                     focusedContainerColor = White,
+                     focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                     unfocusedContainerColor = MaterialTheme.colorScheme.onSecondary,
+                     focusedContainerColor = MaterialTheme.colorScheme.onSecondary,
                  ),
                  isError = state.summaryFieldValidation,
                  supportingText = {
@@ -165,7 +166,7 @@ fun EditGrammar(onDismiss: () -> Unit = {},
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Blue
+                containerColor = MaterialTheme.colorScheme.secondary
             )
         )
     }

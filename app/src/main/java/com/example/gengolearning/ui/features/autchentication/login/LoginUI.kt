@@ -383,7 +383,7 @@ fun LoginUiRoot(navController: NavController,
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(
     locale = "hu",
-    fontScale = 2f
+    fontScale = 1f
 )
 @Composable
 private fun Preview() {

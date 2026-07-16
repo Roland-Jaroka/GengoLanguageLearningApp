@@ -17,18 +17,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -37,34 +34,47 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.NavController
 import com.example.gengolearning.model.appmodels.Languages
 import com.example.gengolearning.model.utils.AnalyticsHelper
 import com.example.gengolearning.ui.components.LanguageSelectionRow
+import com.example.gengolearning.ui.components.LoadingScreen
+import com.example.gengolearning.ui.features.dashboard.home.mainlanguage.LanguageSelectorUiEvents
 import com.example.gengolearning.ui.features.navigation.Route
 import com.example.gengolearning.ui.theme.Blue
 import com.example.gengolearning.ui.theme.White
 import com.gengolearning.app.R
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                        navController: NavController) {
-    val currentLanguage by viewModel.currentLanguage.collectAsState()
-    val mainLanguage by viewModel.mainLanguage.collectAsState("jp")
-    var selectedMainLanguage by remember{ mutableStateOf("")}
-    var selectedLanguage by remember { mutableStateOf(currentLanguage.code) }
+
     val scrollState = rememberScrollState()
     val languages = Languages.languagesList
     val scope = rememberCoroutineScope()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
 
 
-    LaunchedEffect(mainLanguage) {
-        selectedMainLanguage = mainLanguage
+    LaunchedEffect(Unit) {
+        viewModel.uiEvents.collect { events ->
+            when (events) {
+                LanguageSelectorUiEvents.NavigateToDashboard -> {
+                    navController.navigate(Route.Home) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = false
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
+        }
+
     }
 
 
@@ -87,7 +97,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(White)
+                colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background)
 
             )
         }
@@ -96,7 +106,7 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
         Column (modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .background(White)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(scrollState)) {
             Card(
                 modifier = Modifier
@@ -104,8 +114,8 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                     .width(300.dp)
                     .animateContentSize()
                     .padding(12.dp),
-                colors = CardDefaults.cardColors(White),
-                border = BorderStroke(1.dp, Blue),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
                 elevation = CardDefaults.cardElevation(5.dp)
             ) {
 
@@ -128,23 +138,15 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                         LanguageSelectionRow(
                             flag = language.flag,
                             language = stringResource(language.name),
-                            selected = selectedLanguage == language.code,
+                            selected = state.selectedLanguage == language.code,
                             onSelect = {
-                                selectedLanguage = language.code
 
-                                scope.launch {
-                                    delay(200)
-                                    viewModel.setLanguage(selectedLanguage)
-                                    navController.navigate(Route.Home) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            saveState = false
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                                viewModel.selectCurrentLanguage(language.code)
+                                    viewModel.setLanguage(language.code)
 
 
-                                }
+
+
                             }
                         )
                     }
@@ -159,8 +161,8 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                     .animateContentSize()
                     .width(300.dp)
                     .padding(12.dp),
-                colors = CardDefaults.cardColors(White),
-                border = BorderStroke(1.dp, Blue),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.background),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
                 elevation = CardDefaults.cardElevation(5.dp)
             ) {
                 Text(
@@ -177,12 +179,13 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
                     LanguageSelectionRow(
                         flag = language.flag,
                         language = stringResource(language.name),
-                        selected = language.code == selectedMainLanguage,
+                        selected = language.code == state.selectedMainLanguage,
                         onSelect = {
-                            selectedMainLanguage = language.code
+
+                            viewModel.selectMainLanguage(language.code)
 
                             scope.launch {
-                                viewModel.setMainLanguage(selectedMainLanguage)
+                                viewModel.setMainLanguage(language.code)
                             }
 
                             AnalyticsHelper.logEvent("main_language_changed")
@@ -193,5 +196,9 @@ fun LearningLanguageUi(viewModel: LearningLanguageViewModel= hiltViewModel(),
 
             }
         }
+    }
+
+    if (state.isLoading) {
+        LoadingScreen()
     }
 }

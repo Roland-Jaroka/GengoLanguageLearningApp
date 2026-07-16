@@ -19,50 +19,46 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.gengolearning.model.appmodels.WordCategories
 import com.example.gengolearning.ui.components.CategoryListCard
 import com.example.gengolearning.ui.components.MyAppButton
 import com.example.gengolearning.ui.features.dashboard.home.mylist.makeNewCategory.ErrorTypes
-import com.example.gengolearning.ui.theme.BgBlue
-import com.example.gengolearning.ui.theme.Blue
-import com.example.gengolearning.ui.theme.White
+import com.example.gengolearning.ui.theme.AppColorTheme
+import com.example.gengolearning.ui.theme.MyLanguageLearningAppTheme
 import com.gengolearning.app.R
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
+fun EditCategoryRoot(viewModel: EditCategoryViewModel = hiltViewModel(),
                  navController: NavController,
                  categoryId: String?
 ) {
 
-    val colorPicker = rememberColorPickerController()
-    var showColorPicker by remember { mutableStateOf(false) }
 
-    val state by viewModel.editCategoryUiState.collectAsState()
+
+    val state by viewModel.editCategoryUiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { events ->
@@ -72,26 +68,40 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
         }
     }
 
+EditCategory(
+    state,
+    onAction = viewModel::onAction,
+    onNavigateBack = {
+        navController.popBackStack()
+    }
+)
+}
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+   private fun EditCategory(
+        state: EditCategoryUiState,
+        onAction: (EditCategoryActions)-> Unit = {},
+        onNavigateBack: () -> Unit = {}
+    ) {
 
-
-
+        val colorPicker = rememberColorPickerController()
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        containerColor = White,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            navController.popBackStack()
+                            onNavigateBack()
                         }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = null,
-                            tint = BgBlue
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -99,19 +109,19 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
                     text = stringResource(R.string.edit_category_title)
                 )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(White)
+                colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background)
             )
         },
         bottomBar = {
             MyAppButton(
                 onClick = {
-                    viewModel.onEdit(state.category)
+                    onAction(EditCategoryActions.OnEdit(state.category))
                 },
                 text = stringResource(R.string.edit_category_button),
                 modifier = Modifier
                     .padding(10.dp)
                     .navigationBarsPadding(),
-                colors = ButtonDefaults.buttonColors(Blue)
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary)
 
             )
         }
@@ -132,7 +142,7 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
                 OutlinedTextField(
                     value = state.category,
                     onValueChange = {
-                        viewModel.onNameChange(it.take(10))
+                        onAction(EditCategoryActions.OnNameChange(it.take(10)))
                     },
                     shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
@@ -179,7 +189,7 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
 
                     IconButton(
                         onClick = {
-                            showColorPicker = !showColorPicker
+                            onAction(EditCategoryActions.ShowColorPicker)
                         }
                     ) {
                         Image(
@@ -191,7 +201,7 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
                     }
 
                     AnimatedVisibility(
-                        visible = showColorPicker ,
+                        visible = state.showColorPicker ,
                     ) {
 
                         Row(
@@ -221,7 +231,7 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
                 }
 
                 AnimatedVisibility(
-                    visible = showColorPicker,
+                    visible = state.showColorPicker,
                 )  {
                     HsvColorPicker(
                         modifier = Modifier
@@ -229,7 +239,7 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
                             .padding(20.dp),
                         controller = colorPicker,
                         onColorChanged = { envelope ->
-                           viewModel.onColorChange(envelope.color)
+                            onAction(EditCategoryActions.OnColorChange(envelope.color))
                         },
                         initialColor = Color(state.color)
 
@@ -240,5 +250,15 @@ fun EditCategory(viewModel: EditCategoryViewModel = hiltViewModel(),
 
 
         }
+    }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    MyLanguageLearningAppTheme(appColorTheme = AppColorTheme.SUNSET) {
+        EditCategory(
+            state = EditCategoryUiState()
+        )
     }
 }

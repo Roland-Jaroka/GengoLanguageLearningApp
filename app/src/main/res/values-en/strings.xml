@@ -212,4 +212,16 @@
     <string name="common_error_server">It seems like something went wrong on the server. Try again.</string>
     <string name="common_try_again">Try again</string>
     <string name="common_go_back">Go back</string>
+    <string name="add_words_snackbar">The word has been added to your list</string>
+    <string name="synced_modal_title">Your app is synced with the cloud</string>
+    <string name="synced_modal_text">We have synced your data with the cloud so any changes you may made on another device is now up to date on this as well</string>
+    <string name="no_internet_title">No internet</string>
+    <string name="common_common_modal_button_text">Okay</string>
+    <string name="basic_theme">Basic Theme</string>
+    <string name="sunset_theme">Sunset Theme</string>
+    <string name="midnight_teal_theme">Midnight Teal Theme</string>
+    <string name="autumn_theme">Autumn Theme</string>
+    <string name="synced_card_text">You\'re words are up to date and synced with the cloud</string>
+    <string name="synced_card_error_text">We could not sync your data with the cloud</string>
+    <string name="change_theme">Change app theme</string>
 </resources>

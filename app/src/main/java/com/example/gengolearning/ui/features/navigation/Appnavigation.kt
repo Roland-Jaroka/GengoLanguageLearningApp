@@ -16,6 +16,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
@@ -28,18 +30,20 @@ import com.example.gengolearning.model.AppSettingsPreferences
 import com.example.gengolearning.model.BottomNavBar
 import com.example.gengolearning.ui.components.global.OpeningLoadingScreen
 import com.example.gengolearning.ui.components.onBoardongRoot
+import com.example.gengolearning.ui.features.MainApp
+import com.example.gengolearning.ui.features.MainViewModel
 import com.example.gengolearning.ui.features.autchentication.forgotpassword.ForgotPasswordScr
 import com.example.gengolearning.ui.features.autchentication.login.LoginUiRoot
 import com.example.gengolearning.ui.features.autchentication.signup.SignUpUi
-import com.example.gengolearning.ui.features.dashboard.home.Home
-import com.example.gengolearning.ui.features.dashboard.home.addwords.AddWordsUi
+import com.example.gengolearning.ui.features.dashboard.home.HomeRoot
+import com.example.gengolearning.ui.features.dashboard.home.addwords.AddWordsRoot
 import com.example.gengolearning.ui.features.dashboard.home.aiquiz.ui.AiQuizUiRoot
-import com.example.gengolearning.ui.features.dashboard.home.apiwords.ApiWordsScreen
+import com.example.gengolearning.ui.features.dashboard.home.apiwords.ApiWordsScreenRoot
 import com.example.gengolearning.ui.features.dashboard.home.drawingquiz.DrawingQuizView
 import com.example.gengolearning.ui.features.dashboard.home.mainlanguage.MainLanguageSelector
-import com.example.gengolearning.ui.features.dashboard.home.mylist.MyListUi
-import com.example.gengolearning.ui.features.dashboard.home.mylist.editcategory.EditCategory
-import com.example.gengolearning.ui.features.dashboard.home.mylist.editword.EditWord
+import com.example.gengolearning.ui.features.dashboard.home.mylist.MyListUiRoot
+import com.example.gengolearning.ui.features.dashboard.home.mylist.editcategory.EditCategoryRoot
+import com.example.gengolearning.ui.features.dashboard.home.mylist.editword.EditWordRoot
 import com.example.gengolearning.ui.features.dashboard.home.mylist.makeNewCategory.MakeNewCategoryScreen
 import com.example.gengolearning.ui.features.dashboard.home.quiz.QuizUi
 import com.example.gengolearning.ui.features.dashboard.learning.AddNewGrammarUi
@@ -48,14 +52,19 @@ import com.example.gengolearning.ui.features.dashboard.learning.grammarDetails.G
 import com.example.gengolearning.ui.features.dashboard.settings.LearningLanguageUi
 import com.example.gengolearning.ui.features.dashboard.settings.Profile.ProfileMenu
 import com.example.gengolearning.ui.features.dashboard.settings.settingsUi
+import com.example.gengolearning.ui.theme.AppColorTheme
 import com.google.firebase.auth.FirebaseAuth
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    viewModel: MainViewModel = hiltViewModel(),
+    colorTheme: AppColorTheme
+) {
     val navController = rememberNavController()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
@@ -89,7 +98,7 @@ fun AppNavigation() {
                 )
             )
 
-            { BottomNavBar(navController)}
+            { BottomNavBar(navController, colorTheme)}
         }
 
     ) {//innerPadding ->
@@ -133,7 +142,7 @@ fun AppNavigation() {
 
                    composable<Route.OnBoarding> { onBoardongRoot(navController = navController) }
 
-                   composable<Route.Home> { Home(navController = navController) }
+                   composable<Route.Home> { HomeRoot(navController = navController) }
 
 
                    composable<Route.AddWords>(
@@ -143,12 +152,12 @@ fun AppNavigation() {
 
                        backStackEntry.toRoute<Route.AddWords>()
 
-                       AddWordsUi(navController = navController)
+                       AddWordsRoot(navController = navController)
                    }
                    composable<Route.MyList>(
                        enterTransition = { slideInHorizontally(animationSpec = tween(durationMillis = 1000)) { fullWidth -> fullWidth } },
                        exitTransition = { slideOutHorizontally(animationSpec = tween(durationMillis = 1000)) { fullWidth -> fullWidth } }) {
-                       MyListUi(
+                       MyListUiRoot(
                            navController = navController
                        )
                    }
@@ -157,7 +166,7 @@ fun AppNavigation() {
 
                        val route = backStackEntry.toRoute<Route.EditWord>()
 
-                       EditWord(navController = navController, route.wordId)
+                       EditWordRoot(navController = navController, route.wordId)
                    }
 
                    composable<Route.NewCategory> {
@@ -169,7 +178,7 @@ fun AppNavigation() {
 
                        val route = backStackEntry.toRoute<Route.EditCategory>()
 
-                       EditCategory(navController = navController, categoryId = route.categoryId)
+                       EditCategoryRoot(navController = navController, categoryId = route.categoryId)
                    }
 
                    composable<Route.Quiz> { QuizUi(navController = navController) }
@@ -191,7 +200,7 @@ fun AppNavigation() {
                    composable<Route.Settings> { settingsUi(navController = navController) }
                    composable<Route.Profile> { ProfileMenu(navController = navController) }
                    composable<Route.LearningLanguage> { LearningLanguageUi(navController = navController) }
-                   composable<Route.Dictionary> { ApiWordsScreen(navController = navController) }
+                   composable<Route.Dictionary> { ApiWordsScreenRoot(navController = navController) }
                    composable<Route.AiQuiz> {
                        AiQuizUiRoot(
                            navController = navController

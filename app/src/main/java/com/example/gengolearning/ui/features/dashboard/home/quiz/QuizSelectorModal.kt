@@ -11,6 +11,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,7 +65,7 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                     }
                 },
                 text = stringResource(R.string.quiz_selector_modal_button),
-                colors = ButtonDefaults.buttonColors(Blue),
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary),
                 enabled = selectedQuizMode.value != null || shuffledQuizMode
             )
         },
@@ -76,7 +77,7 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                 text = stringResource(R.string.back_button)
             )
         },
-        containerColor = White,
+        containerColor = MaterialTheme.colorScheme.background,
         title = {
             Text(
                 stringResource(R.string.quiz_selector_modal_title)
@@ -88,7 +89,7 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
 
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = White,
+                    color = MaterialTheme.colorScheme.background,
                     shadowElevation = 4.dp,
                     modifier = Modifier
                         .clickable{
@@ -118,7 +119,7 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                                 shuffledQuizMode = false
                             },
                             colors = CheckboxDefaults.colors(
-                               checkedColor = Blue
+                               checkedColor = MaterialTheme.colorScheme.secondary
                             )
                         )
                     }
@@ -130,7 +131,7 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
 
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = White,
+                    color = MaterialTheme.colorScheme.background,
                     shadowElevation = 4.dp,
                     modifier = Modifier
                         .padding(bottom = 5.dp)
@@ -160,7 +161,7 @@ fun QuizSelectorModal(onClick: (QuizModes) -> Unit = {},
                                 selectedQuizMode.value = null
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = Blue
+                                checkedColor = MaterialTheme.colorScheme.secondary
                             )
                         )
                     }

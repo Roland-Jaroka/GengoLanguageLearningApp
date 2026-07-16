@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,9 +28,9 @@ fun LanguageSelectionDashboardRow(flag: Int, language: String, onClick: () -> Un
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp, top = 10.dp),
         shadowElevation = 2.dp,
-        color = White,
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(25.dp),
-        border = BorderStroke(2.dp, BgBlue)
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
     ) {
         Row(
             modifier = Modifier

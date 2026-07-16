@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +28,7 @@ fun LanguageSelectionRow(flag: Int, language: String, selected: Boolean, onSelec
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp, top = 10.dp),
         shadowElevation = 2.dp,
-        color = White,
+        color = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(25.dp)
     ) {
         Row(
@@ -61,7 +62,7 @@ fun LanguageSelectionRow(flag: Int, language: String, selected: Boolean, onSelec
                     onSelect()
                 },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Blue
+                    checkedColor = MaterialTheme.colorScheme.secondary
                 )
             )
         }

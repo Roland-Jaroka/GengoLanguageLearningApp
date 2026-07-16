@@ -84,22 +84,6 @@ class GrammarDetailsViewModel @Inject constructor(
 
         _chatGPTState.value = ChatGPTState.Loading
 
-//        try {
-//            val model = Firebase.ai(backend = GenerativeBackend.googleAI())
-//                .generativeModel("gemini-2.5-flash")
-//            val prompt =
-//                "Give me an example sentence from $currentLanguage language using the following grammar: $grammar and use $appLanguage for explanation"
-//            val response = model.generateContent(prompt)
-//             _chatGPTState.value = ChatGPTState.Success(response.text ?: "")
-//        } catch (e: Exception) {
-//            _chatGPTState.value = ChatGPTState.Error(e.message ?: "Unknown error")
-//
-//            println("The error is: ${e.message}")
-//
-//
-//
-//        }
-
         val response = languageGrammar.getGeminiaiGrammar(
             language = currentLanguage,
             grammarTopic = grammar
@@ -107,7 +91,7 @@ class GrammarDetailsViewModel @Inject constructor(
 
         when(response) {
             is Response.Success -> {
-                _chatGPTState.value = ChatGPTState.Success(response.data.explanation)
+                _chatGPTState.value = ChatGPTState.Success(response.data.explanation + response.data.example)
             }
             is Response.Error -> {
                 _chatGPTState.value = ChatGPTState.Error(response.error.toString())

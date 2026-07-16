@@ -1,20 +1,15 @@
 package com.example.gengolearning.ui.features.dashboard.home
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gengolearning.data.repositories.LanguageGrammar
 import com.example.gengolearning.data.repositories.LanguageWords
 import com.example.gengolearning.data.repositories.UserSettingsRepository
 import com.example.gengolearning.model.AppSettingsPreferences
 import com.example.gengolearning.model.appmodels.NewsResponse
 import com.example.gengolearning.model.appmodels.ProfileImageState
-import com.example.gengolearning.model.appmodels.Words
-import com.example.gengolearning.ui.features.navigation.Route
+import com.example.gengolearning.model.results.CloudSyncResults
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,60 +17,60 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 
 sealed class HomeUiEvents {
     object NavigateToQuiz: HomeUiEvents()
+    object UnableToSync: HomeUiEvents()
 }
-
-sealed class HomeUiState {
-    object Loading : HomeUiState()
-    object Idl: HomeUiState()
-}
-
 @HiltViewModel
 class HomeViewModel @Inject constructor(
    val repository: LanguageWords,
-   val userSettingsRepository: UserSettingsRepository
+   val userSettingsRepository: UserSettingsRepository,
+    val grammarRepo: LanguageGrammar
 ): ViewModel() {
+    val fullList = repository.getAllWords()
+    val homePageWords = repository.getHomePageWord()
 
-    val _wordsList = MutableStateFlow<List<Words>>(emptyList())
-    val wordsList = _wordsList.asStateFlow()
+    val wordList = combine(fullList, homePageWords) {
+        list, homePageWords ->
+        homePageWords.ifEmpty {
+            list
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        initialValue = emptyList()
+    )
 
-
-
-
-    var currentIndex = mutableStateOf(0)
-
-
-    var currentWord = mutableStateOf<Words?>(null)
+    val username = userSettingsRepository.username
 
     val currentLanguage= userSettingsRepository.selectedLanguage
 
     val selectedLanguage: StateFlow<String> = userSettingsRepository.language
 
-    var news = mutableStateListOf<NewsResponse?>()
-
-    var newsModal by mutableStateOf(false)
-        private set
-
-    var quizIsEmptyModal by mutableStateOf(false)
-        private set
-
-    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Idl)
-    val uiState = _uiState.asStateFlow()
-
-    val username = userSettingsRepository.username.stateIn(
-        scope = viewModelScope,
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState = combine(_uiState, wordList,currentLanguage, username ) {
+        state, wordList, currentLanguage, username ->
+        state.copy(
+            wordList = wordList,
+            currentLanguage = currentLanguage,
+            userName = username,
+            currentWord = if (wordList.isNotEmpty()) wordList[state.currentIndex] else null
+        )
+    }.stateIn(
+        viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ""
+        initialValue = HomeUiState()
     )
+
+
 
     val image = userSettingsRepository.profileImage
         .map { picture ->
@@ -96,47 +91,43 @@ class HomeViewModel @Inject constructor(
 
 
     init {
-        repository.words.onEach { list->
-
-            //if word is not empty filter words by isHomePage
-            if (list.isNotEmpty()){
-                val filteredList = list.filter { it.isOnHomePage == true }
-                if (filteredList.isNotEmpty()) {
-                    currentIndex.value = 0
-                    _wordsList.value = filteredList
-                    currentWord.value = wordsList.value[0]
-                }
-
-                //if filtered words is empty which is equals to there are no isOnHomePage== true
-                else {
-                    currentIndex.value = 0
-                    _wordsList.value = list
-                    currentWord.value = wordsList.value[0]
-                }
-
-
-            }
-            //if the word list is empty
-            else {
-                currentIndex.value = 0
-                _wordsList.value = emptyList()
-                currentWord.value = null
-            }
-
-        }.launchIn(viewModelScope)
-
         loadNews()
+
+        wasSyncSuccessful()
 
     }
 
-    fun loadNews() {
+    fun HomeActions(action: HomeActions) {
+        when (action) {
+            HomeActions.OnCloseNewsModal ->  closeNewsModal()
+            HomeActions.OnDismissQuizEmptyModal -> dismissQuizIsEmptyModal()
+            HomeActions.OnNextClick -> onNextClick()
+            HomeActions.OnOpenNewsModal -> openNewsModal()
+            HomeActions.OnPreviousClick -> onPreviousClick()
+            HomeActions.OnPronounciationClick -> onPronunciationClick()
+            HomeActions.OnQuizClick -> onQuizClick()
+            HomeActions.OnSyncWithCloud -> syncroniseWithCloud()
+            HomeActions.OnTranslationClick -> onTranslationClick()
+            HomeActions.OnWordClick -> onWordClick()
+            HomeActions.OnGetData ->  getData()
+            HomeActions.OnShowSyncedModal -> showSyncedModal()
+        }
+    }
+
+    private fun loadNews() {
 
         viewModelScope.launch {
-
+            val list = mutableListOf<NewsResponse>()
             try {
                 val response = repository.getNews()
-                news.clear()
-                news.addAll(response)
+                response.forEach { item->
+                    list.add(item)
+                }
+                _uiState.update {
+                    it.copy(
+                        news = list
+                    )
+                }
             }
             catch(e: Exception) {
                 e.printStackTrace()
@@ -145,40 +136,56 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    fun onNextClick() {
-        val list = wordsList.value
+    private fun onNextClick() {
+        val list = uiState.value.wordList
 
         if (list.isEmpty()) return
 
-        currentIndex.value = (currentIndex.value + 1) % list.size
-
-        currentWord.value = list[currentIndex.value]
+        _uiState.update {
+            it.copy(
+                currentIndex = (it.currentIndex + 1) % uiState.value.wordList.size,
+            )
+        }
     }
 
-    fun onPreviousClick() {
+  private  fun onPreviousClick() {
 
-        val list = wordsList.value
+      val list = uiState.value.wordList
 
-        if (list.isEmpty()) return
-        currentIndex.value = (currentIndex.value - 1 + list.size) % list.size
-        currentWord.value = list[currentIndex.value]
+      if (list.isEmpty()) return
+
+      _uiState.update {
+          val index = (it.currentIndex - 1) % list.size
+          it.copy(
+
+              currentIndex = if (index < 0) list.size - 1 else index
+          )
+      }
     }
 
-    var isWordVisible by mutableStateOf(true)
-    var isPronunciationVisible by mutableStateOf(true)
-    var isTranslationVisible by mutableStateOf(true)
-
-    fun onWordClick() {
-        isWordVisible = !isWordVisible
+    private fun onWordClick() {
+        _uiState.update {
+            it.copy(
+                isWordVisible = !it.isWordVisible
+            )
+        }
     }
 
-    fun onPronunciationClick() {
-        isPronunciationVisible = !isPronunciationVisible
+   private fun onPronunciationClick() {
+        _uiState.update {
+            it.copy(
+                isPronunciationVisible = !it.isPronunciationVisible
+            )
+        }
     }
 
-    fun onTranslationClick() {
+   private fun onTranslationClick() {
 
-        isTranslationVisible = !isTranslationVisible
+        _uiState.update {
+            it.copy(
+                isTranslationVisible = !it.isTranslationVisible
+            )
+        }
     }
 
     fun setWelcomeTutorial(context: Context){
@@ -187,21 +194,29 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun openNewsModal() {
-        newsModal = true
+   private fun openNewsModal() {
+        _uiState.update {
+            it.copy(
+                newsModal = true
+            )
+        }
     }
 
-    fun closeNewsModal() {
-        newsModal = false
+   private fun closeNewsModal() {
+        _uiState.update {
+            it.copy(
+                newsModal = false
+            )
+        }
     }
 
 
 
-    fun syncroniseWithCloud(){
+  private  fun syncroniseWithCloud(){
 
 
         viewModelScope.launch {
-            val wordsList = _wordsList.value
+            val wordsList = uiState.value.wordList
             val categoryList = repository.categories.first()
             val currentLanguage = userSettingsRepository.selectedLanguage.first()
 
@@ -226,11 +241,15 @@ class HomeViewModel @Inject constructor(
 
     }
 
-    fun onQuizClick() {
-        val words = _wordsList.value
+ private   fun onQuizClick() {
+        val words = uiState.value.wordList
 
         if (words.isEmpty()) {
-            quizIsEmptyModal = true
+            _uiState.update {
+                it.copy(
+                    quizIsEmptyModal = true
+                )
+            }
         } else {
             viewModelScope.launch {
                 _uiEvents.emit(HomeUiEvents.NavigateToQuiz)
@@ -238,20 +257,77 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun dismissQuizIsEmptyModal() {
-        quizIsEmptyModal = false
+  private  fun dismissQuizIsEmptyModal() {
+       _uiState.update {
+           it.copy(
+               quizIsEmptyModal = false
+           )
+       }
     }
 
     fun testApi() {
-        _uiState.value = HomeUiState.Loading
+        _uiState.update {
+            it.copy(
+                isLoading = true
+            )
+        }
 
             repository.getFirebaseToken { token ->
                 viewModelScope.launch {
                     repository.testAPI(token)
-                    _uiState.value = HomeUiState.Idl
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false
+                        )
+                    }
                 }
             }
 
+    }
+
+    private fun wasSyncSuccessful() {
+        viewModelScope.launch {
+            repository.cloudSyncWasSuccess.collect { syncResults ->
+
+                if (syncResults is CloudSyncResults.Failure) {
+                    _uiEvents.emit(HomeUiEvents.UnableToSync)
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            synchronized = true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getData() {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isSyncing = true
+                )
+            }
+            repository.loadWords(userSettingsRepository.language.first())
+            repository.loadCategories(userSettingsRepository.language.first())
+            grammarRepo.loadGrammar(userSettingsRepository.language.first())
+
+            _uiState.update {
+                it.copy(
+                    isSyncing = false
+                )
+            }
+        }
+    }
+
+    private fun showSyncedModal() {
+        _uiState.update {
+            it.copy(
+                syncedInfoModal = !it.syncedInfoModal
+            )
+        }
     }
 
 

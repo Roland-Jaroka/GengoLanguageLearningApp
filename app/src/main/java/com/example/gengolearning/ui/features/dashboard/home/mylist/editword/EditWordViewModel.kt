@@ -96,7 +96,18 @@ class EditWordViewModel @Inject constructor(
 
     }
 
-    fun onCategoryClick(categories: WordCategories) {
+    fun onAction(action: EditWordActions) {
+        when (action) {
+            is EditWordActions.OnCategoryClick -> onCategoryClick(action.categories)
+            is EditWordActions.OnDeletableCategoryClick -> onDeleteableCategoryClick(action.categories)
+            is EditWordActions.OnPronunciationInputChange -> onPronunciationInputChange(action.newInput)
+            is EditWordActions.OnTranslationInputChange -> onTranslationInputChange(action.newInput)
+            is EditWordActions.OnUpdate -> onUpdate(action.currentLanguage)
+            is EditWordActions.OnWordInputChange -> onWordInputChange(action.newInput)
+        }
+    }
+
+    private fun onCategoryClick(categories: WordCategories) {
 
         _deleteableCategories.update {
             it + categories
@@ -107,7 +118,7 @@ class EditWordViewModel @Inject constructor(
         }
     }
 
-    fun onDeleteableCategoryClick(categories: WordCategories) {
+    private fun onDeleteableCategoryClick(categories: WordCategories) {
         _addedCategories.update {
             it + categories
         }
@@ -116,27 +127,27 @@ class EditWordViewModel @Inject constructor(
         }
     }
 
-    fun onWordInputChange(newWord: String) {
+  private  fun onWordInputChange(newWord: String) {
         _word.value = _word.value?.copy(word = newWord)
         wordInputError = null
     }
 
-    fun onPronunciationInputChange(newWord: String) {
+ private   fun onPronunciationInputChange(newWord: String) {
       _word.value = _word.value?.copy(pronunciation = newWord)
     }
-    fun onTranslationInputChange(newWord: String) {
+ private   fun onTranslationInputChange(newWord: String) {
        _word.value = _word.value?.copy(translation = newWord)
         translationInputError = null
     }
 
 
-    fun fieldValidation(word: String, translation: String): AddWordResults {
+   private fun fieldValidation(word: String, translation: String): AddWordResults {
         if (word.isBlank()) return AddWordResults.BlankWord
         if (translation.isBlank()) return AddWordResults.BlankTranslation
         return AddWordResults.Success
     }
 
-    fun onUpdate(currentLanguage: String) {
+  private  fun onUpdate(currentLanguage: String) {
 
         val currentWord = _word.value ?: return
 

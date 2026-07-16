@@ -31,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -136,12 +137,12 @@ fun GrammarDetails(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(White),
+                colors = TopAppBarDefaults.topAppBarColors(MaterialTheme.colorScheme.background),
                 actions = {
                     Image(
                         painter = painterResource(android.R.drawable.ic_menu_edit),
                         contentDescription = null,
-                        colorFilter = if (isEditMode) ColorFilter.tint(BgBlue) else null,
+                        colorFilter = if (isEditMode) ColorFilter.tint(MaterialTheme.colorScheme.primary) else null,
                         modifier = Modifier
                             .padding(end = 10.dp)
                             .clickable(
@@ -171,7 +172,7 @@ fun GrammarDetails(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp),
-                colors= CardDefaults.cardColors(White),
+                colors= CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(2.dp)
             ) {
                 Row {
@@ -206,7 +207,7 @@ fun GrammarDetails(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp),
-                colors= CardDefaults.cardColors(White),
+                colors= CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(2.dp)
             ){
                 Column {
@@ -247,7 +248,7 @@ fun GrammarDetails(
                            }
 
 
-                            HorizontalDivider(thickness = 1.dp, color = LightBlue,
+                            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(start = 10.dp, end = 10.dp))
                         }
 
@@ -267,8 +268,8 @@ fun GrammarDetails(
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = White,
                                 unfocusedContainerColor = White,
-                                focusedIndicatorColor = Blue,
-                                unfocusedIndicatorColor = Blue
+                                focusedIndicatorColor = MaterialTheme.colorScheme.secondary,
+                                unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary
                             )
                         )
                             Column {
@@ -312,7 +313,7 @@ fun GrammarDetails(
                                 exampleRows.add("")
                                 AnalyticsHelper.logEvent("add_example_grammarDetails")
                             },
-                        color = Blue
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
 
@@ -383,8 +384,8 @@ fun GrammarDetails(
                         .height(55.dp)
                         .padding(end = 12.dp, bottom = 5.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = BgBlue,
-                        contentColor = White
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     ),
                     elevation = ButtonDefaults.buttonElevation(5.dp),
                 ) {

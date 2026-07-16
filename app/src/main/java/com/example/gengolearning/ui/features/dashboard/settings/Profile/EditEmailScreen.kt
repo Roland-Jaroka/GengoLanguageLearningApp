@@ -13,6 +13,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +51,7 @@ fun EditProfileNameScreen(close: () -> Unit = {},
                    .align(Alignment.TopStart)
                    .padding(top = 50.dp),
                colors = IconButtonDefaults.iconButtonColors(
-                   contentColor = BgBlue
+                   contentColor = MaterialTheme.colorScheme.primary
                )
            ) {
                Icon(
@@ -95,7 +96,7 @@ fun EditProfileNameScreen(close: () -> Unit = {},
                    .navigationBarsPadding(),
                isLoading = isLoading,
                colors = ButtonDefaults.buttonColors(
-                   containerColor = Blue
+                   containerColor = MaterialTheme.colorScheme.secondary
                )
            )
        }

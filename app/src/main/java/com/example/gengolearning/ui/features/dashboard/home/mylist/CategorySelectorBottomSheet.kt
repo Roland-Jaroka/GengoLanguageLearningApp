@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,7 @@ fun CategorySelectorBottomSheet(categories: List<WordCategories>, onClick: (cate
         onDismissRequest = {
               onDismiss()
         },
-        containerColor = White
+        containerColor = MaterialTheme.colorScheme.background
     ) {
         Text(
             text = stringResource(R.string.category_selector_bottomsheet_title),
